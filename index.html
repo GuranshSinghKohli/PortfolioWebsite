@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: rgb(0, 0, 33);
+            color: white;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            height: 80px;
+            background-color: rgb(18, 18, 62);
+        }
+
+        nav ul {
+            display: flex;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        nav ul li {
+            list-style: none;
+            margin: 0 23px;
+            font-size: 1.2rem;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 1.2rem;
+
+        }
+
+        nav ul li a:hover {
+            color: rgb(153, 153, 226);
+            font-size: 1.05 rem;
+        }
+
+        main hr {
+            border: 0;
+            background: #9c97f1;
+            height: 2.5px;
+            margin: 0px 84px;
+        }
+
+        .left {
+            font-size: 5 rem;
+        }
+
+        .firstSection {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 10px;
+
+        }
+
+        .firstSection>div {
+            width: 40%
+        }
+
+        .leftSection {
+
+
+            font-size: 2.7rem;
+
+        }
+
+        .rightSection img {
+            width: 80%
+        }
+
+        .purple {
+            color: rgb(170, 107, 228)
+        }
+
+        .text-gray {
+            color: gray;
+        }
+
+        #element {
+            color: rgb(170, 107, 228);
+        }
+
+        .secondSection {
+            max-width: 80vw;
+            margin: 50px 80px;
+        }
+
+        .secondSection h1 {
+            font-size: 2rem;
+        }
+
+        .bannerSection {
+            width: 100%;
+            height: 0%;
+            position: relative;
+
+            margin-top: 0px;
+            /* Adds space between the content and banner */
+        }
+
+        .leftSection .buttons {
+            padding: 60px;
+        }
+
+        .leftSection .btn {
+            padding: 12px;
+            background: #1e2167;
+            color: white;
+            border: 2px solid white;
+            border-radius: 6px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .secondSection .box {
+            background: white;
+            width: 91vw;
+            height: 2.5px;
+            margin: 30px 0;
+            display: flex;
+        }
+
+        .secondSection .vertical {
+            height: 93px;
+            width: 1px;
+            background-color: white;
+            margin: 0 100px;
+        }
+
+        .image-top {
+            width: 23px;
+        }
+
+        .experience-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .experience-box {
+            background: #1a1a2e;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 0px 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .experience-box h2 {
+            color: #f39c12;
+            margin-bottom: 5px;
+        }
+
+        .experience-box h3 {
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .experience-box ul {
+            padding-left: 20px;
+        }
+
+        .experience-box ul li {
+            margin-bottom: 5px;
+        }
+
+        footer {
+            background-color: #121212;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1100px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .footer-left h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .footer-left img {
+            width: 250px;
+            /* Adjust size as needed */
+            margin-top: 10px;
+        }
+
+        .footer-right ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .footer-right ul li {
+            display: inline;
+            margin: 0 15px;
+        }
+
+        .footer-right ul li a {
+            text-decoration: none;
+            color: white;
+            font-size: 18px;
+            transition: 0.3s;
+        }
+
+        .footer-right ul li a:hover {
+            color: #ffcc00;
+            /* Highlight effect */
+        }
+
+
+        .bannerSection img {
+            width: 100%;
+            /* Make it full width */
+            height: 250px;
+            length: 10%
+                /* Set a reasonable height */
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <nav>
+            <div class="left">Guransh's Portfolio</div>
+            <div class="right">
+                <ul>
+                    <li><a href="index.html" target="_blank">Home</a></li>
+                    <li><a href="about.html" target="_blank">About</a></li>
+                    <li><a href="projects.html" target="_blank">Projects</a></li>
+                    
+                    <li><a href="contact.html" target="_blank">Contact Me</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <section class="bannerSection">
+        <img src="banner.png" alt="University Banner">
+    </section>
+
+
+    <main>
+        <section class="firstSection">
+            <div class="leftSection">
+                Hi ! My name is <span class="purple">Guransh</span>
+                <div> and I am a </div>
+                <div>Mathematics Honors, </div>
+                <div>Data Science Major Student </div>
+                <div> at University Of Waterloo</div>
+
+                <span id="element"></span>
+                <div class="buttons">
+                    <a href="Guransh_Resume (2).pdf" download="Guransh_Resume.pdf" class="btn">Download Resume</a>
+                    <a href="https://github.com/GuranshSinghKohli" target="_blank" class="btn">Visit Github</a>
+                </div>
+            </div>
+            <div class="rightSection">
+                <img src="bg.png.png" alt="">
+            </div>
+        </section>
+        <hr>
+        <section class="secondSection">
+            <span class="text-gray">What I have done so far</span>
+            <h1>Work Experience</h1>
+
+            <div class="experience-container">
+                <div class="experience-box">
+                    <h2>Cashier - Coffee and Donut Shop</h2>
+                    <h3>University of Waterloo, Canada (Jan 2025 - Feb 2025)</h3>
+                    <ul>
+                        <li>Processed customer orders efficiently, handling cash and card transactions with accuracy.
+                        </li>
+                        <li>Maintained a clean and organized work area while providing friendly customer service.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-box">
+                    <h2>Program Assistant - Computer Animation</h2>
+                    <h3>City of Markham, Canada (July 2024 - Sept 2024)</h3>
+                    <ul>
+                        <li>Organized necessary supplies and assisted with animation activities.</li>
+                        <li>Ensured supervision and maintained a safe learning environment for participants.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-box">
+                    <h2>Summer Camp Chess Program Assistant</h2>
+                    <h3>City of Markham, Canada (Jun 2024 - Aug 2024)</h3>
+                    <ul>
+                        <li>Facilitated instructional chess activities and created a positive learning environment.</li>
+                        <li>Assisted in setting up and managing program materials and resources.</li>
+                    </ul>
+                </div>
+
+                <div class="experience-box">
+                    <h2>Tutoring Assistant</h2>
+                    <h3>U+ Education, Markham (Aug 2023 - Sept 2023)</h3>
+                    <ul>
+                        <li>Assisted in teaching math concepts to students aged 8-12.</li>
+                        <li>Maintained classroom engagement and built rapport with students.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+    </main>
+    <footer>
+        <div class="footer-container">
+            <div class="footer-left">
+                <h2>Guransh's Portfolio</h2>
+                <p>University of Waterloo</p>
+                <img src="uw_logo.avif" alt="University of Waterloo Logo">
+            </div>
+            <div class="footer-right">
+                <nav>
+                    <ul>
+                        
+                    <li><a href="about.html" target="_blank">About</a></li>
+                    <li><a href="projects.html" target="_blank">Projects</a></li>
+                    
+                    <li><a href="contact.html" target="_blank">Contact Me</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/typed.js@2.1.0/dist/typed.umd.js"></script>
+    <script>
+        var typed = new Typed('#element', {
+            strings: ['I enjoy exploring sofware development ', 'Data Science & AI to   ', ' create innovative solutions.'],
+            typeSpeed: 45,
+        });
+    </script>
+</body>
+
+</html>

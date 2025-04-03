@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Me</title>
+
+    <style>
+        :root {
+            --primary-color: #01060e;
+            --secondary-color: #161b22;
+            --accent-color: #8a2be2;
+            --text-color: #f0f6fc;
+            --highlight-color: #00b4d8;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            padding-top: 60px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .navbar {
+            background-color: var(--secondary-color);
+            padding: 1rem;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            box-shadow: 0 4px 6px var(--accent-color);
+        }
+
+        .navbar a {
+            color: var(--text-color);
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            color: var(--highlight-color);
+        }
+
+        .contact-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            padding: 20px;
+        }
+
+        .contact-form {
+            background-color: var(--secondary-color);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            transition: transform 0.3s ease;
+        }
+
+        .contact-form:hover {
+            transform: scale(1.05);
+        }
+
+        .form-title {
+            text-align: center;
+            font-size: 1.8rem;
+            color: var(--highlight-color);
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            background-color: var(--primary-color);
+            border: 1px solid var(--highlight-color);
+            color: var(--text-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border: 1px solid var(--accent-color);
+            outline: none;
+        }
+
+        .submit-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            background-color: var(--highlight-color);
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* Footer */
+        .footer {
+            background-color: var(--secondary-color);
+            text-align: center;
+            padding: 20px 10px;
+            margin-top: 20px;
+            box-shadow: 0 -4px 6px var(--accent-color);
+        }
+
+        .footer-text {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-icons a {
+            color: var(--text-color);
+            font-size: 2rem;
+            transition: transform 0.3s ease, color 0.3s ease;
+        }
+
+        .social-icons a:hover {
+            color: var(--highlight-color);
+            transform: scale(1.2);
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--highlight-color);
+            color: var(--primary-color);
+            padding: 12px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(255, 255, 255, 0.2);
+        }
+
+        .back-to-top:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.1);
+        }
+
+    </style>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar">
+        <a href="index.html" target="_blank">Home</a>
+        <a href="about.html" target="_blank">About</a>
+        <a href="projects.html" target="_blank">Projects</a>
+        <a href="contact.html" target="_blank">Contact</a>
+    </nav>
+
+    <!-- Contact Section -->
+    <section class="contact-container">
+        <form class="contact-form" method="POST" id="contact-form">
+            <div class="form-title">Contact Me</div>
+    
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" required placeholder="Your Name">
+            </div>
+    
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required placeholder="Your Email">
+            </div>
+    
+            <div class="form-group">
+                <label for="message">Message</label>
+                <textarea id="message" name="message" rows="5" required placeholder="Your Message"></textarea>
+            </div>
+    
+            <button type="submit" class="submit-button">Send Message</button>
+        </form>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-text">Connect with me:</div>
+        <div class="social-icons">
+          
+            <a href="https://github.com/GuranshSinghKohli" target="_blank"><i class="fab fa-github"></i></a>
+            <a href="https://www.linkedin.com/in/guransh-singh-kohli-759a86226" target="_blank"><i class="fab fa-linkedin"></i></a>
+            <a href="mailto:skohliguransh@gmail.com"><i class="fas fa-envelope"></i></a>
+            <a href="tel:+4167220061"><i class="fas fa-phone"></i></a>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        document.querySelector("#contact-form").addEventListener("submit", function (e) {
+            e.preventDefault();
+        
+            let formData = {
+                name: document.getElementById("name").value,
+                email: document.getElementById("email").value,
+                message: document.getElementById("message").value
+            };
+        
+            fetch("https://script.google.com/macros/s/AKfycbyIEi4Z79O4kTKmdJp9aPTgZEjUKbZeXRANmdbYdXCF88jN28P2jB_6-jHk0-H6mwoCYA/exec", {
+                method: "POST",
+                body: JSON.stringify(formData),
+                headers: { "Content-Type": "application/json" }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === "success") {
+                    alert("Message sent successfully!");
+                    document.querySelector("#contact-form").reset();
+                } else {
+                    alert("Failed to send message. Please try again.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("Failed to send message. Please try again.");
+            });
+        });
+        </script>
+
+</body>
+</html>
+
