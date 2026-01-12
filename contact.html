@@ -122,6 +122,47 @@
             background-color: var(--accent-color);
         }
 
+        /* Success Message */
+        .success-message {
+            display: none;
+            background-color: var(--secondary-color);
+            padding: 40px 30px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 6px 14px rgba(0, 180, 216, 0.25);
+            width: 100%;
+            max-width: 500px;
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        .success-message i {
+            font-size: 3.5rem;
+            color: var(--highlight-color);
+            margin-bottom: 15px;
+        }
+
+        .success-message h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+
+        .success-message p {
+            font-size: 1.1rem;
+            color: #cbd5e1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Footer */
         .footer {
             background-color: var(--secondary-color);
@@ -174,9 +215,8 @@
             background-color: var(--accent-color);
             transform: scale(1.1);
         }
-
     </style>
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 </head>
 <body>
@@ -193,31 +233,37 @@
     <section class="contact-container">
         <form class="contact-form" method="POST" id="contact-form">
             <div class="form-title">Contact Me</div>
-    
+
             <div class="form-group">
                 <label for="name">Name</label>
                 <input type="text" id="name" name="name" required placeholder="Your Name">
             </div>
-    
+
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" required placeholder="Your Email">
             </div>
-    
+
             <div class="form-group">
                 <label for="message">Message</label>
                 <textarea id="message" name="message" rows="5" required placeholder="Your Message"></textarea>
             </div>
-    
+
             <button type="submit" class="submit-button">Send Message</button>
         </form>
+
+        <!-- Success Message (shows after submit) -->
+        <div class="success-message" id="success-message">
+            <i class="fas fa-check-circle"></i>
+            <h2>Response Submitted</h2>
+            <p>Thank you for reaching out! I’ll connect with you soon.</p>
+        </div>
     </section>
 
     <!-- Footer -->
     <footer class="footer">
         <div class="footer-text">Connect with me:</div>
         <div class="social-icons">
-          
             <a href="https://github.com/GuranshSinghKohli" target="_blank"><i class="fab fa-github"></i></a>
             <a href="https://www.linkedin.com/in/guransh-singh-kohli-759a86226" target="_blank"><i class="fab fa-linkedin"></i></a>
             <a href="mailto:skohliguransh@gmail.com"><i class="fas fa-envelope"></i></a>
@@ -231,15 +277,28 @@
     </button>
 
     <script>
+        // Back to top function (you had a button but no function)
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+
         document.querySelector("#contact-form").addEventListener("submit", function (e) {
             e.preventDefault();
-        
+
+            const formEl = document.querySelector(".contact-form");
+            const successEl = document.getElementById("success-message");
+
+            // Optional: disable button while sending
+            const btn = formEl.querySelector("button[type='submit']");
+            btn.disabled = true;
+            btn.textContent = "Sending...";
+
             let formData = {
                 name: document.getElementById("name").value,
                 email: document.getElementById("email").value,
                 message: document.getElementById("message").value
             };
-        
+
             fetch("https://script.google.com/macros/s/AKfycbyIEi4Z79O4kTKmdJp9aPTgZEjUKbZeXRANmdbYdXCF88jN28P2jB_6-jHk0-H6mwoCYA/exec", {
                 method: "POST",
                 body: JSON.stringify(formData),
@@ -248,19 +307,23 @@
             .then(response => response.json())
             .then(data => {
                 if (data.result === "success") {
-                    alert("Message sent successfully!");
-                    document.querySelector("#contact-form").reset();
+                    // Hide form, show success screen
+                    formEl.style.display = "none";
+                    successEl.style.display = "block";
                 } else {
                     alert("Failed to send message. Please try again.");
+                    btn.disabled = false;
+                    btn.textContent = "Send Message";
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
                 alert("Failed to send message. Please try again.");
+                btn.disabled = false;
+                btn.textContent = "Send Message";
             });
         });
-        </script>
+    </script>
 
 </body>
 </html>
-
