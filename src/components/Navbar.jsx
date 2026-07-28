@@ -12,8 +12,15 @@ export default function Navbar() {
 
   return (
     <nav className="navbar">
-      <a href="#" className="navbar-brand">Guransh Singh Kohli</a>
-      <button className="nav-toggle" onClick={() => setOpen(!open)} aria-label="Menu">
+      <a href="#" className="navbar-brand" onClick={() => setOpen(false)}>
+        Guransh <span>Kohli</span>
+      </a>
+      <button
+        className="nav-toggle"
+        onClick={() => setOpen(!open)}
+        aria-label="Menu"
+        aria-expanded={open}
+      >
         <span></span>
         <span></span>
         <span></span>
@@ -25,7 +32,7 @@ export default function Navbar() {
           </li>
         ))}
         <li>
-          <a href="#contact" className="nav-cta" onClick={() => setOpen(false)}>Let's talk</a>
+          <a href="#contact" className="nav-cta" onClick={() => setOpen(false)}>Let’s talk</a>
         </li>
       </ul>
     </nav>

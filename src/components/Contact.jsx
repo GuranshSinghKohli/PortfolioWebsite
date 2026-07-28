@@ -30,39 +30,41 @@ export default function Contact() {
     setLoading(false);
   }
 
-  if (sent) {
-    return (
-      <section id="contact" className="contact">
-        <div className="section contact-inner">
-          <div className="success-box">
-            <span className="success-icon">✓</span>
-            <h3>Message successfully sent, thank you</h3>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section id="contact" className="contact">
-      <div className="section contact-inner">
-        <span className="section-label">Get in touch</span>
-        <h2>Contact</h2>
-        <form className="contact-form" onSubmit={handleSubmit}>
-          <div className="form-row">
-            <input type="text" name="name" placeholder="Your name" required />
-            <input type="email" name="email" placeholder="Your email" required />
+      <div className="section contact-inner reveal">
+        <div className="contact-copy">
+          <span className="section-label">Get in touch</span>
+          <h2>Let’s build something together</h2>
+          <p>
+            Open to internships, collaborations, and conversations about AI systems,
+            backend engineering, and product building.
+          </p>
+          <div className="contact-social">
+            <a href="https://github.com/GuranshSinghKohli" target="_blank" rel="noopener noreferrer">GitHub</a>
+            <a href="https://www.linkedin.com/in/guransh-singh-kohli-759a86226" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+            <a href="mailto:g4kohli@uwaterloo.ca">Email</a>
           </div>
-          <textarea name="message" placeholder="Your message" rows="5" required></textarea>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Sending...' : 'Send message'}
-          </button>
-        </form>
-        <div className="contact-social">
-          <a href="https://github.com/GuranshSinghKohli" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="https://www.linkedin.com/in/guransh-singh-kohli-759a86226" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-          <a href="mailto:skohliguransh@gmail.com">Email</a>
         </div>
+
+        {sent ? (
+          <div className="success-box">
+            <span className="success-icon">✓</span>
+            <h3>Message sent. Thank you</h3>
+            <p>I’ll get back to you soon.</p>
+          </div>
+        ) : (
+          <form className="contact-form" onSubmit={handleSubmit}>
+            <div className="form-row">
+              <input type="text" name="name" placeholder="Your name" required />
+              <input type="email" name="email" placeholder="Your email" required />
+            </div>
+            <textarea name="message" placeholder="Your message" rows="5" required></textarea>
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? 'Sending...' : 'Send message'}
+            </button>
+          </form>
+        )}
       </div>
     </section>
   );

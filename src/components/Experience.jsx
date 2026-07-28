@@ -1,29 +1,80 @@
 const experiences = [
-  { title: 'AI & Software Developer', company: 'Savi Finance', location: 'Waterloo, Canada', dates: 'Dec 2025 – Present', bullets: ['Built and integrated backend services and automation components to streamline internal workflows.', 'Prototyped, tested, and debugged production-facing features supporting <strong>1.5k+ active users</strong>.', 'Collaborated with cross-functional teams to improve system reliability in an early-stage fintech environment.'] },
-  { title: 'Co-Founder & Software Developer', company: 'Wanderers — Community for Explorers', location: 'Waterloo, Canada', dates: 'Jan 2025 – Present', bullets: ['Co-founded and engineered a community platform enabling interest-based user discovery and group formation.', 'Implemented core backend features including user profiles, tagging, and matching logic.', 'Designed scalable system architecture to support future personalization and recommendation features.'] },
-  { title: 'AI Growth Strategy Intern Lead', company: 'EdVisingU (Riipen Labs)', location: 'Remote, Canada', dates: 'Jan 2026 – Present', bullets: ['Analyzed onboarding and acquisition funnels using <strong>Python (Pandas)</strong> and <strong>SQL</strong>, tracking CTR, activation, and retention to identify drop-offs and propose A/B growth experiments improving <strong>user conversion by 18%</strong>.', 'Performed <strong>LLM-assisted analysis</strong> using the <strong>OpenAI API</strong> and web-scraped datasets, synthesizing user feedback and product usage logs to guide AI feature prioritization, pricing strategy, and roadmap decisions.'] },
-  { title: 'At Large Member, Ownership Consulting Committee', company: 'Waterloo Undergraduate Student Association (WUSA)', location: 'Canada', dates: 'July 2025 – Present', bullets: ['Represent undergraduate students at-large by voicing campus-wide concerns in board-level discussions.', 'Collaborated with multiple committees to evaluate and improve student services across campus.'] },
-  { title: 'Summer Camp Chess Program Assistant', company: 'City of Markham', location: 'Canada', dates: 'Jun 2024 – Aug 2024', bullets: ['Facilitated instructional chess sessions and supported student learning.', 'Assisted with setup, coordination, and management of program materials.'] },
-  { title: 'Tutoring Assistant', company: 'U+ Education', location: 'Markham, Canada', dates: 'Aug 2023 – Sept 2023', bullets: ['Assisted in teaching math concepts to students aged 8–12.', 'Maintained student engagement and supported individualized learning.'] },
+  {
+    title: 'AI Engineer',
+    company: 'Windscribe',
+    location: 'Toronto, Canada',
+    dates: 'May 2026 - Dec 2026',
+    bullets: [
+      'Developed an internal dispute management dashboard integrating LLM-powered case summarization and automated decision logic for Stripe payment disputes, reducing the support team’s manual workload by <strong>20%</strong>.',
+      'Engineered an internal reporting system that analyzed dispute dashboard activity to automatically generate weekly operational reports, summarize dispute trends, and eliminate manual reporting for the support team.',
+    ],
+  },
+  {
+    title: 'Software Developer',
+    company: 'Savi Finance',
+    location: 'Toronto, Canada',
+    dates: 'Nov 2025 - May 2026',
+    bullets: [
+      'Developed RESTful APIs in <strong>Go</strong> backed by <strong>MySQL</strong>, implementing request validation, optimized data persistence, and backend business logic for trip logging and expense tracking, supporting financial reporting for <strong>1.5k+ users</strong>.',
+      'Engineered scalable backend services by designing database schemas, strengthening API validation, optimizing query performance, and debugging complex edge cases to improve production reliability.',
+    ],
+  },
+  {
+    title: 'Founding Engineer',
+    company: 'Wanderers.ai',
+    location: 'Waterloo, Canada',
+    dates: 'Jan 2026 - Present',
+    bullets: [
+      'Built a full-stack campus social platform for the University of Waterloo using <strong>Next.js</strong>, <strong>Supabase</strong>, and the <strong>Google Maps API</strong>, enabling students to discover and join real-time location-based campus activities.',
+    ],
+    link: 'https://devpost.com/software/wanderers-5ctnj7',
+  },
+  {
+    title: 'At Large Member, Ownership Consulting Committee',
+    company: 'Waterloo Undergraduate Student Association (WUSA)',
+    location: 'Canada',
+    dates: 'July 2025 - Present',
+    bullets: [
+      'Represent undergraduate students at-large by voicing campus-wide concerns in board-level discussions.',
+      'Collaborated with multiple committees to evaluate and improve student services across campus.',
+    ],
+  },
 ];
 
 export default function Experience() {
   return (
     <section id="experience" className="experience">
       <div className="section">
-        <span className="section-label">What I've done so far</span>
-        <h2>Work Experience</h2>
+        <span className="section-label">Experience</span>
+        <h2>Where I’ve built</h2>
+        <p className="experience-intro">
+          Roles spanning AI product engineering, production backend systems, and founding work on campus software.
+        </p>
         <div className="experience-list">
-          {experiences.map((exp, i) => (
-            <div key={i} className="exp-card">
-              <h3>{exp.title}</h3>
-              <p className="exp-meta">{exp.company}, {exp.location} · {exp.dates}</p>
-              <ul>
-                {exp.bullets.map((b, j) => (
-                  <li key={j} dangerouslySetInnerHTML={{ __html: b }} />
-                ))}
-              </ul>
-            </div>
+          {experiences.map((exp) => (
+            <article key={`${exp.company}-${exp.title}`} className="exp-card reveal">
+              <div className="exp-side">
+                <span className="exp-dates">{exp.dates}</span>
+                <span className="exp-location">{exp.location}</span>
+              </div>
+              <div className="exp-body">
+                <h3>{exp.title}</h3>
+                <p className="exp-company">
+                  {exp.link ? (
+                    <a href={exp.link} target="_blank" rel="noopener noreferrer">
+                      {exp.company} ↗
+                    </a>
+                  ) : (
+                    exp.company
+                  )}
+                </p>
+                <ul>
+                  {exp.bullets.map((bullet) => (
+                    <li key={bullet} dangerouslySetInnerHTML={{ __html: bullet }} />
+                  ))}
+                </ul>
+              </div>
+            </article>
           ))}
         </div>
       </div>
