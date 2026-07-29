@@ -3,6 +3,12 @@ import { useState } from 'react';
 const GOOGLE_SCRIPT =
   'https://script.google.com/macros/s/AKfycbyIEi4Z79O4kTKmdJp9aPTgZEjUKbZeXRANmdbYdXCF88jN28P2jB_6-jHk0-H6mwoCYA/exec';
 
+const socials = [
+  { href: 'https://github.com/GuranshSinghKohli', label: 'GitHub' },
+  { href: 'https://www.linkedin.com/in/guransh-singh-kohli-759a86226', label: 'LinkedIn' },
+  { href: 'mailto:skohliguransh@gmail.com', label: 'Email' },
+];
+
 export default function Contact() {
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -32,34 +38,52 @@ export default function Contact() {
 
   return (
     <section id="contact" className="contact">
-      <div className="section">
-        <span className="section-label">Get in touch</span>
-        <h2>Contact</h2>
-
-        {sent ? (
-          <div className="success-box">
-            <span className="success-icon">✓</span>
-            <h3>Message successfully sent, thank you</h3>
+      <div className="section contact-layout">
+        <div className="contact-copy">
+          <span className="section-label">Get in touch</span>
+          <h2>Contact</h2>
+          <p>
+            Open to co-op roles, collaborations, and conversations about AI systems,
+            backend engineering, and building products.
+          </p>
+          <div className="contact-social">
+            {socials.map(({ href, label }) => (
+              <a key={label} href={href} target={href.startsWith('mailto:') ? undefined : '_blank'} rel="noopener noreferrer">
+                {label}
+              </a>
+            ))}
           </div>
-        ) : (
-          <div data-reveal>
+        </div>
+
+        <div className="contact-panel">
+          {sent ? (
+            <div className="success-box">
+              <span className="success-icon">✓</span>
+              <h3>Message successfully sent, thank you</h3>
+              <p>I&apos;ll get back to you soon.</p>
+            </div>
+          ) : (
             <form className="contact-form" onSubmit={handleSubmit}>
               <div className="form-row">
-                <input type="text" name="name" placeholder="Your name" required />
-                <input type="email" name="email" placeholder="Your email" required />
+                <label className="field">
+                  <span>Name</span>
+                  <input type="text" name="name" placeholder="Your name" autoComplete="name" required />
+                </label>
+                <label className="field">
+                  <span>Email</span>
+                  <input type="email" name="email" placeholder="you@email.com" autoComplete="email" required />
+                </label>
               </div>
-              <textarea name="message" placeholder="Your message" rows="5" required />
+              <label className="field">
+                <span>Message</span>
+                <textarea name="message" placeholder="What would you like to talk about?" rows="5" required />
+              </label>
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? 'Sending...' : 'Send message'}
               </button>
             </form>
-            <div className="contact-social">
-              <a href="https://github.com/GuranshSinghKohli" target="_blank" rel="noopener noreferrer">GitHub</a>
-              <a href="https://www.linkedin.com/in/guransh-singh-kohli-759a86226" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-              <a href="mailto:skohliguransh@gmail.com">Email</a>
-            </div>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </section>
   );
