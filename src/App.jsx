@@ -8,13 +8,17 @@ import Contact from './components/Contact';
 import Footer from './components/Footer';
 import './App.css';
 
+function setupReveal(observer) {
+  document.querySelectorAll('[data-reveal]:not([data-reveal-bound])').forEach((el) => {
+    el.setAttribute('data-reveal-bound', '1');
+    observer.observe(el);
+  });
+}
+
 function App() {
   useEffect(() => {
-    const nodes = document.querySelectorAll('.reveal');
-    if (!nodes.length) return undefined;
-
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      nodes.forEach((node) => node.classList.add('visible'));
+      document.querySelectorAll('[data-reveal]').forEach((el) => el.classList.add('is-visible'));
       return undefined;
     }
 
@@ -22,16 +26,23 @@ function App() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
+            entry.target.classList.add('is-visible');
             observer.unobserve(entry.target);
           }
         });
       },
-      { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+      { threshold: 0.15 }
     );
 
-    nodes.forEach((node) => observer.observe(node));
-    return () => observer.disconnect();
+    setupReveal(observer);
+    const interval = setInterval(() => setupReveal(observer), 400);
+    const timeout = setTimeout(() => clearInterval(interval), 4000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timeout);
+      observer.disconnect();
+    };
   }, []);
 
   return (
