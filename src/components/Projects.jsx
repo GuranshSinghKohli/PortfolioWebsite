@@ -35,19 +35,6 @@ const projects = [
     desc: 'End-to-end ML workflow on USA traffic accident data. Feature engineering, K-Means pattern discovery, and a supervised model achieving ~80% accuracy for severity prediction.',
   },
   {
-    title: 'VectorMate: Neural Chess Engine',
-    link: 'https://github.com/Kapil-Iyer/VectorMate',
-    skills: 'Python, PyTorch, CNN, Next.js',
-    desc: 'Neural-network-based chess engine with CNN policy evaluation, targeting 1000+ ELO through improved move selection and search strategies.',
-  },
-  {
-    title: 'Weatherloo: ERA5 Globe Visualization',
-    link: 'https://github.com/GuranshSinghKohli/Weatherloo',
-    demo: 'https://guranshsinghkohli.github.io/Weatherloo/',
-    skills: 'Python, Plotly.js, ERA5, GCS, Zarr',
-    desc: 'Interactive globe visualizing 120 hours of ERA5 2 m air temperature from the public ARCO zarr on GCS. Reproducible pipeline with explicit data provenance and no synthetic fill.',
-  },
-  {
     title: 'DesignIt',
     link: 'https://github.com/lavnalla/designit2',
     demo: 'https://designit2-lavnallas-projects.vercel.app',
