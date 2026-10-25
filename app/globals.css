@@ -104,17 +104,6 @@
   --sidebar-ring: var(--accent);
 }
 
-:root[data-accent="sky"] {
-  --accent: #7cc7ff;
-}
-
-:root[data-accent="amber"] {
-  --accent: #ffb86b;
-}
-
-:root[data-accent="paper"] {
-  --accent: #f2f2f2;
-}
 
 @layer base {
   * {

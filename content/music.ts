@@ -1,0 +1,17 @@
+import type { Track } from "./types";
+
+/**
+ * The fixed playlist. "Now playing" loops through it by the clock, so every
+ * visitor hears the same song at the same moment (PRD section 12).
+ *
+ * [fill in: 10 to 20 tracks. Copy the entry below for each one. Get the exact
+ * duration from the streaming app. Art is fetched by the Phase 4 script.]
+ */
+export const tracks: Track[] = [
+  {
+    title: "[fill in: track title]",
+    artist: "[fill in: artist]",
+    durationSeconds: 0,
+    art: "[fill in: /art/track-slug.jpg]",
+  },
+];

@@ -13,6 +13,23 @@ Notes for choices the PRD leaves open.
 - Class merging uses `clsx` and `tailwind-merge` through `cn` in `lib/utils.ts`. The `radix-nova` CLI writes `import { cn } from "cn"` into new components; change it to `@/lib/utils`.
 - The AI provider is Anthropic through the Vercel AI SDK (`ai`, `@ai-sdk/anthropic`). The model comes from `ASK_MODEL`.
 
+## Product decisions (2026-10-25)
+
+Answers to the open questions in PHASES.md.
+
+1. **Three headline projects:** QuantPilot, RoadSafe AI, Wanderers.space. The PRD asks for four; the résumé has three. Wanderers is shown as a project, with its founding-engineer role kept on the project entry, not in `content/roles.ts`.
+2. **Mark:** one lime centre dot with three linked satellites, as §4 says. `LogoMark` is updated.
+3. **Source chips** stay in Phase 6. The Phase 2 thread ships without them, even though figure C shows them.
+4. **First-load budget:** the GSAP boot intro and SplitText load after first paint. Motion is used through `LazyMotion` with `m` components.
+5. **Theme:** dark only at launch. Every token is still written as a `light-dark()` pair now, so the light theme in Phase 6 is a switch, not a rewrite.
+6. **Toggle names:** About / Work everywhere, both in the sidebar and on the composer pills.
+7. **Session tickets:** short-lived, with a silent refresh, so a mobile IP change costs one retry and not a broken ask.
+8. **Contact:** Resend on the server, falling back to `mailto:` with the draft prefilled. There is no browser-send step and no public email key.
+9. **Accent:** lime only until the Phase 6 accent picker. The `data-accent` alternatives are removed from `globals.css`.
+10. **Class merging:** keep `clsx` + `tailwind-merge`. `AGENTS.md` says to change `"cn"` imports to `"@/lib/utils"` after any `shadcn add`.
+
 ## Content
 
-Personal facts come from the October 2026 résumé, still in `content/*.md` until Phase 0 moves them into typed files. Their `nodeIds` front matter belongs to the old graph and can go then. Hobbies are not on the résumé, so the AI must not invent any. The phone number is not published.
+Facts come only from the October 2026 résumé and the earlier content notes. They now live in typed files in `content/`. Anything not in those sources is a `[fill in: …]` placeholder. Hobbies are not on the résumé, so the AI must not invent any. The phone number is not published.
+
+Router signals in `content/roles.ts` and `content/projects.ts` are names and topic words taken from each entry's own facts.
