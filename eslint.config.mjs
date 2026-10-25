@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // next.config.ts sets distDir to dist.
+    "dist/**",
   ]),
 ]);
 
