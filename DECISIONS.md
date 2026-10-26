@@ -89,6 +89,8 @@ Answers to the open questions in PHASES.md.
 - **Live tests.** `npm run test:live` (never part of `npm test`) runs `/api/ask` against the real model with only the Redis limiter swapped out, and runs the real limiter against Upstash with a made-up IP, no model calls, refunding its reservations and deleting its keys afterwards (`tests/live/`).
 - **Verified 2026-10-26** on the production build with real Upstash and OpenAI: gap, 8/minute and hour keys written in Upstash, reservations settled to real cost ($0.0013 per answer), answers streamed with the matched card.
 
+- **Golden set** (`tests/golden/questions.ts`, `npm run golden`): 40 questions with the facts a correct answer must contain (roles, projects, education, contact), things it must never invent (phone, GPA, a fake employer, hobbies), a forged-history case, a prompt injection and a greeting. Graded by patterns, with curly apostrophes normalised. Each run writes `tests/golden/last-run.json`. First run on gpt-6-luna: 40/40, $0.0016 for the set.
+
 ## Performance budgets (2026-10-26)
 
 The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:

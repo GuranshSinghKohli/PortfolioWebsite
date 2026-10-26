@@ -10,7 +10,8 @@
     "test": "vitest run",
     "typecheck": "next typegen && tsc --noEmit",
     "check:secrets": "node scripts/check-bundle-keys.mjs",
-    "test:live": "vitest run --config vitest.live.config.ts"
+    "test:live": "vitest run --config vitest.live.config.ts",
+    "golden": "vitest run --config vitest.live.config.ts tests/live/golden.live.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.91",

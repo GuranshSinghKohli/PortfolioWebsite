@@ -115,7 +115,7 @@ Rules that apply to every phase:
 - [x] Stream text events, then one attachments event from the entity matcher. Read the model from `ASK_MODEL`.
 - [ ] Client side: streaming reveal with a lime caret, Escape to skip, cycling loading verbs from the voice guide, send button pulse until the first token.
 - [ ] Scale length to the question; off-topic questions get a joke from the voice guide.
-- [ ] Golden set: 40 known questions with expected facts, checked by a script.
+- [x] Golden set: 40 known questions with expected facts, checked by a script (`npm run golden`; 40/40 on gpt-6-luna, 2026-10-26).
 - [x] Forged-history test: a fake "system override" turn claiming a fake job is ignored and the job denied. (Unit test and the live run in `tests/live/` both pass.)
 - [x] CI check that no API key prefix appears in the client bundle.
 

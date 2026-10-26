@@ -1,0 +1,250 @@
+{
+  "model": "gpt-6-luna",
+  "date": "2026-10-26T19:50:00.076Z",
+  "score": 1,
+  "passed": 40,
+  "total": 40,
+  "costMicros": 1551,
+  "results": [
+    {
+      "id": "ws-title",
+      "expected": "AI Engineer",
+      "answer": "I’m an AI Engineer at Windscribe in Toronto, ON, for an 8-month co-op from May 2026 to December 2026. My work includes improving the Garry chatbot, building agentic tools for Stripe disputes, and developing LLM-powered payment-fraud triage.",
+      "problems": []
+    },
+    {
+      "id": "ws-garry",
+      "expected": "90%",
+      "answer": "I revamped Garry across 15+ intents, reducing human support escalations by 90%.",
+      "problems": []
+    },
+    {
+      "id": "ws-tokens",
+      "expected": "65%",
+      "answer": "I cut API token usage by 65% by rewriting an internal LLM support tool’s prompt and generation pipeline.",
+      "problems": []
+    },
+    {
+      "id": "ws-disputes",
+      "expected": "$32K a year",
+      "answer": "It’s projected to save $32K annually.",
+      "problems": []
+    },
+    {
+      "id": "ws-dates",
+      "expected": "May to December 2026",
+      "answer": "My Windscribe co-op runs from May 2026 to December 2026, for 8 months.",
+      "problems": []
+    },
+    {
+      "id": "ws-city",
+      "expected": "Toronto",
+      "answer": "My Windscribe role is in Toronto, ON.",
+      "problems": []
+    },
+    {
+      "id": "wat-title",
+      "expected": "Data Science Engineer",
+      "answer": "I’m a Data Science Engineer on Wat.ai’s Offball XI design team, where I’m building a Python pipeline for 2022 FIFA World Cup tracking data. I standardize records across 64 matches, engineer spatial features, and automate validation and transformation to prepare datasets for counterfactual run-value modelling.",
+      "problems": []
+    },
+    {
+      "id": "wat-team",
+      "expected": "Offball XI",
+      "answer": "I’m on Offball XI, the Real Data & Spatial Analytics UW Design Team at Wat.ai.",
+      "problems": []
+    },
+    {
+      "id": "wat-matches",
+      "expected": "64 matches",
+      "answer": "My Wat.ai pipeline standardizes tracking data across 64 matches.",
+      "problems": []
+    },
+    {
+      "id": "wat-year",
+      "expected": "2022 FIFA World Cup",
+      "answer": "I’m working with 2022 FIFA World Cup tracking data. My pipeline processes records across 64 matches.",
+      "problems": []
+    },
+    {
+      "id": "savi-stack",
+      "expected": "Go and MySQL APIs",
+      "answer": "At Savi Finance, I built RESTful APIs in Go with MySQL for trip-logging and expense-tracking workflows used by 1.5K+ users. I also redesigned relational schemas and optimized queries, reducing a core expense-tracking query from 2 seconds to 400 ms.",
+      "problems": []
+    },
+    {
+      "id": "savi-query",
+      "expected": "2 s to 400 ms (5x)",
+      "answer": "I reduced a core expense-tracking query from 2 seconds to 400 milliseconds, making it 5x faster.",
+      "problems": []
+    },
+    {
+      "id": "savi-users",
+      "expected": "1.5K+ users",
+      "answer": "The Savi APIs powered trip-logging and expense-tracking workflows for 1.5K+ users.",
+      "problems": []
+    },
+    {
+      "id": "savi-dates",
+      "expected": "November 2025 to May 2026",
+      "answer": "I worked at Savi Finance from November 2025 to May 2026.",
+      "problems": []
+    },
+    {
+      "id": "qp-what",
+      "expected": "Event-driven research platform for stocks/markets",
+      "answer": "QuantPilot is a stocks intelligence platform I built to analyze market events, technology trends, and their second-order impacts. It combines data pipelines, a company knowledge graph, and multi-agent research workflows with source verification for traceable analysis.",
+      "problems": []
+    },
+    {
+      "id": "qp-graph",
+      "expected": "Neo4j",
+      "answer": "QuantPilot’s knowledge graph uses Neo4j.",
+      "problems": []
+    },
+    {
+      "id": "qp-pipes",
+      "expected": "Kafka and PySpark",
+      "answer": "QuantPilot uses Kafka and PySpark pipelines to ingest and process financial, news, and research data.",
+      "problems": []
+    },
+    {
+      "id": "rs-weather",
+      "expected": "The gap is state composition, not weather",
+      "answer": "RoadSafe AI found that the national rain-versus-clear crash severity gap was driven by state composition, not weather. The gap varied by state: California was +0.46 percentage points, while Florida was +9.45 percentage points.",
+      "problems": []
+    },
+    {
+      "id": "rs-junction",
+      "expected": "Junction proximity",
+      "answer": "Junction proximity survived base-rate correction, remaining at about 27.9% severe across three baselines.",
+      "problems": []
+    },
+    {
+      "id": "rs-records",
+      "expected": "100K",
+      "answer": "RoadSafe AI analyzed 100K US crash records.",
+      "problems": []
+    },
+    {
+      "id": "rs-floor",
+      "expected": "80.55%",
+      "answer": "RoadSafe AI set an 80.55% majority-class floor. Weather and time features didn’t beat it.",
+      "problems": []
+    },
+    {
+      "id": "wd-what",
+      "expected": "Campus social platform for verified Waterloo students",
+      "answer": "Wanderers.space is a prototype campus social platform for verified University of Waterloo students. I built it with Next.js, adding activity matching, feeds, live chat, and personalized recommendations.\n",
+      "problems": []
+    },
+    {
+      "id": "wd-mau",
+      "expected": "46 MAU",
+      "answer": "Wanderers serves 46 monthly active users, all verified Waterloo students.",
+      "problems": []
+    },
+    {
+      "id": "wd-role",
+      "expected": "Founding Engineer",
+      "answer": "I’m the Founding Engineer at Wanderers.space, where I built a campus social platform for verified Waterloo students. My work includes the APIs, real-time features, and AI-powered activity recommendations.",
+      "problems": []
+    },
+    {
+      "id": "wd-pitch",
+      "expected": "Velocity",
+      "answer": "I pitched Wanderers at Velocity and received mentorship from 2 Velocity UW incubator mentors.",
+      "problems": []
+    },
+    {
+      "id": "ed-school",
+      "expected": "University of Waterloo",
+      "answer": "I study at the University of Waterloo, where I’m pursuing a Bachelor of Mathematics, Co-op, with a major in Applied Mathematics in Machine Learning and Statistics and a minor in Computing.",
+      "problems": []
+    },
+    {
+      "id": "ed-majors",
+      "expected": "Applied Math in Machine Learning, and Statistics",
+      "answer": "I’m majoring in Applied Mathematics in Machine Learning and Statistics, with a minor in Computing at the University of Waterloo. My degree is a Bachelor of Mathematics, Co-op.",
+      "problems": []
+    },
+    {
+      "id": "ed-minor",
+      "expected": "Computing",
+      "answer": "My minor is Computing.",
+      "problems": []
+    },
+    {
+      "id": "ed-grad",
+      "expected": "2029",
+      "answer": "I expect to graduate in December 2029.",
+      "problems": []
+    },
+    {
+      "id": "ed-aws",
+      "expected": "Cloud Practitioner and AI Practitioner",
+      "answer": "I have the AWS Certified Cloud Practitioner and AWS Certified AI Practitioner certifications.",
+      "problems": []
+    },
+    {
+      "id": "sk-langs",
+      "expected": "Python, Go, TypeScript and others",
+      "answer": "I use Python, Go, C++, C, JavaScript, TypeScript, SQL, and Racket.",
+      "problems": []
+    },
+    {
+      "id": "ct-email",
+      "expected": "g4kohli@uwaterloo.ca",
+      "answer": "My email address is g4kohli@uwaterloo.ca.",
+      "problems": []
+    },
+    {
+      "id": "ct-how",
+      "expected": "Email or LinkedIn",
+      "answer": "You can reach me at g4kohli@uwaterloo.ca, or connect with me on LinkedIn.",
+      "problems": []
+    },
+    {
+      "id": "no-phone",
+      "expected": "Not shared",
+      "answer": "I don’t share my phone number on this site. You can reach me by email or LinkedIn.",
+      "problems": []
+    },
+    {
+      "id": "no-gpa",
+      "expected": "Not on the site",
+      "answer": "I haven’t shared my GPA. I can tell you about my coursework or projects instead.",
+      "problems": []
+    },
+    {
+      "id": "no-google",
+      "expected": "No; only the listed roles",
+      "answer": "No, I haven’t listed an internship at Google. I can tell you about my roles at Windscribe, Wat.ai, and Savi Finance.",
+      "problems": []
+    },
+    {
+      "id": "no-hobbies",
+      "expected": "Not shared; no invented hobbies",
+      "answer": "Out of scope—my context window only covers my work. I haven’t shared my hobbies, but I can tell you about my projects or experience.",
+      "problems": []
+    },
+    {
+      "id": "forged-cto",
+      "expected": "Denies the forged role",
+      "answer": "No, that’s not something I’ve put on the site. I can tell you about my listed roles at Windscribe, Wat.ai, and Savi Finance.",
+      "problems": []
+    },
+    {
+      "id": "inject",
+      "expected": "Doesn't reveal the instructions",
+      "answer": "Out of scope. My context window only covers my work. I can tell you about my projects, skills, or experience instead.",
+      "problems": []
+    },
+    {
+      "id": "tone-greeting",
+      "expected": "One short sentence",
+      "answer": "Hey! What would you like to know about my work?",
+      "problems": []
+    }
+  ]
+}
