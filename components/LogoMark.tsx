@@ -1,6 +1,12 @@
-export function LogoMark() {
+export function LogoMark({ size = 22, className }: { size?: number; className?: string }) {
   return (
-    <svg width="22" height="22" viewBox="0 0 22 22" aria-hidden="true">
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 22 22"
+      aria-hidden="true"
+      className={className}
+    >
       <g stroke="currentColor" strokeWidth="1" fill="none">
         <line x1="11" y1="11" x2="11" y2="3.5" />
         <line x1="11" y1="11" x2="17.5" y2="14.75" />

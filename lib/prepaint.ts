@@ -1,0 +1,35 @@
+import { profile } from "@/content/profile";
+
+/*
+ * Scripts that run while the HTML is parsed, before first paint. They correct
+ * what the server can't know: saved theme, rail state and the visitor's clock.
+ * Plain strings, so server components can inline them.
+ */
+
+export const THEME_STORAGE_KEY = "theme";
+export const RAIL_STORAGE_KEY = "rail";
+
+/** Root layout <head>: saved theme and rail state on <html>. */
+export const shellScript = `(function(){try{var d=document.documentElement,t=localStorage.getItem("${THEME_STORAGE_KEY}");if(t==="light"||t==="dark")d.dataset.theme=t;if(localStorage.getItem("${RAIL_STORAGE_KEY}")==="collapsed")d.dataset.rail="collapsed"}catch(e){}})()`;
+
+export type DayPart = keyof typeof profile.greetings;
+
+/** Morning 5–11, afternoon 12–16, evening 17–21, late night 22–4. */
+export function dayPart(hour: number): DayPart {
+  if (hour >= 5 && hour < 12) return "morning";
+  if (hour >= 12 && hour < 17) return "afternoon";
+  if (hour >= 17 && hour < 22) return "evening";
+  return "lateNight";
+}
+
+/** Swaps the server's default greeting for the one matching the visitor's clock. */
+export function greetingScript(id: string) {
+  const greetings = JSON.stringify(profile.greetings);
+  return `(function(){var n=document.getElementById(${JSON.stringify(id)});if(!n)return;var h=new Date().getHours(),g=${greetings};n.textContent=h>=5&&h<12?g.morning:h<17&&h>=12?g.afternoon:h>=17&&h<22?g.evening:g.lateNight})()`;
+}
+
+/** Picks one sub-line per visit. */
+export function subLineScript(id: string) {
+  const lines = JSON.stringify(profile.subLines);
+  return `(function(){var n=document.getElementById(${JSON.stringify(id)});if(!n)return;var l=${lines};n.textContent=l[Math.floor(Math.random()*l.length)]})()`;
+}

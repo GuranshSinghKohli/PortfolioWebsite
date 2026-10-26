@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
+
+import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { shellScript } from "@/lib/prepaint";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -24,9 +28,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${bricolage.variable} ${jetbrains.variable} dark h-full antialiased`}
+      data-theme="dark"
+      suppressHydrationWarning
+      className={`${bricolage.variable} ${jetbrains.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-bg text-text">{children}</body>
+      <head>
+        {/* Saved theme and rail state, applied before first paint. */}
+        <script dangerouslySetInnerHTML={{ __html: shellScript }} />
+      </head>
+      <body className="h-full bg-bg text-text">
+        <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
+        <Toaster theme="dark" position="bottom-center" />
+      </body>
     </html>
   );
 }

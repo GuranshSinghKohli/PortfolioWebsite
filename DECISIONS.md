@@ -28,6 +28,17 @@ Answers to the open questions in PHASES.md.
 9. **Accent:** lime only until the Phase 6 accent picker. The `data-accent` alternatives are removed from `globals.css`.
 10. **Class merging:** keep `clsx` + `tailwind-merge`. `AGENTS.md` says to change `"cn"` imports to `"@/lib/utils"` after any `shadcn add`.
 
+## Phase 1 shell
+
+- **Light tokens not in the PRD.** §9 gives light values for nine tokens. `--raised` (#FBFAF7), `--line-soft` (#EAE8E2), `--line-muted` (#CFCDC6) and `--dim` (#6E717A, 4.6:1 on the light page) are derived from that palette. `--accent-fg` (#0E0F12) is the dark text that §9 requires on lime fills.
+- **`muted` means two things.** shadcn uses `bg-muted` as a quiet surface; the PRD uses `--muted` as label text. The CSS variables keep the PRD names. Tailwind `bg-muted` maps to `--surface`, and `text-muted-foreground` maps to the PRD `--muted`.
+- **Theme.** `<html data-theme="dark">` with `color-scheme: dark`. The pre-paint script honours a saved `theme` in localStorage, but nothing writes one until the Phase 6 toggle. The `dark:` variant follows `data-theme`.
+- **Pre-paint scripts.** Theme and rail state are set on `<html>` from `<head>`. The greeting and sub-line are server-rendered with defaults and corrected by inline scripts before paint, per the Next.js "preventing flash before hydration" guide. No `new Date()` runs during prerender, which Cache Components forbids.
+- **Rail header** shows first and last name ("Guransh Kohli") so it fits 248px; the profile row shows the full name.
+- **Unfilled content is hidden, not shown.** `isFilled()` hides the composer location badge and the term while they are still placeholders.
+- **Brand icons.** lucide-react 1.x dropped GitHub and LinkedIn, so `components/icons.tsx` draws them as 1.5px line icons.
+- **Stale Tailwind CSS after adding files.** A Turbopack build reusing `dist/cache` once shipped CSS without classes from new files. `rm -rf dist` before a build fixes it locally.
+
 ## Content
 
 Facts come only from the October 2026 résumé and the earlier content notes. They now live in typed files in `content/`. Anything not in those sources is a `[fill in: …]` placeholder. Hobbies are not on the résumé, so the AI must not invent any. The phone number is not published.
