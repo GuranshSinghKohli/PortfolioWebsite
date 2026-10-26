@@ -98,9 +98,3 @@ const projectAnswers: CuratedAnswer[] = projects.map((project) => ({
 }));
 
 export const answers: CuratedAnswer[] = [...topics, ...roleAnswers, ...projectAnswers];
-
-/** Chips under the composer on the home screen, by mode. */
-export const homeChips = {
-  about: ["projects", "resume", "listening", "contact"],
-  work: ["projects", "experience", "resume", "contact"],
-} as const satisfies Record<"about" | "work", string[]>;

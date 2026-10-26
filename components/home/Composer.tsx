@@ -3,11 +3,13 @@
 import { ArrowUp, MapPin } from "lucide-react";
 import { useReducedMotion } from "motion/react";
 import * as m from "motion/react-m";
-import { useState } from "react";
+import { useId, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { profile } from "@/content/profile";
-import { ModeToggle } from "@/components/shell/mode";
+import { ModeToggle, useMode } from "@/components/shell/mode";
 import { isFilled } from "@/lib/content";
+import { ask, prefetchOnIntent, prefetchThread } from "@/lib/thread/store";
+import { cn } from "@/lib/utils";
 
 /** PRD §11 caps a typed question at 300 characters. */
 const MAX_QUESTION = 300;
@@ -32,26 +34,59 @@ function FocusBeam() {
   );
 }
 
-/** The ask box. Submitting does nothing until Phase 2 wires the thread. */
-export function Composer() {
+/**
+ * The ask box, on the home screen and as the thread's sticky follow-up
+ * composer. Enter sends, Shift+Enter adds a line. Focus prefetches the thread.
+ */
+export function Composer({
+  placeholder = "Ask me about anything I've built…",
+  className,
+}: {
+  placeholder?: string;
+  className?: string;
+}) {
+  const id = useId();
+  const { mode } = useMode();
   const [focused, setFocused] = useState(false);
+  const [text, setText] = useState("");
+
+  function send(event?: FormEvent) {
+    event?.preventDefault();
+    const question = text.trim();
+    if (!question) return;
+    setText("");
+    void ask({ kind: "typed", text: question }, mode);
+  }
+
+  function onKeyDown(event: KeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) send(event);
+  }
 
   return (
     <form
-      onSubmit={(event) => event.preventDefault()}
-      className="relative w-full rounded-2xl border border-line bg-surface transition-colors focus-within:border-line-muted"
+      onSubmit={send}
+      className={cn(
+        "relative w-full rounded-2xl border border-line bg-surface transition-colors focus-within:border-line-muted",
+        className,
+      )}
     >
       {focused && <FocusBeam />}
-      <label htmlFor="composer-input" className="sr-only">
+      <label htmlFor={id} className="sr-only">
         Ask a question
       </label>
       <textarea
-        id="composer-input"
+        id={id}
         name="question"
         rows={2}
         maxLength={MAX_QUESTION}
-        placeholder="Ask me about anything I've built…"
-        onFocus={() => setFocused(true)}
+        placeholder={placeholder}
+        value={text}
+        onChange={(event) => setText(event.target.value)}
+        onKeyDown={onKeyDown}
+        onFocus={() => {
+          setFocused(true);
+          void prefetchThread().catch(() => {});
+        }}
         onBlur={() => setFocused(false)}
         className="block w-full resize-none bg-transparent px-4 pt-3.5 text-[15px] leading-[1.5] text-body outline-none placeholder:text-muted-foreground"
       />
@@ -66,6 +101,7 @@ export function Composer() {
         <button
           type="submit"
           aria-label="Send question"
+          {...prefetchOnIntent}
           className="ml-auto flex size-11 items-center justify-center rounded-full bg-accent text-accent-foreground outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
         >
           <ArrowUp className="size-4" strokeWidth={2} aria-hidden="true" />

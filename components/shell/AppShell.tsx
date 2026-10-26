@@ -1,7 +1,7 @@
 "use client";
 
 import { Menu } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import { profile } from "@/content/profile";
 import { LogoMark } from "@/components/LogoMark";
@@ -18,6 +18,7 @@ import { Rail } from "./Rail";
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const collapsed = useRailCollapsed();
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   return (
     <MotionProvider>
@@ -32,7 +33,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </aside>
 
           <div className="flex min-w-0 flex-1 flex-col">
-            <Sheet>
+            <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
               <header className="flex h-14 shrink-0 items-center gap-1 border-b border-line-soft px-2 shell:hidden">
                 {/* SheetTrigger, so Radix returns focus here when the drawer closes. */}
                 <SheetTrigger
@@ -51,7 +52,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <SheetDescription className="sr-only">Topics, roles, projects and links</SheetDescription>
-                <Rail variant="drawer" />
+                <Rail variant="drawer" onAsk={() => setDrawerOpen(false)} />
               </SheetContent>
             </Sheet>
 

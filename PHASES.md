@@ -82,15 +82,15 @@ Rules that apply to every phase:
 
 **Tasks**
 
-- [ ] Add the app state machine: boot → home → thread, with sheets opening over any state (§8, figure 3).
-- [ ] Build the topic router (§8): strong signals switch topic, weak signals switch only when the current topic says nothing about them, and anything else inherits the current topic. Reuse it to pick follow-up chips.
-- [ ] Wire curated answers from `content/answers.ts` to chips and sidebar items, with an "asked from sidebar" chip in the thread.
-- [ ] Build the thread: right-aligned question bubbles, left-aligned answers, attachments under each answer, follow-up chips, and a sticky "Ask a follow-up…" composer.
-- [ ] Add the thread motion from figure C, without source chips: bubble slides in from the composer, cards stagger in after the text, cards lift on hover with a lime edge light.
+- [x] Add the app state machine: boot → home → thread (§8, figure 3). Sheets come in 2B or later.
+- [x] Build the topic router (§8): strong signals switch topic, weak signals switch only when the current topic says nothing about them, and anything else inherits the current topic. Reuse it to pick follow-up chips.
+- [x] Wire curated answers from `content/answers.ts` to chips and sidebar items, with an "asked from sidebar" chip in the thread.
+- [ ] Build the thread: right-aligned question bubbles, left-aligned answers, attachments under each answer, follow-up chips, and a sticky "Ask a follow-up…" composer. (2A done: everything but attachments.)
+- [ ] Add the thread motion from figure C, without source chips (2A done: bubble rise and answer fade-up): bubble slides in from the composer, cards stagger in after the text, cards lift on hover with a lime edge light.
 - [ ] Build the attachments: project cards (one card fills the column, two or more go two-up), a role timeline in the §7 entry format, a music grid, a contact card and a résumé card.
 - [ ] Build the entity matcher: an index from each card's own title and copy, scored against both question and answer, with a confidence floor and a "show all" link.
 - [ ] Make attachments render only after the answer text finishes.
-- [ ] Unit tests for the router and entity matcher.
+- [ ] Unit tests for the router (done in 2A) and entity matcher.
 
 **Creates or changes:** `lib/state/` (thread store), `lib/router.ts`, `lib/matcher.ts`, `components/thread/`, `components/attachments/`, `tests/router.test.ts`, `tests/matcher.test.ts`.
 
@@ -158,7 +158,7 @@ Rules that apply to every phase:
 - [x] Install `posthog-js`.
 - [ ] Accessibility pass: real buttons and links, 44 px targets, an `aria-live="polite"` thread, 4.5:1 contrast in the dark theme, theme-aware logos.
 - [ ] Reduced motion collapses every animation and stops hover playback.
-- [ ] Performance budgets (DECISIONS.md, 2026-10-26): LCP ≤ 1.8 s on Lighthouse mobile, TBT ≤ 200 ms, CLS ≤ 0.1, first-load JS ≤ 200 kB compressed, 3D chunk ≤ 350 kB compressed, demos ≤ 12 MB total, every page prerendered.
+- [ ] Performance budgets (DECISIONS.md, 2026-10-26): LCP ≤ 1.8 s on Lighthouse mobile, TBT ≤ 200 ms, CLS ≤ 0.1, INP ≤ 200 ms, first-load JS ≤ 200 kB compressed, 3D chunk ≤ 350 kB compressed, demos ≤ 12 MB total, every page prerendered.
 - [ ] Analytics events from §15: `ask`, `answer_done`, `card_hover_play`, `sheet_open`, `contact_sent` (server / mailto), `resume_download`, `error`.
 - [ ] Error states for every API path.
 - [ ] Confirm the shared Upstash rate limiter holds across instances.

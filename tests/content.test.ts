@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { answers, homeChips } from "@/content/answers";
+import { answers } from "@/content/answers";
+import { chipLabels, homeChips } from "@/content/chips";
 import { projects } from "@/content/projects";
 import { roles } from "@/content/roles";
 
@@ -34,6 +35,10 @@ describe("content", () => {
     }
     for (const id of [...homeChips.about, ...homeChips.work]) {
       expect(answerIds).toContain(id);
+    }
+    for (const id of Object.keys(chipLabels)) expect(answerIds).toContain(id);
+    for (const answer of answers) {
+      for (const id of answer.followUps) expect(chipLabels, `label for ${id}`).toHaveProperty(id);
     }
   });
 

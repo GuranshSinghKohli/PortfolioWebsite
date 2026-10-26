@@ -25,8 +25,9 @@ import { SheetClose } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { isFilled } from "@/lib/content";
 import { setRailCollapsed } from "@/lib/rail";
+import { ask, goHome, prefetchOnIntent } from "@/lib/thread/store";
 import { cn } from "@/lib/utils";
-import { ModeToggle } from "./mode";
+import { ModeToggle, useMode } from "./mode";
 
 const topics: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "about", label: "About", icon: User },
@@ -70,7 +71,7 @@ function RailButton({
 }: { icon: LucideIcon; text: string; collapsed: boolean } & ComponentProps<"button">) {
   return (
     <WithTooltip collapsed={collapsed} text={text}>
-      <button type="button" className={cn(row, className)} {...props}>
+      <button type="button" className={cn(row, className)} {...prefetchOnIntent} {...props}>
         <Icon className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
         <span className="truncate collapsed:sr-only">{text}</span>
       </button>
@@ -95,20 +96,43 @@ function SocialLink({ href, text, children }: { href: string; text: string; chil
 /**
  * Everything in the sidebar (PRD §7). Rendered twice: as the desktop rail,
  * which can collapse to 64px, and inside the mobile drawer, which can't.
+ * Every item asks its curated question in the thread; `onAsk` lets the
+ * drawer close afterwards.
  */
-export function Rail({ variant, collapsed = false }: { variant: "rail" | "drawer"; collapsed?: boolean }) {
+export function Rail({
+  variant,
+  collapsed = false,
+  onAsk,
+}: {
+  variant: "rail" | "drawer";
+  collapsed?: boolean;
+  onAsk?: () => void;
+}) {
   const isRail = variant === "rail";
   const meta = [profile.school, profile.term].filter(isFilled).join(" · ");
+  const { mode } = useMode();
+  const askFor = (id: string) => () => {
+    void ask({ kind: "answer", id, from: "sidebar" }, mode);
+    onAsk?.();
+  };
 
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center justify-between gap-2 px-3 pt-2 collapsed:flex-col collapsed:gap-1">
-        <div className="flex min-w-0 items-center gap-2.5 pl-1 collapsed:h-11 collapsed:pl-0">
-          <LogoMark className="shrink-0 text-text" />
-          <span className="truncate text-[15px] font-medium text-text collapsed:sr-only">
-            {displayName}
-          </span>
-        </div>
+        <WithTooltip collapsed={collapsed} text="Home">
+          <button
+            type="button"
+            onClick={() => {
+              goHome();
+              onAsk?.();
+            }}
+            aria-label={`${displayName}, home`}
+            className="flex h-11 min-w-0 items-center gap-2.5 rounded-lg px-1 outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring collapsed:w-11 collapsed:justify-center collapsed:px-0"
+          >
+            <LogoMark className="shrink-0 text-text" />
+            <span className="truncate text-[15px] font-medium text-text collapsed:sr-only">{displayName}</span>
+          </button>
+        </WithTooltip>
         {isRail ? (
           <WithTooltip collapsed={collapsed} text="Expand sidebar">
             <button
@@ -137,6 +161,7 @@ export function Rail({ variant, collapsed = false }: { variant: "rail" | "drawer
           icon={Plus}
           text="Get in touch"
           collapsed={collapsed}
+          onClick={askFor("contact")}
           className="border border-line text-text hover:border-line-muted collapsed:border-transparent"
         />
       </div>
@@ -144,7 +169,13 @@ export function Rail({ variant, collapsed = false }: { variant: "rail" | "drawer
       <div className="mt-2 flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 pb-6 [mask-image:linear-gradient(to_bottom,black_calc(100%-24px),transparent)]">
         <nav aria-label="Topics" className="flex flex-col">
           {topics.map((topic) => (
-            <RailButton key={topic.id} icon={topic.icon} text={topic.label} collapsed={collapsed} />
+            <RailButton
+              key={topic.id}
+              icon={topic.icon}
+              text={topic.label}
+              collapsed={collapsed}
+              onClick={askFor(topic.id)}
+            />
           ))}
         </nav>
 
@@ -153,7 +184,13 @@ export function Rail({ variant, collapsed = false }: { variant: "rail" | "drawer
             Pinned
           </h2>
           {roles.map((role) => (
-            <button key={role.id} type="button" className={row}>
+            <button
+              key={role.id}
+              type="button"
+              className={row}
+              onClick={askFor(`role:${role.id}`)}
+              {...prefetchOnIntent}
+            >
               <span className="size-1.5 shrink-0 rounded-full bg-accent" aria-hidden="true" />
               <span className="min-w-0 flex-1 truncate">{role.company}</span>
               <span className="font-mono text-[10px] tracking-[0.08em] text-dim">{roleYear(role.dates)}</span>
@@ -166,7 +203,13 @@ export function Rail({ variant, collapsed = false }: { variant: "rail" | "drawer
             Recent
           </h2>
           {projects.map((project) => (
-            <button key={project.slug} type="button" className={row}>
+            <button
+              key={project.slug}
+              type="button"
+              className={row}
+              onClick={askFor(`project:${project.slug}`)}
+              {...prefetchOnIntent}
+            >
               <span className="truncate">{project.title}</span>
             </button>
           ))}

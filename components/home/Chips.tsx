@@ -3,17 +3,11 @@
 import type { Variants } from "motion/react";
 import * as m from "motion/react-m";
 
-import { homeChips } from "@/content/answers";
+import { chipLabels, homeChips } from "@/content/chips";
+import { ChipButton } from "@/components/ChipButton";
 import { useMode } from "@/components/shell/mode";
 import { useIntroStage } from "@/lib/intro";
-
-const chipLabels: Record<string, string> = {
-  projects: "Projects",
-  experience: "Experience",
-  resume: "Résumé",
-  listening: "Listening",
-  contact: "Contact",
-};
+import { ask } from "@/lib/thread/store";
 
 /** PRD figure B, effect 4: rise in after the greeting with a 60 ms stagger. */
 const rise: Variants = {
@@ -26,8 +20,9 @@ const rise: Variants = {
 };
 
 /**
- * Suggestion chips under the composer. They switch with the About / Work mode.
- * While the intro runs, CSS keeps them hidden until their turn.
+ * Suggestion chips under the composer. They switch with the About / Work mode
+ * and open the thread with their curated answer. While the intro runs, CSS
+ * keeps them hidden until their turn.
  */
 export function Chips() {
   const { mode } = useMode();
@@ -38,14 +33,9 @@ export function Chips() {
     <ul aria-label="Suggested questions" className="flex flex-wrap justify-center gap-2">
       {homeChips[mode].map((id, index) => (
         <m.li key={id} data-chip custom={index} variants={rise} initial={false} animate={animate}>
-          <m.button
-            type="button"
-            whileHover={{ y: -2 }}
-            transition={{ duration: 0.15 }}
-            className="h-11 rounded-full border border-line px-4 text-[13px] text-body outline-none transition-colors hover:border-line-muted hover:text-text focus-visible:ring-2 focus-visible:ring-ring"
-          >
+          <ChipButton onClick={() => void ask({ kind: "answer", id, from: "chip" }, mode)}>
             {chipLabels[id]}
-          </m.button>
+          </ChipButton>
         </m.li>
       ))}
     </ul>

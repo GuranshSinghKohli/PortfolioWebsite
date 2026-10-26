@@ -50,6 +50,17 @@ Answers to the open questions in PHASES.md.
 - **First-load JS.** Measured gzip of the scripts in the home page HTML: 189 kB at Checkpoint 1A and 198 kB at 1B. React DOM and the Next.js client runtime alone are about 117 kB; the rest is mainly Radix (tooltip, dialog), lucide icons and Motion's core. The 3D chunk is 268 kB gzip. GSAP (boot only) is a 27 kB chunk loaded after first paint on a first visit.
 - **LCP (1B review).** Lighthouse 13.5, mobile preset, production build on localhost, median of 3: 0.77 s on a repeat visit and 0.77 s on a first visit (FCP 0.67 s, CLS 0, TBT 14 ms). The LCP element is the composer placeholder: split into word spans, the greeting is no longer one large text block. On a first visit the boot intro hides the shell for about 1.6 s, which Lighthouse doesn't count.
 
+## Phase 2 thread (Checkpoint 2A)
+
+- **Thread code is lazy.** `lib/thread/store.ts` (first load) holds the view and turns and imports no thread code. The router, answer texts and thread UI are one 3.9 kB chunk (`components/thread/runtime.ts`), loaded by `import()` and prefetched on hover, focus or press of any chip, sidebar item, send button, or composer focus. `homeChips` and chip labels moved to `content/chips.ts` so the home page doesn't pull in `answers.ts`.
+- **Home stays mounted, hidden, during a thread.** Rebuilding it would lose the pre-paint greeting (the inline script only runs on first load), and the hidden hero canvas stops drawing. The rail header (mark and name) returns home and clears the thread.
+- **Router.** Topics are curated answer ids. Entity signals come from `content/roles.ts` and `content/projects.ts`; the topic words (résumé, Spotify, work, built, music, where…) live in `lib/router.ts`. "Says nothing about" means the word is absent from the current topic's answer text and its own signals. One addition to the PRD rule: a question that points back at the current topic ("that", "it", "this", "there", "they"…) keeps it even if it has a weak word, so "how does that work" inherits as the PRD's own example requires. Strong names still switch.
+- **Typed questions without AI.** A strong or weak route gets that topic's curated answer. An inherited topic, no topic, or the answer just shown gets "The live AI arrives soon. Try one of these:" with follow-up chips.
+- **Follow-up chips** are the topic's own follow-ups, then the home chips for the current mode, skipping answers already shown, three at most.
+- **Motion.** The question bubble rises from the composer (32 px, 260 ms spring) rather than a shared-layout animation from the home composer, which would need Motion's layout features in the first load. The answer fades up over 240 ms after it. Reduced motion shows both still and scrolls instantly.
+- **Focus.** Asking from the home screen moves focus to the conversation region, because the chip or button that asked is hidden with the home screen. The region is `aria-live="polite"`; follow-up chips sit outside it so they aren't announced with every answer.
+- **INP measurement.** Event Timing API (`PerformanceObserver` on `event` entries, the longest entry per `interactionId`, as web-vitals does) in a real, non-headless Chrome against `next start`. Headless Chrome reported one false 930 ms presentation delay per run with no long task in the trace, so headless numbers aren't used for INP.
+
 ## Performance budgets (2026-10-26)
 
 The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:
@@ -59,10 +70,11 @@ The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose r
 | LCP | ≤ 1.8 s, Lighthouse mobile preset |
 | TBT | ≤ 200 ms |
 | CLS | ≤ 0.1 |
+| INP | ≤ 200 ms |
 | First-load JS | ≤ 200 kB compressed (gzip of the scripts in the page HTML) |
 | 3D chunk | ≤ 350 kB compressed, excluded from first load |
 
-These replace the PRD's 130 kB first-load and 100 ms INP targets. Cheap trims applied: the Toaster loads lazily, Motion uses `LazyMotion` with `domAnimation` loaded async (a separate 14 kB chunk), and `lucide-react` is already in Next's default `optimizePackageImports` list. The home page's first load contains nothing from three, R3F, drei, postprocessing, `ai`, posthog, Upstash, sonner or GSAP. At this decision: 198 kB first-load, LCP 0.77 s, TBT 14 ms, CLS 0.
+These replace the PRD's 130 kB first-load and 100 ms INP targets (INP kept, at 200 ms). Cheap trims applied: the Toaster loads lazily, Motion uses `LazyMotion` with `domAnimation` loaded async (a separate 14 kB chunk), and `lucide-react` is already in Next's default `optimizePackageImports` list. The home page's first load contains nothing from three, R3F, drei, postprocessing, `ai`, posthog, Upstash, sonner or GSAP. At this decision: 198 kB first-load, LCP 0.77 s, TBT 14 ms, CLS 0.
 
 ## Content
 
