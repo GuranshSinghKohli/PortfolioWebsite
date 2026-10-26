@@ -2,6 +2,8 @@ import { openai, type OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai
 import { streamText } from "ai";
 import { z } from "zod";
 
+import { blockedReply } from "@/content/answers";
+import { isBlockedPrompt } from "@/lib/ai/blocked";
 import { historySchema, MAX_QUESTION_CHARS, clean, sanitizeHistory, wrapQuestion } from "@/lib/ai/history";
 import { costMicros, ratesFor } from "@/lib/ai/pricing";
 import { systemInstruction, topicHint } from "@/lib/ai/prompt";
@@ -19,7 +21,13 @@ import { verifyTicket } from "@/lib/ticket";
  *   {"type":"text","text":"…"}
  *   {"type":"attachments","items":[…]}
  *   {"type":"done","topic":"…"}
- *   {"type":"error","error":"…"}   (instead of done, if the model fails)
+ *
+ * A question the model's safety checks block (an empty answer, a
+ * content-filter finish, or a flagged prompt) ends with
+ *   {"type":"blocked","text":"…"}    replace any streamed text with this
+ *   {"type":"done","topic":"…"}
+ * and a failure ends with {"type":"error","error":"model"} instead of done.
+ * There is no refusal fallback to another model.
  */
 const bodySchema = z.object({
   question: z.string(),
@@ -33,8 +41,6 @@ const MAX_OUTPUT_TOKENS = 4096;
 
 /** Groups every ask on one prompt cache, since the system instruction never changes between requests. */
 const PROMPT_CACHE_KEY = "portfolio-ask-v1";
-
-const REFUSED = "That one's outside what I can answer here. Ask me about my work, projects or experience instead.";
 
 function fail(status: number, error: string, headers: Record<string, string> = {}) {
   return Response.json({ error }, { status, headers: { ...noStore, ...headers } });
@@ -67,6 +73,7 @@ export async function POST(request: Request) {
   if (!limit.ok) return fail(429, limit.reason, { "Retry-After": String(limit.retryAfter) });
 
   const history = sanitizeHistory(parsed.data.history);
+  let modelError: unknown;
   const { topic } = route(question, parsed.data.topic);
 
   const result = streamText({
@@ -82,7 +89,10 @@ export async function POST(request: Request) {
     maxRetries: 1,
     abortSignal: request.signal,
     // Log the message only; the SDK's default logs the whole error object.
-    onError: ({ error }) => console.error("ask model error:", error instanceof Error ? error.message : "unknown"),
+    onError: ({ error }) => {
+      modelError = error;
+      console.error("ask model error:", error instanceof Error ? error.message : "unknown");
+    },
     providerOptions: {
       openai: {
         // Short conversational answers don't need deep reasoning; no summaries, and nothing stored at OpenAI.
@@ -117,17 +127,19 @@ export async function POST(request: Request) {
           ),
         );
 
-        if (!text.trim()) {
-          // A refusal or an empty answer: say something useful rather than nothing.
-          text = REFUSED;
-          send({ type: "text", text });
-        }
-        if (finishReason !== "content-filter") {
+        if (finishReason === "content-filter" || !text.trim()) {
+          send({ type: "blocked", text: blockedReply });
+        } else {
           send({ type: "attachments", items: matchedAttachments(question, text) });
         }
         send({ type: "done", topic });
       } catch (error) {
-        if (!request.signal.aborted) {
+        if (request.signal.aborted) return;
+        if (isBlockedPrompt(modelError ?? error)) {
+          await settle(0).catch(() => {}); // A rejected prompt isn't billed: refund the reservation.
+          send({ type: "blocked", text: blockedReply });
+          send({ type: "done", topic });
+        } else {
           console.error("ask failed", error instanceof Error ? error.message : error);
           send({ type: "error", error: "model" });
         }

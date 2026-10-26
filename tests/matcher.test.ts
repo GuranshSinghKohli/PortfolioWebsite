@@ -20,6 +20,13 @@ describe("matcher", () => {
     );
   });
 
+  it("attaches every card an answer names, however briefly", () => {
+    // gpt-6-luna's own answer to "What have you built?" (2026-10-26): RoadSafe AI gets one short clause.
+    const answer =
+      "I've built QuantPilot, an event-driven market research platform, and RoadSafe AI, a road-safety analytics project. I'm also a founding engineer on Wanderers.space, a campus social platform for verified Waterloo students. My work has included data pipelines, knowledge graphs, APIs, real-time chat, and AI-powered research and recommendations.";
+    expect(ids("What have you built?", answer).sort()).toEqual(["quantpilot", "roadsafe-ai", "wanderers"]);
+  });
+
   it("matches on a title word alone", () => {
     expect(ids("Savi?")).toEqual(["savi"]);
     expect(ids("tell me about QuantPilot")).toEqual(["quantpilot"]);

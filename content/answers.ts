@@ -7,6 +7,12 @@ import type { CuratedAnswer } from "./types";
  * Instant answers for chips and sidebar items (PRD section 8). These never
  * call the AI, so every fact in them must also be in content/.
  */
+/**
+ * What a typed question gets when the model's safety checks block it, in the
+ * voice of content/voice.md: short, polite, steering back to work.
+ */
+export const blockedReply = "That's not one I'll answer here. Ask me about something I've built instead.";
+
 /** The music grid hides while the playlist is still a placeholder, so the answer says so. */
 const hasTracks = tracks.some((track) => !track.title.startsWith("[fill in"));
 

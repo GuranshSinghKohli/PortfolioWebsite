@@ -12,8 +12,9 @@ import { normalize } from "@/lib/router";
  * - Body words match only when no sibling card uses them, so shared words
  *   like "pipeline" or "100k" never decide anything.
  * - The question and the answer are scored together.
- * - A card needs a title hit or two distinctive words, and must score within
- *   CONFIDENCE of the best card, so one strong match doesn't drag weak ones in.
+ * - A card needs a title hit or two distinctive words. A card named by its
+ *   title always attaches; one matched only by body words must also score
+ *   within CONFIDENCE of the best card, so incidental words don't drag it in.
  */
 export type Entity = { kind: "project" | "role"; id: string };
 export type Scored = Entity & { score: number; title: boolean; words: string[] };
@@ -86,7 +87,7 @@ export function score(question: string, answer = ""): Scored[] {
 export function match(question: string, answer = ""): Entity[] {
   const scored = score(question, answer);
   const best = scored[0]?.score ?? 0;
-  return scored.filter((entry) => entry.score >= best * CONFIDENCE).map(({ kind, id }) => ({ kind, id }));
+  return scored.filter((entry) => entry.title || entry.score >= best * CONFIDENCE).map(({ kind, id }) => ({ kind, id }));
 }
 
 /** Matched cards as thread attachments, projects first. */
