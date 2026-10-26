@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && node scripts/check-bundle-keys.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
-    "typecheck": "next typegen && tsc --noEmit"
+    "typecheck": "next typegen && tsc --noEmit",
+    "check:secrets": "node scripts/check-bundle-keys.mjs",
+    "test:live": "vitest run --config vitest.live.config.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "4.0.78",

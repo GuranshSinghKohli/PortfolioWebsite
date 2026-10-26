@@ -72,6 +72,20 @@ Answers to the open questions in PHASES.md.
 - **Résumé tile** is drawn (paper with the name and ruled lines), not a render of the PDF's first page, which would need a PDF renderer.
 - **Hover** lifts a project card 3px and a lime edge light follows the pointer; reduced motion turns the lift off.
 
+## Phase 3 AI ask, server side (Checkpoint 3A)
+
+- **Split.** 3A is the server: session tickets, guards, the Upstash limiter and bill guard, grounding, the system instruction, and the streamed answer with attachments. 3B is the client (streaming reveal, caret, Escape, loading verbs, send pulse) and the golden set.
+- **Budget: $20 a month** (2026-10-26), a daily cap of $20 / 31 = $0.645. Each answer's real token usage is priced (`lib/ai/pricing.ts`, first-party rates for Haiku, Sonnet and Opus 5.5; cache writes 1.25× input) and added to a per-UTC-day total in Upstash. An ask reserves $0.02 before calling the model and settles to the real cost after, so concurrent asks can't all slip under the cap. A failed or aborted answer keeps its reservation. Unknown models and answers served by a refusal fallback are priced at the top rate.
+- **Limits fail closed.** 8/min and 40/hour per IP (sliding windows), a 700 ms gap (a Redis key that lives 700 ms), and the daily cap all live in Upstash. If Redis can't be reached, or the rate limiter times out, the ask gets a 503 and no model call is made. `@upstash/ratelimit` lets requests through on timeout by default; that is treated as a block here.
+- **Tickets.** `"<expiry ms>.<HMAC-SHA256 of expiry and IP>"`, 10-minute life, verified in constant time with Web Crypto. The IP is never in the ticket. The client (3B) refreshes before expiry and once on a 401.
+- **Origin check.** A matching `Origin`, or `Sec-Fetch-Site: same-origin` when a browser omits `Origin` on a same-origin GET.
+- **History.** The client sends `{ role: "visitor" | "site", text }`; any other role is a 400. Only the last 8 are kept, each capped at 700 characters with control and invisible formatting characters stripped. They reach the model inside `<transcript_record>` in the visitor's message, never as real turns; angle brackets become look-alikes so a message can't close the record. The router hint goes in `<lead_here>` and the question in `<question>`.
+- **Prompt.** One cached system block: the rules from PRD §11, `content/voice.md` (minus its own notes and unfilled lines) and a fact record built from `content/` that skips every placeholder. The router hint and question are after it, so the cached prefix never changes.
+- **Model settings.** Model from `ASK_MODEL`. `effort: "low"`: short conversational answers don't need deep thinking. `maxOutputTokens: 4096` as a runaway guard (thinking counts toward it); length comes from the prompt. Refusal fallbacks (`fallbacks: "default"`) are on for Opus, Sonnet and Fable models; Haiku has none.
+- **Stream format.** Newline-delimited JSON: `text` events, then one `attachments` event from the entity matcher (scoring the question and the full answer), then `done` with the routed topic. `error` replaces `done` if the model fails. An empty answer (a refusal) becomes a short steer back to work topics.
+- **Secret check.** `npm run build` ends with `scripts/check-bundle-keys.mjs`, so every Vercel build fails if an Anthropic or Resend key shape, or the value of any server secret, appears in `dist/static`.
+- **Live tests.** `npm run test:live` runs `/api/ask` against the real model with only the Redis limiter swapped out (`tests/live/`). It is never part of `npm test`.
+
 ## Performance budgets (2026-10-26)
 
 The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:

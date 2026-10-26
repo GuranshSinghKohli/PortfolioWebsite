@@ -108,16 +108,16 @@ Rules that apply to every phase:
 
 - [x] Install `ai`, `@ai-sdk/anthropic`, `zod`, `@upstash/ratelimit`, `@upstash/redis`.
 - [x] Create `.env.example` with placeholder keys.
-- [ ] `GET /api/session`: stateless HMAC ticket signed with `ASK_SIGNING_SECRET`, bound to the IP, with a short life. The client refreshes it silently before expiry and once on a rejected ticket, so an IP change mid-session costs one retry.
-- [ ] Guards on `POST /api/ask`: origin check, ticket check, 300-character input cap, rate limits of 8/min and 40/hour per IP, a 700 ms minimum gap, and a daily global cap (§11).
-- [ ] Grounding: router hint as "lead here", the full fact record, and the last 8 history turns (each capped at 700 characters, control characters stripped, wrapped as a transcript record).
-- [ ] Write the system instruction with every rule in §11, plus `content/voice.md`.
-- [ ] Stream text events, then one attachments event from the entity matcher. Read the model from `ASK_MODEL`.
+- [x] `GET /api/session`: stateless HMAC ticket signed with `ASK_SIGNING_SECRET`, bound to the IP, with a short life. The client refreshes it silently before expiry and once on a rejected ticket, so an IP change mid-session costs one retry.
+- [x] Guards on `POST /api/ask`: origin check, ticket check, 300-character input cap, rate limits of 8/min and 40/hour per IP, a 700 ms minimum gap, and a daily global cap (§11).
+- [x] Grounding: router hint as "lead here", the full fact record, and the last 8 history turns (each capped at 700 characters, control characters stripped, wrapped as a transcript record).
+- [x] Write the system instruction with every rule in §11, plus `content/voice.md`.
+- [x] Stream text events, then one attachments event from the entity matcher. Read the model from `ASK_MODEL`.
 - [ ] Client side: streaming reveal with a lime caret, Escape to skip, cycling loading verbs from the voice guide, send button pulse until the first token.
 - [ ] Scale length to the question; off-topic questions get a joke from the voice guide.
 - [ ] Golden set: 40 known questions with expected facts, checked by a script.
-- [ ] Forged-history test: a fake "system override" turn claiming a fake job is ignored and the job denied.
-- [ ] CI check that no API key prefix appears in the client bundle.
+- [ ] Forged-history test: a fake "system override" turn claiming a fake job is ignored and the job denied. (Unit test passes; the live run in `tests/live/` is waiting on Anthropic credits.)
+- [x] CI check that no API key prefix appears in the client bundle.
 
 **Creates or changes:** `app/api/session/route.ts`, `app/api/ask/route.ts`, `lib/ai/` (prompt, grounding, history sanitiser), `lib/ticket.ts`, `lib/ratelimit.ts`, `scripts/golden-set.ts`, `tests/golden/`, `tests/history.test.ts`.
 
@@ -221,6 +221,6 @@ Rules that apply to every phase:
 
 ## Open questions
 
-1. **Monthly AI budget** (§15). It sets the daily global cap in Phase 3.
+1. ~~Monthly AI budget~~: $20 a month (DECISIONS).
 2. **Map view in v1 or Phase 6?** (§15). It is planned for Phase 6.
 3. **Shared rate limiter timing.** §11 needs Upstash in Phase 3 for the AI limits; §14 lists it in Phase 5. This plan builds it in Phase 3 and verifies it in Phase 5.

@@ -1,5 +1,6 @@
 import { projects } from "@/content/projects";
 import { roles } from "@/content/roles";
+import type { Attachment } from "@/content/types";
 import { isFilled } from "@/lib/content";
 import { normalize } from "@/lib/router";
 
@@ -86,4 +87,15 @@ export function match(question: string, answer = ""): Entity[] {
   const scored = score(question, answer);
   const best = scored[0]?.score ?? 0;
   return scored.filter((entry) => entry.score >= best * CONFIDENCE).map(({ kind, id }) => ({ kind, id }));
+}
+
+/** Matched cards as thread attachments, projects first. */
+export function matchedAttachments(question: string, answer = ""): Attachment[] {
+  const found = match(question, answer);
+  const slugs = found.filter((entity) => entity.kind === "project").map((entity) => entity.id);
+  const ids = found.filter((entity) => entity.kind === "role").map((entity) => entity.id);
+  return [
+    ...(slugs.length ? [{ kind: "projects" as const, slugs }] : []),
+    ...(ids.length ? [{ kind: "roles" as const, ids }] : []),
+  ];
 }

@@ -1,7 +1,7 @@
 import { answers } from "@/content/answers";
 import { homeChips } from "@/content/chips";
 import type { Attachment, CuratedAnswer } from "@/content/types";
-import { match } from "@/lib/matcher";
+import { matchedAttachments as matchedCards } from "@/lib/matcher";
 import { pickFollowUps, route, type TopicId } from "@/lib/router";
 import type { Ask, Turn } from "./store";
 
@@ -17,17 +17,6 @@ export type ThreadContext = {
 };
 
 const isCards = (attachment: Attachment) => attachment.kind === "projects" || attachment.kind === "roles";
-
-/** Project and role cards from the entity matcher, projects first. */
-function matchedCards(question: string, answer = ""): Attachment[] {
-  const found = match(question, answer);
-  const slugs = found.filter((entity) => entity.kind === "project").map((entity) => entity.id);
-  const ids = found.filter((entity) => entity.kind === "role").map((entity) => entity.id);
-  return [
-    ...(slugs.length ? [{ kind: "projects" as const, slugs }] : []),
-    ...(ids.length ? [{ kind: "roles" as const, ids }] : []),
-  ];
-}
 
 /**
  * A typed question's attachments. When the curated answer carries cards, the
