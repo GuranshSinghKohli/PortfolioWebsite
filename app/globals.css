@@ -108,3 +108,62 @@
     @apply bg-bg font-sans text-text antialiased;
   }
 }
+
+/*
+ * Home intro (lib/intro.ts, components/motion/runIntro.ts). While
+ * <html data-intro> is set, the pieces the intro animates start hidden. If its
+ * script never loads, the failsafe shows them after 5 s.
+ */
+[data-boot-overlay] [data-draw] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+}
+[data-boot-overlay] [data-boot-core] {
+  opacity: 0;
+}
+html[data-intro="boot"] [data-boot-overlay] {
+  display: flex;
+  animation: intro-failsafe-out 0s 5s forwards;
+}
+html[data-intro="boot"] [data-shell],
+html[data-intro] :is(#home-greeting, #home-subline, [data-chip]) {
+  opacity: 0;
+  animation: intro-failsafe-in 0s 5s forwards;
+}
+@keyframes intro-failsafe-in {
+  to {
+    opacity: 1;
+  }
+}
+@keyframes intro-failsafe-out {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* Composer focus beam: a conic highlight clipped to a 1px ring. Motion turns --beam. */
+@utility beam-ring {
+  padding: 1px;
+  background: conic-gradient(
+    from calc(var(--beam, 0) * 1deg),
+    transparent 0 72%,
+    var(--accent) 86%,
+    transparent 100%
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
+/* PRD §10: reduced motion collapses every animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
 
-import { Toaster } from "@/components/ui/sonner";
+import { LazyToaster } from "@/components/LazyToaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { shellScript } from "@/lib/prepaint";
 import "./globals.css";
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="h-full bg-bg text-text">
         <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
-        <Toaster theme="dark" position="bottom-center" />
+        <LazyToaster theme="dark" position="bottom-center" />
       </body>
     </html>
   );

@@ -8,9 +8,14 @@ import { profile } from "@/content/profile";
 
 export const THEME_STORAGE_KEY = "theme";
 export const RAIL_STORAGE_KEY = "rail";
+export const BOOT_STORAGE_KEY = "booted";
 
-/** Root layout <head>: saved theme and rail state on <html>. */
-export const shellScript = `(function(){try{var d=document.documentElement,t=localStorage.getItem("${THEME_STORAGE_KEY}");if(t==="light"||t==="dark")d.dataset.theme=t;if(localStorage.getItem("${RAIL_STORAGE_KEY}")==="collapsed")d.dataset.rail="collapsed"}catch(e){}})()`;
+/**
+ * Root layout <head>: saved theme and rail state on <html>, plus data-intro:
+ * "boot" on a first visit, "reveal" after that, and absent with reduced
+ * motion. CSS hides the animated pieces while data-intro is set.
+ */
+export const shellScript = `(function(){try{var d=document.documentElement,t=localStorage.getItem("${THEME_STORAGE_KEY}");if(t==="light"||t==="dark")d.dataset.theme=t;if(localStorage.getItem("${RAIL_STORAGE_KEY}")==="collapsed")d.dataset.rail="collapsed";if(!matchMedia("(prefers-reduced-motion: reduce)").matches)d.dataset.intro=localStorage.getItem("${BOOT_STORAGE_KEY}")?"reveal":"boot"}catch(e){}})()`;
 
 export type DayPart = keyof typeof profile.greetings;
 

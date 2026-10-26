@@ -59,13 +59,13 @@ Rules that apply to every phase:
 - [x] Install the UI kit: shadcn components (button, input, card, badge, sheet, tooltip, hover-card, collapsible, separator, skeleton, sonner), `lucide-react`, `clsx`, `tailwind-merge`.
 - [x] Rewrite every token in `app/globals.css` as a `light-dark()` pair, with `--accent-ink` (§9). Set `color-scheme: dark` for launch, so the light values are written but unused. Map shadcn variables onto the tokens. Lime is the only accent.
 - [x] Wrap the app in `TooltipProvider` and mount `Toaster`.
-- [ ] Use Motion through `LazyMotion` with `m` components, loading features asynchronously.
+- [x] Use Motion through `LazyMotion` with `m` components, loading features asynchronously.
 - [x] Build the sidebar rail (§7): header, About/Work toggle, Get in touch, topics, pinned roles, recent projects, now-playing slot, résumé, footer. Collapse to 64 px (persisted); become a drawer over a scrim under 860 px.
 - [x] Build the home view: centred mark, time-aware greeting, composer (placeholder, About/Work pills, location badge, send), static chips from `homeChips`.
-- [ ] Add the GSAP boot intro, loaded after first paint: mark draws, then the shell fades in. At most 1.8 s, skippable, first visit only (stored in localStorage).
-- [ ] Add the greeting word reveal with GSAP SplitText, loaded after first paint: 40 ms stagger, 500 ms per word. The greeting renders as plain text first.
-- [ ] Add the composer focus beam and the chip rise and hover effects (Motion).
-- [ ] Add the hero constellation (R3F + drei + postprocessing): 12 s orbit, ±4° pointer parallax, bloom on the lime core. Load it lazily with `next/dynamic` (no SSR) and show a 2D SVG fallback while it loads, on phones under 600 px, and with reduced motion. Use `frameloop="demand"` when off-screen and cap pixel ratio at 1.75.
+- [x] Add the GSAP boot intro, loaded after first paint: mark draws, then the shell fades in. At most 1.8 s, skippable, first visit only (stored in localStorage).
+- [x] Add the greeting word reveal with GSAP SplitText, loaded after first paint: 40 ms stagger, 500 ms per word. The greeting renders as plain text first.
+- [x] Add the composer focus beam and the chip rise and hover effects (Motion).
+- [x] Add the hero constellation (R3F + drei + postprocessing): 12 s orbit, ±4° pointer parallax, bloom on the lime core. Load it lazily with `next/dynamic` (no SSR) and show a 2D SVG fallback while it loads, on phones under 600 px, and with reduced motion. Use `frameloop="demand"` when off-screen and cap pixel ratio at 1.75.
 - [x] Replace the placeholder `app/page.tsx`.
 
 **Creates or changes:** `app/layout.tsx`, `app/page.tsx`, `app/globals.css`, `components/shell/` (rail, drawer, home, composer, chips), `components/three/` (constellation scene and 2D fallback), `components/motion/` (LazyMotion provider, boot intro, greeting).

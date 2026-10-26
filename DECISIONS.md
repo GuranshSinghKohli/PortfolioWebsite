@@ -39,6 +39,17 @@ Answers to the open questions in PHASES.md.
 - **Brand icons.** lucide-react 1.x dropped GitHub and LinkedIn, so `components/icons.tsx` draws them as 1.5px line icons.
 - **Stale Tailwind CSS after adding files.** A Turbopack build reusing `dist/cache` once shipped CSS without classes from new files. `rm -rf dist` before a build fixes it locally.
 
+## Phase 1 motion
+
+- **Intro flag.** The `<head>` script sets `<html data-intro>`: `boot` on a first visit, `reveal` after that (the `booted` key in localStorage), and nothing with reduced motion. CSS hides the shell (boot only), greeting, sub-line and chips while it is set; `components/motion/runIntro.ts` animates them in and removes it. A CSS failsafe shows everything after 5 s if the intro script never loads.
+- **Sequence.** Boot (mark draws, overlay fades, shell fades in) takes 1.6 s. Any key, click or the "Skip intro" button jumps to its end. The greeting reveal then runs on every motion-allowed visit, and the chips rise in as it settles. GSAP and SplitText are a separate 30 kB chunk imported after first paint.
+- **The greeting is hidden until GSAP loads.** Showing it and then re-hiding it for the reveal would flash. The cost is that the greeting (likely the LCP element) paints when the reveal starts, not at first paint. Reduced-motion visitors see it at first paint.
+- **Sub-line.** The PRD only animates the greeting; the sub-line fades up 200 ms after it, so it doesn't sit alone on screen during the reveal.
+- **Hero.** The 2D mark is server-rendered and stays for phones under 600 px, reduced motion and browsers without WebGL 2. Otherwise the 3D scene loads on idle and crossfades in after its first frame. The canvas is twice the hero box so bloom fades out before its edge. Scene colours are read from the theme tokens at mount.
+- **Bloom on slow devices.** drei `PerformanceMonitor` turns bloom off when the frame rate drops (PRD §10). Headless Chrome's software renderer always triggers this, so automated screenshots show the core without its glow.
+- **Toaster** loads after hydration through `next/dynamic`. Nothing toasts before Phase 4.
+- **First-load JS is over the 130 kB budget.** Measured gzip of the scripts in the HTML: 189 kB at Checkpoint 1A and 198 kB at 1B. React DOM and the Next.js client runtime alone are about 117 kB. The rest is mainly Radix (tooltip, dialog), lucide icons and Motion's core. The 3D chunk is 268 kB gzip, under its 350 kB budget.
+
 ## Content
 
 Facts come only from the October 2026 résumé and the earlier content notes. They now live in typed files in `content/`. Anything not in those sources is a `[fill in: …]` placeholder. Hobbies are not on the résumé, so the AI must not invent any. The phone number is not published.

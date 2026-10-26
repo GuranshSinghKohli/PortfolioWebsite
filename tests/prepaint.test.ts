@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { profile } from "@/content/profile";
-import { dayPart, greetingScript, subLineScript } from "@/lib/prepaint";
+import { BOOT_STORAGE_KEY, dayPart, greetingScript, shellScript, subLineScript } from "@/lib/prepaint";
 
 /** Runs an inline script against a one-node fake document. */
 function run(script: string) {
@@ -9,6 +9,16 @@ function run(script: string) {
   vi.stubGlobal("document", { getElementById: () => node });
   new Function(script)();
   return node.textContent;
+}
+
+/** Runs the <head> script and returns the data attributes it set on <html>. */
+function runShell(storage: Record<string, string>, reducedMotion = false) {
+  const dataset: Record<string, string> = {};
+  vi.stubGlobal("document", { documentElement: { dataset } });
+  vi.stubGlobal("localStorage", { getItem: (key: string) => storage[key] ?? null });
+  vi.stubGlobal("matchMedia", () => ({ matches: reducedMotion }));
+  new Function(shellScript)();
+  return dataset;
 }
 
 afterEach(() => {
@@ -40,5 +50,18 @@ describe("pre-paint scripts", () => {
 
   it("picks a sub-line from the profile", () => {
     expect(profile.subLines).toContain(run(subLineScript("s")));
+  });
+
+  it("boots on a first visit and only reveals after that", () => {
+    expect(runShell({}).intro).toBe("boot");
+    expect(runShell({ [BOOT_STORAGE_KEY]: "1" }).intro).toBe("reveal");
+  });
+
+  it("skips the intro with reduced motion", () => {
+    expect(runShell({}, true).intro).toBeUndefined();
+  });
+
+  it("restores the collapsed rail", () => {
+    expect(runShell({ rail: "collapsed" }).rail).toBe("collapsed");
   });
 });

@@ -1,4 +1,13 @@
+/** The mark on a 22-unit grid (PRD §4): a lime centre with three linked satellites. */
+export const MARK_CENTRE = [11, 11] as const;
+export const MARK_SATELLITES = [
+  [11, 3.5],
+  [17.5, 14.75],
+  [4.5, 14.75],
+] as const;
+
 export function LogoMark({ size = 22, className }: { size?: number; className?: string }) {
+  const [cx, cy] = MARK_CENTRE;
   return (
     <svg
       width={size}
@@ -8,14 +17,14 @@ export function LogoMark({ size = 22, className }: { size?: number; className?: 
       className={className}
     >
       <g stroke="currentColor" strokeWidth="1" fill="none">
-        <line x1="11" y1="11" x2="11" y2="3.5" />
-        <line x1="11" y1="11" x2="17.5" y2="14.75" />
-        <line x1="11" y1="11" x2="4.5" y2="14.75" />
-        <circle cx="11" cy="3.5" r="1.5" />
-        <circle cx="17.5" cy="14.75" r="1.5" />
-        <circle cx="4.5" cy="14.75" r="1.5" />
+        {MARK_SATELLITES.map(([x, y]) => (
+          <line key={`l${x}`} x1={cx} y1={cy} x2={x} y2={y} />
+        ))}
+        {MARK_SATELLITES.map(([x, y]) => (
+          <circle key={`c${x}`} cx={x} cy={y} r="1.5" />
+        ))}
       </g>
-      <circle cx="11" cy="11" r="2.1" fill="var(--accent)" />
+      <circle cx={cx} cy={cy} r="2.1" fill="var(--accent)" />
     </svg>
   );
 }
