@@ -1,4 +1,4 @@
-import { anthropic, type AnthropicLanguageModelOptions } from "@ai-sdk/anthropic";
+import { openai, type OpenAILanguageModelResponsesOptions } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { z } from "zod";
 
@@ -28,11 +28,11 @@ const bodySchema = z.object({
   topic: z.string().max(64).nullable().default(null),
 });
 
-/** A runaway guard, not a length control: the prompt keeps answers short. Thinking counts toward it. */
+/** A runaway guard, not a length control: the prompt keeps answers short. Reasoning counts toward it. */
 const MAX_OUTPUT_TOKENS = 4096;
 
-/** Server-side refusal fallbacks exist on these models; Haiku has none. */
-const SUPPORTS_FALLBACKS = /^claude-(opus|sonnet|fable)-/;
+/** Groups every ask on one prompt cache, since the system instruction never changes between requests. */
+const PROMPT_CACHE_KEY = "portfolio-ask-v1";
 
 const REFUSED = "That one's outside what I can answer here. Ask me about my work, projects or experience instead.";
 
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
 
   const model = process.env.ASK_MODEL;
   const secret = process.env.ASK_SIGNING_SECRET;
-  if (!model || !secret || !process.env.ANTHROPIC_API_KEY) return fail(503, "unavailable");
+  if (!model || !secret || !process.env.OPENAI_API_KEY) return fail(503, "unavailable");
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return fail(400, "bad_request");
@@ -70,14 +70,8 @@ export async function POST(request: Request) {
   const { topic } = route(question, parsed.data.topic);
 
   const result = streamText({
-    model: anthropic(model),
-    instructions: [
-      {
-        role: "system",
-        content: systemInstruction,
-        providerOptions: { anthropic: { cacheControl: { type: "ephemeral" } } },
-      },
-    ],
+    model: openai(model),
+    instructions: systemInstruction,
     messages: [
       {
         role: "user",
@@ -90,10 +84,13 @@ export async function POST(request: Request) {
     // Log the message only; the SDK's default logs the whole error object.
     onError: ({ error }) => console.error("ask model error:", error instanceof Error ? error.message : "unknown"),
     providerOptions: {
-      anthropic: {
-        effort: "low",
-        ...(SUPPORTS_FALLBACKS.test(model) ? { fallbacks: "default" as const } : {}),
-      } satisfies AnthropicLanguageModelOptions,
+      openai: {
+        // Short conversational answers don't need deep reasoning; no summaries, and nothing stored at OpenAI.
+        reasoningEffort: "low",
+        reasoningSummary: null,
+        store: false,
+        promptCacheKey: PROMPT_CACHE_KEY,
+      } satisfies OpenAILanguageModelResponsesOptions,
     },
   });
 
@@ -107,16 +104,7 @@ export async function POST(request: Request) {
           text += delta;
           send({ type: "text", text: delta });
         }
-        const [usage, finishReason, finalStep] = await Promise.all([
-          result.usage,
-          result.finishReason,
-          result.finalStep,
-        ]);
-
-        const iterations = finalStep.providerMetadata?.anthropic?.iterations;
-        const servedByFallback =
-          Array.isArray(iterations) &&
-          iterations.some((entry) => (entry as { type?: string } | null)?.type === "fallback_message");
+        const [usage, finishReason] = await Promise.all([result.usage, result.finishReason]);
         await settle(
           costMicros(
             {
@@ -125,7 +113,7 @@ export async function POST(request: Request) {
               cacheWrite: usage.inputTokenDetails?.cacheWriteTokens ?? 0,
               output: usage.outputTokens ?? 0,
             },
-            ratesFor(model, servedByFallback),
+            ratesFor(model),
           ),
         );
 

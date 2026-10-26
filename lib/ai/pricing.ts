@@ -1,21 +1,23 @@
 /**
  * What an answer cost, from its real token usage, for the daily bill guard.
- * USD per million tokens, Anthropic first-party rates (October 2026). Cache
- * writes bill at 1.25× input (5-minute TTL); cache reads as listed.
+ * USD per million tokens, OpenAI Standard tier, short context (pricing page,
+ * 2026-10-26). OpenAI bills no premium for cache writes: they cost input rate.
  */
 type Rates = { input: number; output: number; cacheRead: number };
 
 const RATES: Record<string, Rates> = {
-  "claude-haiku-5-5": { input: 0.1, output: 0.5, cacheRead: 0.01 },
-  "claude-sonnet-5-5": { input: 2, output: 10, cacheRead: 0.2 },
-  "claude-opus-5-5": { input: 4, output: 20, cacheRead: 0.2 },
+  "gpt-6.1-sol": { input: 2, output: 10, cacheRead: 0.1 },
+  "gpt-6.1-terra": { input: 1, output: 5, cacheRead: 0.05 },
+  "gpt-6-luna": { input: 0.1, output: 0.5, cacheRead: 0.01 },
+  "gpt-6-sol": { input: 2, output: 10, cacheRead: 0.2 },
+  "gpt-6-astra": { input: 10, output: 50, cacheRead: 1 },
 };
 
-/** Unknown models, and turns a fallback model served, bill at the top rate so the guard never under-counts. */
-const TOP_RATE: Rates = { input: 10, output: 50, cacheRead: 1 };
+/** Unknown models bill at the top rate, so the guard never under-counts. */
+const TOP_RATE: Rates = RATES["gpt-6-astra"];
 
-export function ratesFor(model: string, servedByFallback = false): Rates {
-  return servedByFallback ? TOP_RATE : (RATES[model] ?? TOP_RATE);
+export function ratesFor(model: string): Rates {
+  return RATES[model] ?? TOP_RATE;
 }
 
 export type Usage = {
@@ -23,7 +25,7 @@ export type Usage = {
   input: number;
   cacheRead: number;
   cacheWrite: number;
-  /** Includes thinking tokens. */
+  /** Includes reasoning tokens. */
   output: number;
 };
 
@@ -31,7 +33,7 @@ export type Usage = {
 export function costMicros(usage: Usage, rates: Rates) {
   const usd =
     (usage.input * rates.input +
-      usage.cacheWrite * rates.input * 1.25 +
+      usage.cacheWrite * rates.input +
       usage.cacheRead * rates.cacheRead +
       usage.output * rates.output) /
     1_000_000;

@@ -1,5 +1,5 @@
 // Fails the build if anything secret reached the browser bundle (PRD §11).
-// Checks for Anthropic, Upstash and Resend key shapes, and for the exact
+// Checks for OpenAI, Anthropic and Resend key shapes, and for the exact
 // values of server-only variables when they are set (Vercel builds, .env.local).
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
@@ -11,10 +11,11 @@ try {
 
 const root = path.join(process.cwd(), "dist", "static");
 const patterns = [
+  { name: "OpenAI key", re: /sk-(proj-|svcacct-|admin-)?[A-Za-z0-9_-]{32,}/ },
   { name: "Anthropic key", re: /sk-ant-[A-Za-z0-9_-]{10,}/ },
   { name: "Resend key", re: /\bre_[A-Za-z0-9]{8,}_[A-Za-z0-9]{8,}/ },
 ];
-const secrets = ["ANTHROPIC_API_KEY", "ASK_SIGNING_SECRET", "UPSTASH_REDIS_REST_TOKEN", "RESEND_API_KEY"]
+const secrets = ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", "ASK_SIGNING_SECRET", "UPSTASH_REDIS_REST_TOKEN", "RESEND_API_KEY"]
   .map((name) => ({ name, value: process.env[name] }))
   .filter((entry) => entry.value && entry.value.length >= 12);
 

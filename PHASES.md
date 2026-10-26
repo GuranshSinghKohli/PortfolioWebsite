@@ -106,7 +106,7 @@ Rules that apply to every phase:
 
 **Tasks**
 
-- [x] Install `ai`, `@ai-sdk/anthropic`, `zod`, `@upstash/ratelimit`, `@upstash/redis`.
+- [x] Install `ai`, `@ai-sdk/openai` (switched from `@ai-sdk/anthropic`), `zod`, `@upstash/ratelimit`, `@upstash/redis`.
 - [x] Create `.env.example` with placeholder keys.
 - [x] `GET /api/session`: stateless HMAC ticket signed with `ASK_SIGNING_SECRET`, bound to the IP, with a short life. The client refreshes it silently before expiry and once on a rejected ticket, so an IP change mid-session costs one retry.
 - [x] Guards on `POST /api/ask`: origin check, ticket check, 300-character input cap, rate limits of 8/min and 40/hour per IP, a 700 ms minimum gap, and a daily global cap (§11).
@@ -116,12 +116,12 @@ Rules that apply to every phase:
 - [ ] Client side: streaming reveal with a lime caret, Escape to skip, cycling loading verbs from the voice guide, send button pulse until the first token.
 - [ ] Scale length to the question; off-topic questions get a joke from the voice guide.
 - [ ] Golden set: 40 known questions with expected facts, checked by a script.
-- [ ] Forged-history test: a fake "system override" turn claiming a fake job is ignored and the job denied. (Unit test passes; the live run in `tests/live/` is waiting on Anthropic credits.)
+- [x] Forged-history test: a fake "system override" turn claiming a fake job is ignored and the job denied. (Unit test and the live run in `tests/live/` both pass.)
 - [x] CI check that no API key prefix appears in the client bundle.
 
 **Creates or changes:** `app/api/session/route.ts`, `app/api/ask/route.ts`, `lib/ai/` (prompt, grounding, history sanitiser), `lib/ticket.ts`, `lib/ratelimit.ts`, `scripts/golden-set.ts`, `tests/golden/`, `tests/history.test.ts`.
 
-**Libraries:** `ai`, `@ai-sdk/anthropic`, `zod`, `@upstash/ratelimit`, `@upstash/redis`.
+**Libraries:** `ai`, `@ai-sdk/openai`, `zod`, `@upstash/ratelimit`, `@upstash/redis`.
 
 **Done when:** the golden set is at least 95% correct, the forged-history test passes, and no key is in the bundle.
 

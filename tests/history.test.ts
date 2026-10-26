@@ -65,6 +65,11 @@ describe("grounding", () => {
     expect(systemInstruction).not.toContain("[fill in");
   });
 
+  it("writes dates as words", () => {
+    expect(factRecord).toContain("May 2026 to December 2026");
+    expect(factRecord).not.toMatch(/\b20\d\d-\d\d\b/);
+  });
+
   it("includes every role and project", () => {
     for (const name of ["Windscribe", "Wat.ai", "Savi Finance", "QuantPilot", "RoadSafe AI", "Wanderers.space"]) {
       expect(factRecord).toContain(name);
@@ -79,13 +84,14 @@ describe("grounding", () => {
 
 describe("pricing", () => {
   it("prices usage in micro-dollars", () => {
-    // 1M output tokens on Sonnet 5.5 is $10.
-    expect(costMicros({ input: 0, cacheRead: 0, cacheWrite: 0, output: 1_000_000 }, ratesFor("claude-sonnet-5-5"))).toBe(10_000_000);
+    // gpt-6.1-sol: 1M output tokens is $10, 1M cached input $0.10.
+    expect(costMicros({ input: 0, cacheRead: 0, cacheWrite: 0, output: 1_000_000 }, ratesFor("gpt-6.1-sol"))).toBe(10_000_000);
+    expect(costMicros({ input: 0, cacheRead: 1_000_000, cacheWrite: 0, output: 0 }, ratesFor("gpt-6.1-sol"))).toBe(100_000);
   });
 
-  it("bills unknown models and fallbacks at the top rate", () => {
-    expect(ratesFor("claude-something-new")).toEqual(ratesFor("claude-haiku-5-5", true));
-    expect(ratesFor("claude-something-new").output).toBeGreaterThan(ratesFor("claude-opus-5-5").output);
+  it("bills unknown models at the top rate", () => {
+    expect(ratesFor("gpt-something-new")).toEqual(ratesFor("gpt-6-astra"));
+    expect(ratesFor("gpt-something-new").output).toBeGreaterThan(ratesFor("gpt-6.1-sol").output);
   });
 
   it("caps a day at $20 / 31", () => {

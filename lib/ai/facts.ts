@@ -11,7 +11,10 @@ import { isFilled } from "@/lib/content";
  * from content/, skipping anything still marked "[fill in", so the model
  * can't repeat a placeholder or treat it as a fact. Static, so it caches.
  */
-const range = ({ start, end }: DateRange) => `${start} to ${end ?? "present"}`;
+const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+/** "2026-05" → "May 2026", so answers don't echo the raw format. */
+const month = (value: string) => `${MONTHS[Number(value.slice(5, 7)) - 1]} ${value.slice(0, 4)}`;
+const range = ({ start, end }: DateRange) => `${month(start)} to ${end ? month(end) : "present"}`;
 const list = (items: string[]) => items.filter(isFilled).join(", ");
 const line = (label: string, value: string | undefined) => (isFilled(value) ? `${label}: ${value}` : null);
 const block = (lines: (string | null)[]) => lines.filter(Boolean).join("\n");
