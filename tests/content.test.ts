@@ -37,6 +37,10 @@ describe("content", () => {
     }
   });
 
+  it("has written text for every curated answer", () => {
+    for (const answer of answers) expect(answer.answer, answer.id).not.toContain("[fill in");
+  });
+
   it("gives every role and project a curated answer", () => {
     for (const role of roles) expect(answerIds).toContain(`role:${role.id}`);
     for (const project of projects) expect(answerIds).toContain(`project:${project.slug}`);

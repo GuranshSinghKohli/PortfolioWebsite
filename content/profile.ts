@@ -7,15 +7,15 @@ export const profile: Profile = {
   school: "University of Waterloo",
   term: "[fill in: current term, e.g. 2B]",
   greetings: {
-    morning: "[fill in: morning greeting]",
-    afternoon: "[fill in: afternoon greeting]",
-    evening: "[fill in: evening greeting]",
-    lateNight: "[fill in: late-night greeting]",
+    morning: "Up early? I'm Guransh.",
+    afternoon: "Hey, I'm Guransh.",
+    evening: "Evening shift. I'm Guransh.",
+    lateNight: "Still up? Same. I'm Guransh.",
   },
   subLines: [
-    "[fill in: rotating sub-line 1]",
-    "[fill in: rotating sub-line 2]",
-    "[fill in: rotating sub-line 3]",
+    "AI engineer at Windscribe. Studying at Waterloo.",
+    "I build agents, data pipelines and apps people actually use.",
+    "Ask about my work. Every answer comes with receipts.",
   ],
   socials: {
     email: "g4kohli@uwaterloo.ca",
