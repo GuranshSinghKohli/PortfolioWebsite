@@ -1,14 +1,14 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { profile } from "@/content/profile";
-import { BOOT_STORAGE_KEY, dayPart, greetingScript, shellScript, subLineScript } from "@/lib/prepaint";
+import { BOOT_STORAGE_KEY, dayPart, greetingHtml, greetingScript, shellScript, subLineScript } from "@/lib/prepaint";
 
 /** Runs an inline script against a one-node fake document. */
 function run(script: string) {
-  const node = { textContent: "" };
+  const node = { textContent: "", innerHTML: "" };
   vi.stubGlobal("document", { getElementById: () => node });
   new Function(script)();
-  return node.textContent;
+  return node.innerHTML || node.textContent;
 }
 
 /** Runs the <head> script and returns the data attributes it set on <html>. */
@@ -31,8 +31,16 @@ describe("pre-paint scripts", () => {
     vi.useFakeTimers();
     for (let hour = 0; hour < 24; hour++) {
       vi.setSystemTime(new Date(2026, 9, 26, hour, 30));
-      expect(run(greetingScript("g")), `hour ${hour}`).toBe(profile.greetings[dayPart(hour)]);
+      expect(run(greetingScript("g")), `hour ${hour}`).toBe(greetingHtml(profile.greetings[dayPart(hour)]));
     }
+  });
+
+  it("wraps each greeting word in an indexed, escaped span", () => {
+    expect(greetingHtml("Hey, I'm <G>")).toBe(
+      '<span class="greeting-word" style="--i:0">Hey,</span> ' +
+        '<span class="greeting-word" style="--i:1">I\'m</span> ' +
+        '<span class="greeting-word" style="--i:2">&lt;G&gt;</span>',
+    );
   });
 
   it("splits the day at 5, 12, 17 and 22", () => {

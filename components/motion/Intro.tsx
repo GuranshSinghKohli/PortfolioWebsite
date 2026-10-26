@@ -3,34 +3,69 @@
 import { useEffect } from "react";
 
 import { MARK_CENTRE, MARK_SATELLITES } from "@/components/LogoMark";
-import { initialIntro, requestIntroSkip, setIntroStage } from "@/lib/intro";
+import { GREETING, initialIntro, requestIntroSkip, setIntroStage, type IntroKind } from "@/lib/intro";
+
+/** Chips start this long before the greeting finishes, and take this long (60 ms stagger, 320 ms each). */
+const CHIPS_LEAD = 150;
+const CHIPS_DURATION = 600;
+
+/** When the CSS greeting reveal ends, in ms since navigation start. */
+function greetingEnd(kind: IntroKind) {
+  const words = document.querySelectorAll("#home-greeting .greeting-word").length;
+  const paint = performance.getEntriesByName("first-contentful-paint")[0]?.startTime ?? 0;
+  const delay = kind === "boot" ? GREETING.bootDelay : 0;
+  return paint + delay + Math.max(words - 1, 0) * GREETING.stagger + GREETING.duration;
+}
 
 /**
- * Starts the home intro after first paint. GSAP and SplitText load in their
- * own chunk here, so they stay out of the first-load JS (DECISIONS 4).
+ * Runs the home intro. On a first visit the GSAP boot loads after first
+ * paint in its own chunk, so it stays out of the first-load JS (DECISIONS 4).
+ * The chips rise in as the greeting settles, then the intro ends.
  */
 export function Intro() {
   useEffect(() => {
     const kind = initialIntro;
     if (!kind) return;
 
+    const root = document.documentElement;
+    root.dataset.intro = kind;
+    setIntroStage("waiting");
+
     let cancelled = false;
-    let stop: (() => void) | undefined;
-    const frame = requestAnimationFrame(() => {
-      import("./runIntro")
-        .then(({ runIntro }) => {
-          if (!cancelled) stop = runIntro(kind);
-        })
-        .catch(() => {
-          delete document.documentElement.dataset.intro;
-          setIntroStage("done");
-        });
-    });
+    let stopBoot: (() => void) | undefined;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    const finish = () => {
+      delete root.dataset.intro;
+      setIntroStage("done");
+    };
+    const chipsThenFinish = () => {
+      const wait = Math.max(0, greetingEnd(kind) - CHIPS_LEAD - performance.now());
+      timers.push(
+        setTimeout(() => {
+          setIntroStage("chips");
+          timers.push(setTimeout(finish, CHIPS_DURATION));
+        }, wait),
+      );
+    };
+
+    let frame = 0;
+    if (kind === "boot") {
+      frame = requestAnimationFrame(() => {
+        import("./runBoot")
+          .then(({ runBoot }) => {
+            if (!cancelled) stopBoot = runBoot(chipsThenFinish);
+          })
+          .catch(finish);
+      });
+    } else {
+      chipsThenFinish();
+    }
 
     return () => {
       cancelled = true;
       cancelAnimationFrame(frame);
-      stop?.();
+      timers.forEach(clearTimeout);
+      stopBoot?.();
     };
   }, []);
 
@@ -39,7 +74,7 @@ export function Intro() {
 
 /**
  * Full-screen boot layer for a first visit. CSS shows it only while
- * <html data-intro="boot"> is set; runIntro draws the mark and fades it out.
+ * <html data-intro="boot"> is set; runBoot draws the mark and fades it out.
  */
 export function BootOverlay() {
   const [cx, cy] = MARK_CENTRE;

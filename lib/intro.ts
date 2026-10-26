@@ -6,7 +6,7 @@ import { useSyncExternalStore } from "react";
  * Home intro sequence: boot (first visit) → greeting reveal → chips → done.
  * The pre-paint script decides on <html data-intro> whether it runs at all.
  * Read once at module load, because Strict Mode's dev remount clears
- * attributes on <html>.
+ * attributes on <html>. The greeting reveal itself is CSS (globals.css).
  */
 export type IntroKind = "boot" | "reveal";
 
@@ -17,6 +17,9 @@ export const initialIntro: IntroKind | undefined =
   typeof document === "undefined"
     ? undefined
     : (document.documentElement.dataset.intro as IntroKind | undefined);
+
+/** Greeting reveal timing, matching .greeting-word in globals.css. */
+export const GREETING = { stagger: 40, duration: 500, bootDelay: 1400 } as const;
 
 let stage: IntroStage = initialIntro ? "waiting" : "done";
 const listeners = new Set<() => void>();

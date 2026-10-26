@@ -20,7 +20,7 @@ Answers to the open questions in PHASES.md.
 1. **Three headline projects:** QuantPilot, RoadSafe AI, Wanderers.space. The PRD asks for four; the résumé has three. Wanderers is shown as a project, with its founding-engineer role kept on the project entry, not in `content/roles.ts`.
 2. **Mark:** one lime centre dot with three linked satellites, as §4 says. `LogoMark` is updated.
 3. **Source chips** stay in Phase 6. The Phase 2 thread ships without them, even though figure C shows them.
-4. **First-load budget:** the GSAP boot intro and SplitText load after first paint. Motion is used through `LazyMotion` with `m` components.
+4. **First-load budget:** the GSAP boot intro loads after first paint, and the greeting reveal is CSS only. Motion is used through `LazyMotion` with `m` components.
 5. **Theme:** dark only at launch. Every token is still written as a `light-dark()` pair now, so the light theme in Phase 6 is a switch, not a rewrite.
 6. **Toggle names:** About / Work everywhere, both in the sidebar and on the composer pills.
 7. **Session tickets:** short-lived, with a silent refresh, so a mobile IP change costs one retry and not a broken ask.
@@ -41,14 +41,14 @@ Answers to the open questions in PHASES.md.
 
 ## Phase 1 motion
 
-- **Intro flag.** The `<head>` script sets `<html data-intro>`: `boot` on a first visit, `reveal` after that (the `booted` key in localStorage), and nothing with reduced motion. CSS hides the shell (boot only), greeting, sub-line and chips while it is set; `components/motion/runIntro.ts` animates them in and removes it. A CSS failsafe shows everything after 5 s if the intro script never loads.
-- **Sequence.** Boot (mark draws, overlay fades, shell fades in) takes 1.6 s. Any key, click or the "Skip intro" button jumps to its end. The greeting reveal then runs on every motion-allowed visit, and the chips rise in as it settles. GSAP and SplitText are a separate 30 kB chunk imported after first paint.
-- **The greeting is hidden until GSAP loads.** Showing it and then re-hiding it for the reveal would flash. The cost is that the greeting (likely the LCP element) paints when the reveal starts, not at first paint. Reduced-motion visitors see it at first paint.
-- **Sub-line.** The PRD only animates the greeting; the sub-line fades up 200 ms after it, so it doesn't sit alone on screen during the reveal.
+- **Intro flag.** The `<head>` script sets `<html data-intro>`: `boot` on a first visit, `reveal` after that (the `booted` key in localStorage), and nothing with reduced motion. While it is set, CSS hides what waits on JS: the shell during the boot, and the chips. `components/motion/Intro.tsx` reveals them and removes the flag. A CSS failsafe shows them after 5 s if the scripts never load.
+- **Boot.** The mark draws, the overlay fades and the shell fades in, in 1.6 s. Any key, click or the "Skip intro" button jumps to its end. GSAP is a separate chunk imported after first paint, and only on a first visit.
+- **Greeting reveal is CSS only (1B review).** The server renders the greeting as word spans, and the pre-paint script swaps in the spans for the visitor's time of day. CSS staggers them from first paint (40 ms, 500 ms each, 8 px rise) and fades the sub-line up 200 ms in. The h1's HTML is set with `dangerouslySetInnerHTML`, so React never hydrates spans the script replaced. On a first visit a CSS delay of 1.4 s holds the reveal until the shell fades in. Reduced motion shows it still. The chips start (Motion) as the greeting settles, timed from first contentful paint.
 - **Hero.** The 2D mark is server-rendered and stays for phones under 600 px, reduced motion and browsers without WebGL 2. Otherwise the 3D scene loads on idle and crossfades in after its first frame. The canvas is twice the hero box so bloom fades out before its edge. Scene colours are read from the theme tokens at mount.
 - **Bloom on slow devices.** drei `PerformanceMonitor` turns bloom off when the frame rate drops (PRD §10). Headless Chrome's software renderer always triggers this, so automated screenshots show the core without its glow.
 - **Toaster** loads after hydration through `next/dynamic`. Nothing toasts before Phase 4.
-- **First-load JS is over the 130 kB budget.** Measured gzip of the scripts in the HTML: 189 kB at Checkpoint 1A and 198 kB at 1B. React DOM and the Next.js client runtime alone are about 117 kB. The rest is mainly Radix (tooltip, dialog), lucide icons and Motion's core. The 3D chunk is 268 kB gzip, under its 350 kB budget.
+- **First-load JS is over the 130 kB budget.** Measured gzip of the scripts in the HTML: 189 kB at Checkpoint 1A and 198 kB at 1B. React DOM and the Next.js client runtime alone are about 117 kB. The rest is mainly Radix (tooltip, dialog), lucide icons and Motion's core. The 3D chunk is 268 kB gzip, under its 350 kB budget. GSAP (boot only) is a 27 kB chunk loaded after first paint on a first visit.
+- **LCP (1B review).** Lighthouse 13.5, mobile preset, production build on localhost, median of 3: 0.77 s on a repeat visit and 0.77 s on a first visit (FCP 0.67 s, CLS 0, TBT 14 ms). The LCP element is the composer placeholder: split into word spans, the greeting is no longer one large text block. On a first visit the boot intro hides the shell for about 1.6 s, which Lighthouse doesn't count.
 
 ## Content
 

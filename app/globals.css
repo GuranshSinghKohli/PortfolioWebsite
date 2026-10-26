@@ -110,9 +110,40 @@
 }
 
 /*
- * Home intro (lib/intro.ts, components/motion/runIntro.ts). While
- * <html data-intro> is set, the pieces the intro animates start hidden. If its
- * script never loads, the failsafe shows them after 5 s.
+ * Greeting reveal (PRD figure B, effect 2), CSS only so it starts at first
+ * paint: words rise 8px with a 40 ms stagger, 500 ms each, and the sub-line
+ * follows. On a first visit it waits for the boot intro (1.4 s, matching
+ * GREETING.bootDelay in lib/intro.ts). Reduced motion shows it still.
+ */
+.greeting-word {
+  display: inline-block;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .greeting-word,
+  #home-subline {
+    animation: rise-in 500ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .greeting-word {
+    animation-delay: calc(var(--i) * 40ms + var(--intro-delay, 0ms));
+  }
+  #home-subline {
+    animation-delay: calc(200ms + var(--intro-delay, 0ms));
+  }
+  html[data-intro="boot"] {
+    --intro-delay: 1400ms;
+  }
+}
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/*
+ * Boot intro and chips (lib/intro.ts, components/motion/). While
+ * <html data-intro> is set, the shell (boot only) and the chips start hidden
+ * because they wait on JS. If it never loads, the failsafe shows them after 5 s.
  */
 [data-boot-overlay] [data-draw] {
   stroke-dasharray: 1;
@@ -126,7 +157,7 @@ html[data-intro="boot"] [data-boot-overlay] {
   animation: intro-failsafe-out 0s 5s forwards;
 }
 html[data-intro="boot"] [data-shell],
-html[data-intro] :is(#home-greeting, #home-subline, [data-chip]) {
+html[data-intro] [data-chip] {
   opacity: 0;
   animation: intro-failsafe-in 0s 5s forwards;
 }

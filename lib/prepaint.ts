@@ -27,10 +27,26 @@ export function dayPart(hour: number): DayPart {
   return "lateNight";
 }
 
+const escapeHtml = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/**
+ * The greeting as word spans for the CSS reveal (globals.css, .greeting-word):
+ * each word carries its index in --i, which staggers its animation-delay.
+ */
+export function greetingHtml(text: string) {
+  return text
+    .split(" ")
+    .map((word, i) => `<span class="greeting-word" style="--i:${i}">${escapeHtml(word)}</span>`)
+    .join(" ");
+}
+
 /** Swaps the server's default greeting for the one matching the visitor's clock. */
 export function greetingScript(id: string) {
-  const greetings = JSON.stringify(profile.greetings);
-  return `(function(){var n=document.getElementById(${JSON.stringify(id)});if(!n)return;var h=new Date().getHours(),g=${greetings};n.textContent=h>=5&&h<12?g.morning:h<17&&h>=12?g.afternoon:h>=17&&h<22?g.evening:g.lateNight})()`;
+  const html = JSON.stringify(
+    Object.fromEntries(Object.entries(profile.greetings).map(([part, text]) => [part, greetingHtml(text)])),
+  );
+  return `(function(){var n=document.getElementById(${JSON.stringify(id)});if(!n)return;var h=new Date().getHours(),g=${html};n.innerHTML=h>=5&&h<12?g.morning:h<17&&h>=12?g.afternoon:h>=17&&h<22?g.evening:g.lateNight})()`;
 }
 
 /** Picks one sub-line per visit. */

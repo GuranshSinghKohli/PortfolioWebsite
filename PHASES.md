@@ -63,7 +63,7 @@ Rules that apply to every phase:
 - [x] Build the sidebar rail (§7): header, About/Work toggle, Get in touch, topics, pinned roles, recent projects, now-playing slot, résumé, footer. Collapse to 64 px (persisted); become a drawer over a scrim under 860 px.
 - [x] Build the home view: centred mark, time-aware greeting, composer (placeholder, About/Work pills, location badge, send), static chips from `homeChips`.
 - [x] Add the GSAP boot intro, loaded after first paint: mark draws, then the shell fades in. At most 1.8 s, skippable, first visit only (stored in localStorage).
-- [x] Add the greeting word reveal with GSAP SplitText, loaded after first paint: 40 ms stagger, 500 ms per word. The greeting renders as plain text first.
+- [x] Add the greeting word reveal: 40 ms stagger, 500 ms per word. CSS only, from first paint (changed from GSAP SplitText at the 1B review).
 - [x] Add the composer focus beam and the chip rise and hover effects (Motion).
 - [x] Add the hero constellation (R3F + drei + postprocessing): 12 s orbit, ±4° pointer parallax, bloom on the lime core. Load it lazily with `next/dynamic` (no SSR) and show a 2D SVG fallback while it loads, on phones under 600 px, and with reduced motion. Use `frameloop="demand"` when off-screen and cap pixel ratio at 1.75.
 - [x] Replace the placeholder `app/page.tsx`.
