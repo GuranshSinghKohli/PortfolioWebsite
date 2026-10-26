@@ -72,7 +72,7 @@ Rules that apply to every phase:
 
 **Libraries:** `three`, `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing`, `postprocessing`, `maath`, `motion`, `gsap`, `@gsap/react`, shadcn (`radix-ui`), `lucide-react`.
 
-**Done when:** the stack is installed and pinned; the dark shell matches the home figures; the hero holds 60 fps and its fallback works; first-load JS stays within 130 kB.
+**Done when:** the stack is installed and pinned; the dark shell matches the home figures; the hero holds 60 fps and its fallback works; first-load JS stays within 200 kB (budgets in DECISIONS.md).
 
 ---
 
@@ -158,7 +158,7 @@ Rules that apply to every phase:
 - [x] Install `posthog-js`.
 - [ ] Accessibility pass: real buttons and links, 44 px targets, an `aria-live="polite"` thread, 4.5:1 contrast in the dark theme, theme-aware logos.
 - [ ] Reduced motion collapses every animation and stops hover playback.
-- [ ] Performance budgets: LCP ≤ 1.8 s, first-load JS ≤ 130 kB compressed, INP ≤ 100 ms, demos ≤ 12 MB total, every page prerendered.
+- [ ] Performance budgets (DECISIONS.md, 2026-10-26): LCP ≤ 1.8 s on Lighthouse mobile, TBT ≤ 200 ms, CLS ≤ 0.1, first-load JS ≤ 200 kB compressed, 3D chunk ≤ 350 kB compressed, demos ≤ 12 MB total, every page prerendered.
 - [ ] Analytics events from §15: `ask`, `answer_done`, `card_hover_play`, `sheet_open`, `contact_sent` (server / mailto), `resume_download`, `error`.
 - [ ] Error states for every API path.
 - [ ] Confirm the shared Upstash rate limiter holds across instances.

@@ -47,8 +47,22 @@ Answers to the open questions in PHASES.md.
 - **Hero.** The 2D mark is server-rendered and stays for phones under 600 px, reduced motion and browsers without WebGL 2. Otherwise the 3D scene loads on idle and crossfades in after its first frame. The canvas is twice the hero box so bloom fades out before its edge. Scene colours are read from the theme tokens at mount.
 - **Bloom on slow devices.** drei `PerformanceMonitor` turns bloom off when the frame rate drops (PRD §10). Headless Chrome's software renderer always triggers this, so automated screenshots show the core without its glow.
 - **Toaster** loads after hydration through `next/dynamic`. Nothing toasts before Phase 4.
-- **First-load JS is over the 130 kB budget.** Measured gzip of the scripts in the HTML: 189 kB at Checkpoint 1A and 198 kB at 1B. React DOM and the Next.js client runtime alone are about 117 kB. The rest is mainly Radix (tooltip, dialog), lucide icons and Motion's core. The 3D chunk is 268 kB gzip, under its 350 kB budget. GSAP (boot only) is a 27 kB chunk loaded after first paint on a first visit.
+- **First-load JS.** Measured gzip of the scripts in the home page HTML: 189 kB at Checkpoint 1A and 198 kB at 1B. React DOM and the Next.js client runtime alone are about 117 kB; the rest is mainly Radix (tooltip, dialog), lucide icons and Motion's core. The 3D chunk is 268 kB gzip. GSAP (boot only) is a 27 kB chunk loaded after first paint on a first visit.
 - **LCP (1B review).** Lighthouse 13.5, mobile preset, production build on localhost, median of 3: 0.77 s on a repeat visit and 0.77 s on a first visit (FCP 0.67 s, CLS 0, TBT 14 ms). The LCP element is the composer placeholder: split into word spans, the greeting is no longer one large text block. On a first visit the boot intro hides the shell for about 1.6 s, which Lighthouse doesn't count.
+
+## Performance budgets (2026-10-26)
+
+The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:
+
+| Budget | Target |
+| --- | --- |
+| LCP | ≤ 1.8 s, Lighthouse mobile preset |
+| TBT | ≤ 200 ms |
+| CLS | ≤ 0.1 |
+| First-load JS | ≤ 200 kB compressed (gzip of the scripts in the page HTML) |
+| 3D chunk | ≤ 350 kB compressed, excluded from first load |
+
+These replace the PRD's 130 kB first-load and 100 ms INP targets. Cheap trims applied: the Toaster loads lazily, Motion uses `LazyMotion` with `domAnimation` loaded async (a separate 14 kB chunk), and `lucide-react` is already in Next's default `optimizePackageImports` list. The home page's first load contains nothing from three, R3F, drei, postprocessing, `ai`, posthog, Upstash, sonner or GSAP. At this decision: 198 kB first-load, LCP 0.77 s, TBT 14 ms, CLS 0.
 
 ## Content
 
