@@ -9,10 +9,12 @@ export default function Home() {
     <AppShell>
       <div className="mx-auto flex min-h-full w-full max-w-[720px] flex-col items-center justify-center gap-8 px-4 py-12">
         <Hero />
-        <Greeting />
-        <div className="flex w-full flex-col gap-4">
-          <Composer />
-          <Chips />
+        <div className="relative z-10 flex w-full flex-col items-center gap-8">
+          <Greeting />
+          <div className="flex w-full flex-col gap-4">
+            <Composer />
+            <Chips />
+          </div>
         </div>
       </div>
     </AppShell>

@@ -46,10 +46,11 @@ export function Hero() {
         className={cn("absolute inset-0 size-full transition-opacity duration-500", show3d && ready && "opacity-0")}
       />
       {show3d && (
-        // Twice the box, so the bloom fades out before the canvas edge.
+        // Twice the box, with a radial mask, so the bloom fades out before the
+        // canvas edge. The text below sits above it (z-10 in page.tsx).
         <div
           className={cn(
-            "pointer-events-none absolute -inset-16 transition-opacity duration-500",
+            "pointer-events-none absolute -inset-16 transition-opacity duration-500 [mask-image:radial-gradient(closest-side,#000_45%,transparent)]",
             ready ? "opacity-100" : "opacity-0",
           )}
         >
