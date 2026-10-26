@@ -117,7 +117,30 @@ describe("resolveTurn", () => {
 
   it("replies with the no-AI line when nothing matches", () => {
     const { turn } = resolveTurn({ kind: "typed", text: "what's your favourite colour" }, context());
-    expect(turn.reply).toEqual({ text: NO_AI_YET, chips: ["projects", "resume", "listening"] });
+    expect(turn.reply).toEqual({ text: NO_AI_YET, attachments: [], chips: ["projects", "resume", "listening"] });
+  });
+
+  it("attaches the curated cards for a chip, and matched cards for typed text", () => {
+    const chip = resolveTurn({ kind: "answer", id: "projects", from: "chip" }, context());
+    expect(chip.turn.reply.attachments).toEqual([
+      { kind: "projects", slugs: ["quantpilot", "roadsafe-ai", "wanderers"] },
+    ]);
+    const typed = resolveTurn({ kind: "typed", text: "What did you build at Savi?" }, context());
+    expect(typed.turn.reply.attachments).toEqual([{ kind: "roles", ids: ["savi"] }]);
+  });
+
+  it("doesn't add cards an answer only mentions when it has none of its own", () => {
+    const { turn } = resolveTurn({ kind: "typed", text: "can I see your résumé" }, context());
+    expect(turn.reply.attachments).toEqual([{ kind: "resume" }]);
+  });
+
+  it("attaches cards a no-AI reply's question describes", () => {
+    const { turn } = resolveTurn(
+      { kind: "typed", text: "how did severe crashes relate to weather?" },
+      context({ topic: "project:roadsafe-ai", asked: ["project:roadsafe-ai"] }),
+    );
+    expect(turn.reply.text).toBe(NO_AI_YET);
+    expect(turn.reply.attachments).toEqual([{ kind: "projects", slugs: ["roadsafe-ai"] }]);
   });
 
   it("doesn't repeat the answer just shown", () => {

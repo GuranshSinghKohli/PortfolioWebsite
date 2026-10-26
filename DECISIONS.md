@@ -61,6 +61,17 @@ Answers to the open questions in PHASES.md.
 - **Focus.** Asking from the home screen moves focus to the conversation region, because the chip or button that asked is hidden with the home screen. The region is `aria-live="polite"`; follow-up chips sit outside it so they aren't announced with every answer.
 - **INP measurement.** Event Timing API (`PerformanceObserver` on `event` entries, the longest entry per `interactionId`, as web-vitals does) in a real, non-headless Chrome against `next start`. Headless Chrome reported one false 930 ms presentation delay per run with no long task in the trace, so headless numbers aren't used for INP.
 
+## Phase 2 attachments (Checkpoint 2B)
+
+- **Matcher** (`lib/matcher.ts`). Title words are the project title or company name (job titles like "AI Engineer" are too generic). Words are lower-cased, accent-free, stemmed to a crude singular, and words under three letters or in a stopword list are dropped. "Sibling" means every other indexed card, projects and roles together. Score: 3 for a title hit plus 1 per distinctive word. The confidence floor keeps cards scoring at least half the best card's score.
+- **Which path uses it.** Chips and sidebar items keep the cards listed in `content/answers.ts`. Typed questions use the matcher on the question and the answer. If the curated answer has no cards of its own (résumé, contact, listening), only cards the question names are added, so the résumé answer naming every company doesn't pull in the timeline. Phase 3 AI answers will use it the same way.
+- **"Show all"** appears under any narrowed project or role list and expands it in place.
+- **Cards wait for the text.** A turn mounts its attachments when the answer's fade-up completes (immediately with reduced motion).
+- **Fallbacks while content is a placeholder.** Posters: a shorter typographic tile with the title in dim type and the stack in mono. Logos: monogram initials. Links: only filled ones show (Live is hidden for all three projects; RoadSafe AI has no Code link yet). The music grid hides while `content/music.ts` is a placeholder, and the Listening answer says the playlist isn't up yet instead of promising one.
+- **Role timeline.** One role shows every impact line; a list shows the first two each (PRD: "one or two impact sentences").
+- **Résumé tile** is drawn (paper with the name and ruled lines), not a render of the PDF's first page, which would need a PDF renderer.
+- **Hover** lifts a project card 3px and a lime edge light follows the pointer; reduced motion turns the lift off.
+
 ## Performance budgets (2026-10-26)
 
 The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:

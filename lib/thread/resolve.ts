@@ -1,5 +1,7 @@
 import { answers } from "@/content/answers";
 import { homeChips } from "@/content/chips";
+import type { Attachment, CuratedAnswer } from "@/content/types";
+import { match } from "@/lib/matcher";
 import { pickFollowUps, route, type TopicId } from "@/lib/router";
 import type { Ask, Turn } from "./store";
 
@@ -14,10 +16,37 @@ export type ThreadContext = {
   mode: keyof typeof homeChips;
 };
 
+const isCards = (attachment: Attachment) => attachment.kind === "projects" || attachment.kind === "roles";
+
+/** Project and role cards from the entity matcher, projects first. */
+function matchedCards(question: string, answer = ""): Attachment[] {
+  const found = match(question, answer);
+  const slugs = found.filter((entity) => entity.kind === "project").map((entity) => entity.id);
+  const ids = found.filter((entity) => entity.kind === "role").map((entity) => entity.id);
+  return [
+    ...(slugs.length ? [{ kind: "projects" as const, slugs }] : []),
+    ...(ids.length ? [{ kind: "roles" as const, ids }] : []),
+  ];
+}
+
+/**
+ * A typed question's attachments. When the curated answer carries cards, the
+ * matcher scores the question and the answer and its result replaces them (if
+ * it finds any). When it carries none (résumé, contact, listening), only cards
+ * the question itself names are added, so an answer that mentions every role
+ * doesn't pull in the timeline. Music, contact and résumé always come along.
+ */
+function typedAttachments(question: string, answer: CuratedAnswer): Attachment[] {
+  const curated = answer.attachments.filter(isCards);
+  const cards = curated.length ? matchedCards(question, answer.answer) : matchedCards(question);
+  return [...(cards.length || !curated.length ? cards : curated), ...answer.attachments.filter((a) => !isCards(a))];
+}
+
 /**
  * Turns an ask into a thread turn. Chips and sidebar items name their curated
- * answer. Typed text goes through the router: a new topic gets its curated
- * answer; an inherited or repeated one gets the no-AI line and chips.
+ * answer and get its listed attachments. Typed text goes through the router:
+ * a new topic gets its curated answer with matched cards; an inherited or
+ * repeated one gets the no-AI line, chips, and any cards the question names.
  */
 export function resolveTurn(ask: Ask, context: ThreadContext): { turn: Turn; topic: TopicId | null } {
   const fallback = homeChips[context.mode];
@@ -34,6 +63,7 @@ export function resolveTurn(ask: Ask, context: ThreadContext): { turn: Turn; top
           reply: {
             text: answer.answer,
             answerId: answer.id,
+            attachments: answer.attachments,
             chips: pickFollowUps(answer.id, [...context.asked, answer.id], fallback),
           },
         },
@@ -57,9 +87,14 @@ export function resolveTurn(ask: Ask, context: ThreadContext): { turn: Turn; top
           ? {
               text: answer.answer,
               answerId: answer.id,
+              attachments: typedAttachments(question, answer),
               chips: pickFollowUps(answer.id, [...context.asked, answer.id], fallback),
             }
-          : { text: NO_AI_YET, chips: pickFollowUps(topic, context.asked, fallback) },
+          : {
+              text: NO_AI_YET,
+              attachments: matchedCards(question),
+              chips: pickFollowUps(topic, context.asked, fallback),
+            },
     },
   };
 }

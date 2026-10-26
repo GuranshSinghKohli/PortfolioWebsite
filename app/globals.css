@@ -187,6 +187,19 @@ html[data-intro] [data-chip] {
     linear-gradient(#000 0 0);
 }
 
+/* Project card edge light: a lime glow on the 1px border at the pointer (--x, --y). */
+@utility edge-light {
+  padding: 1px;
+  background: radial-gradient(
+    200px circle at var(--x, 50%) var(--y, 0%),
+    var(--accent),
+    transparent 70%
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box exclude,
+    linear-gradient(#000 0 0);
+}
+
 /* PRD §10: reduced motion collapses every animation. */
 @media (prefers-reduced-motion: reduce) {
   *,

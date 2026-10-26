@@ -85,12 +85,12 @@ Rules that apply to every phase:
 - [x] Add the app state machine: boot → home → thread (§8, figure 3). Sheets come in 2B or later.
 - [x] Build the topic router (§8): strong signals switch topic, weak signals switch only when the current topic says nothing about them, and anything else inherits the current topic. Reuse it to pick follow-up chips.
 - [x] Wire curated answers from `content/answers.ts` to chips and sidebar items, with an "asked from sidebar" chip in the thread.
-- [ ] Build the thread: right-aligned question bubbles, left-aligned answers, attachments under each answer, follow-up chips, and a sticky "Ask a follow-up…" composer. (2A done: everything but attachments.)
-- [ ] Add the thread motion from figure C, without source chips (2A done: bubble rise and answer fade-up): bubble slides in from the composer, cards stagger in after the text, cards lift on hover with a lime edge light.
-- [ ] Build the attachments: project cards (one card fills the column, two or more go two-up), a role timeline in the §7 entry format, a music grid, a contact card and a résumé card.
-- [ ] Build the entity matcher: an index from each card's own title and copy, scored against both question and answer, with a confidence floor and a "show all" link.
-- [ ] Make attachments render only after the answer text finishes.
-- [ ] Unit tests for the router (done in 2A) and entity matcher.
+- [x] Build the thread: right-aligned question bubbles, left-aligned answers, attachments under each answer, follow-up chips, and a sticky "Ask a follow-up…" composer.
+- [x] Add the thread motion from figure C, without source chips: bubble slides in from the composer, cards stagger in after the text, cards lift on hover with a lime edge light.
+- [x] Build the attachments: project cards (one card fills the column, two or more go two-up), a role timeline in the §7 entry format, a music grid, a contact card and a résumé card.
+- [x] Build the entity matcher: an index from each card's own title and copy, scored against both question and answer, with a confidence floor and a "show all" link.
+- [x] Make attachments render only after the answer text finishes.
+- [x] Unit tests for the router and entity matcher.
 
 **Creates or changes:** `lib/state/` (thread store), `lib/router.ts`, `lib/matcher.ts`, `components/thread/`, `components/attachments/`, `tests/router.test.ts`, `tests/matcher.test.ts`.
 

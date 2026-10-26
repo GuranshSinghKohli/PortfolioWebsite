@@ -3,6 +3,7 @@
 import { useSyncExternalStore } from "react";
 
 import type { Mode } from "@/components/shell/mode";
+import type { Attachment } from "@/content/types";
 
 /**
  * App state (PRD figure 3): boot → home → thread. Boot is the intro in
@@ -22,6 +23,8 @@ export type Turn = {
     text: string;
     /** The curated answer shown, if any. */
     answerId?: string;
+    /** Cards under the answer, shown once its text has finished. */
+    attachments: Attachment[];
     /** Follow-up chips, shown after the last turn only. */
     chips: string[];
   };

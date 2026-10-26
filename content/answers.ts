@@ -1,3 +1,4 @@
+import { tracks } from "./music";
 import { projects } from "./projects";
 import { roles } from "./roles";
 import type { CuratedAnswer } from "./types";
@@ -6,6 +7,9 @@ import type { CuratedAnswer } from "./types";
  * Instant answers for chips and sidebar items (PRD section 8). These never
  * call the AI, so every fact in them must also be in content/.
  */
+/** The music grid hides while the playlist is still a placeholder, so the answer says so. */
+const hasTracks = tracks.some((track) => !track.title.startsWith("[fill in"));
+
 const topics: CuratedAnswer[] = [
   {
     id: "about",
@@ -34,8 +38,10 @@ const topics: CuratedAnswer[] = [
   {
     id: "listening",
     question: "What are you listening to?",
-    answer: "Here's what's on repeat right now.",
-    attachments: [{ kind: "music" }],
+    answer: hasTracks
+      ? "Here's what's on repeat right now."
+      : "My playlist isn't up yet. Check back soon, or ask me about something I've built.",
+    attachments: hasTracks ? [{ kind: "music" }] : [],
     followUps: ["about", "projects"],
   },
   {
