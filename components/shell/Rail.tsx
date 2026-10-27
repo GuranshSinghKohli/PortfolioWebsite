@@ -13,6 +13,7 @@ import {
   X,
   type LucideIcon,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import type { ComponentProps, ReactNode } from "react";
 
 import { profile } from "@/content/profile";
@@ -20,14 +21,22 @@ import { projects } from "@/content/projects";
 import { roles } from "@/content/roles";
 import type { DateRange } from "@/content/types";
 import { GitHubIcon, LinkedInIcon } from "@/components/icons";
+import { NowPlayingPlaceholder } from "@/components/listening/NowPlayingPlaceholder";
 import { LogoMark } from "@/components/LogoMark";
 import { SheetClose } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { isFilled } from "@/lib/content";
+import { playlist } from "@/lib/listening";
 import { setRailCollapsed } from "@/lib/rail";
 import { ask, goHome, prefetchOnIntent } from "@/lib/thread/store";
 import { cn } from "@/lib/utils";
 import { ModeToggle, useMode } from "./mode";
+
+/** The live card reads the clock, so it renders on the client only, as its own chunk. */
+const NowPlaying = dynamic(() => import("@/components/listening/NowPlaying").then((mod) => mod.NowPlaying), {
+  ssr: false,
+  loading: () => <NowPlayingPlaceholder />,
+});
 
 const topics: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "about", label: "About", icon: User },
@@ -215,16 +224,9 @@ export function Rail({
           ))}
         </section>
 
-        <section
-          aria-label="Now playing"
-          className="shrink-0 rounded-[14px] border border-line bg-surface px-3 py-2.5 collapsed:hidden"
-        >
-          <p className={label}>Now playing</p>
-          <p className="mt-1 truncate text-[13px] text-text">Nothing playing</p>
-          <div className="mt-2 h-0.5 rounded-full bg-line" aria-hidden="true">
-            <div className="h-full w-0 rounded-full bg-accent" />
-          </div>
-        </section>
+        <div className="collapsed:hidden">
+          {playlist.length ? <NowPlaying /> : <NowPlayingPlaceholder empty />}
+        </div>
       </div>
 
       <div className="flex flex-col border-t border-line-soft px-3 py-2">

@@ -27,6 +27,17 @@ export const aiProblems = {
   server: "Something broke on my side. Try again, or tap a chip below.",
 };
 
+/**
+ * The contact sheet's results, in the same voice. `{email}` is the visitor's
+ * address. Failures hand the draft to the visitor's mail app.
+ */
+export const contactCopy = {
+  sent: "Sent. It's in my inbox now, and my reply will go to {email}.",
+  failed: "My mail server didn't take it, so I opened your mail app with your message ready to send.",
+  rateLimited: "That's a few messages from you already. I opened your mail app with this one ready to send.",
+  mailtoHint: "Nothing opened?",
+};
+
 /** The music grid hides while the playlist is still a placeholder, so the answer says so. */
 const hasTracks = tracks.some((track) => !track.title.startsWith("[fill in"));
 

@@ -9,6 +9,7 @@ import { tracks } from "@/content/music";
 import { profile } from "@/content/profile";
 import { GitHubIcon, LinkedInIcon } from "@/components/icons";
 import { isFilled } from "@/lib/content";
+import { openSheet, prefetchSheetsOnIntent } from "@/lib/sheets";
 import { cn } from "@/lib/utils";
 import { actionClass, card, cardRise, ExternalLink, monoLabel } from "./shared";
 
@@ -52,10 +53,9 @@ function ContactRow({ href, icon, label, value }: { href: string; icon: ReactNod
   );
 }
 
-/** Contact card. "Send a message" opens the mail app until the Phase 4 form. */
+/** Contact card. "Send a message" opens the contact sheet. */
 export function ContactCard({ start }: { start: number }) {
   const { email, linkedin, github } = profile.socials;
-  const mailto = `mailto:${email}?subject=${encodeURIComponent("Hello from your portfolio")}`;
 
   return (
     <m.div custom={start} variants={cardRise} className={cn(card, "flex flex-col gap-3 p-4 sm:p-5")}>
@@ -65,10 +65,15 @@ export function ContactCard({ start }: { start: number }) {
         <ContactRow href={linkedin} icon={<LinkedInIcon />} label="LinkedIn" value={linkedin.replace(/^https?:\/\/(www\.)?/, "")} />
         <ContactRow href={github} icon={<GitHubIcon />} label="GitHub" value={github.replace(/^https?:\/\/(www\.)?/, "")} />
       </ul>
-      <a href={mailto} className={cn(actionClass(true), "self-start")}>
+      <button
+        type="button"
+        onClick={(event) => openSheet({ kind: "contact" }, event.currentTarget)}
+        {...prefetchSheetsOnIntent}
+        className={cn(actionClass(true), "cursor-pointer self-start")}
+      >
         <Send strokeWidth={1.75} aria-hidden="true" />
         Send a message
-      </a>
+      </button>
     </m.div>
   );
 }

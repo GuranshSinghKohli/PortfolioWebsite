@@ -6,9 +6,10 @@ import { Redis } from "@upstash/redis";
 import { DAILY_CAP_MICROS } from "@/lib/ai/pricing";
 
 /**
- * Limits for POST /api/ask (PRD §11), shared across serverless instances
- * through Upstash Redis. Every check fails closed: if Redis is unreachable,
- * the ask is refused rather than let through unmetered.
+ * Limits for POST /api/ask (PRD §11) and POST /api/contact (§12), shared
+ * across serverless instances through Upstash Redis. Every check fails
+ * closed: if Redis is unreachable, the request is refused rather than let
+ * through unmetered.
  */
 const redis = Redis.fromEnv();
 const PREFIX = "portfolio:ask";
@@ -63,6 +64,40 @@ export async function checkAsk(ip: string): Promise<LimitResult> {
     const midnight = new Date();
     midnight.setUTCHours(24, 0, 0, 0);
     return { ok: false, reason: "budget", retryAfter: Math.ceil((midnight.getTime() - Date.now()) / 1000) };
+  }
+  return { ok: true };
+}
+
+const contactPerHour = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(4, "1 h"),
+  prefix: "portfolio:contact:hour",
+  timeout: 2000,
+});
+
+const contactPerDay = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(60, "1 d"),
+  prefix: "portfolio:contact:day",
+  timeout: 2000,
+});
+
+export type ContactLimit = { ok: true } | { ok: false; reason: "hour" | "day"; retryAfter: number } | { ok: false; reason: "unavailable" };
+
+/**
+ * Checks one contact message from `ip`: 4 an hour and 60 a day. A limiter
+ * timeout means Redis didn't answer, which the route reports as unavailable.
+ */
+export async function checkContact(ip: string): Promise<ContactLimit> {
+  for (const [limiter, reason] of [
+    [contactPerHour, "hour"],
+    [contactPerDay, "day"],
+  ] as const) {
+    const result = await limiter.limit(ip);
+    if (result.reason === "timeout") return { ok: false, reason: "unavailable" };
+    if (!result.success) {
+      return { ok: false, reason, retryAfter: Math.max(1, Math.ceil((result.reset - Date.now()) / 1000)) };
+    }
   }
   return { ok: true };
 }

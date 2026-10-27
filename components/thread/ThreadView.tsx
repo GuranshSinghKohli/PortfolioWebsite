@@ -7,6 +7,7 @@ import { chipLabels } from "@/content/chips";
 import { Attachments } from "@/components/attachments/Attachments";
 import { ChipButton } from "@/components/ChipButton";
 import { Composer } from "@/components/home/Composer";
+import { SheetHost } from "@/components/sheets/SheetHost";
 import { useMode } from "@/components/shell/mode";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/lib/media";
@@ -131,6 +132,7 @@ export function ThreadView() {
       <div className="sticky bottom-0 -mx-4 mt-auto bg-bg/80 px-4 pt-3 pb-4 backdrop-blur-md before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-bg/80 before:to-transparent">
         <Composer placeholder="Ask a follow-up…" />
       </div>
+      <SheetHost />
     </div>
   );
 }

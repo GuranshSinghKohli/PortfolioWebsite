@@ -11,7 +11,8 @@
     "typecheck": "next typegen && tsc --noEmit",
     "check:secrets": "node scripts/check-bundle-keys.mjs",
     "test:live": "vitest run --config vitest.live.config.ts",
-    "golden": "vitest run --config vitest.live.config.ts tests/live/golden.live.ts"
+    "golden": "vitest run --config vitest.live.config.ts tests/live/golden.live.ts",
+    "fetch-art": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/fetch-art.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "4.0.91",
@@ -35,6 +36,7 @@
     "radix-ui": "1.7.0",
     "react": "19.3.1",
     "react-dom": "19.3.1",
+    "resend": "6.32.1",
     "shadcn": "4.21.4",
     "sonner": "2.0.8",
     "tailwind-merge": "3.7.0",

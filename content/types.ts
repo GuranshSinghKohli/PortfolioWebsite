@@ -43,6 +43,8 @@ export type Profile = {
     email: string;
     github: string;
     linkedin: string;
+    /** Booking link shown in the contact sheet. */
+    calendar?: string;
   };
   resumePath: string;
 };

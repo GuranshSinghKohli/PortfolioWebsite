@@ -133,13 +133,13 @@ Rules that apply to every phase:
 
 **Tasks**
 
-- [ ] Hover demos: muted, looping, `preload="none"`, play on hover, rewind on leave. On touch, tapping opens the sheet. Reduced motion skips playback.
-- [ ] Project detail sheet (shadcn `sheet`): demo, write-up, stack, links. Closes on Escape, backdrop or X; traps and restores focus; locks scroll.
-- [ ] Now playing: computed on the client from the clock looping through `content/music.ts`, with a placeholder on the first frame. Progress bar, equaliser bars and mute toggle.
-- [ ] Art script: fetch album art once from a public catalogue API into `public/art/`. Never hotlink.
-- [ ] `POST /api/contact`: zod validation, honeypot, 4/hour and 60/day per IP, sent through Resend.
-- [ ] Contact fallback: if the server send fails, open `mailto:` with the draft prefilled.
-- [ ] Calendar booking link in the contact sheet.
+- [x] Hover demos: muted, looping, `preload="none"`, play on hover, rewind on leave. On touch, tapping opens the sheet. Reduced motion skips playback.
+- [x] Project detail sheet (shadcn `sheet`): demo, write-up, stack, links. Closes on Escape, backdrop or X; traps and restores focus; locks scroll.
+- [x] Now playing: computed on the client from the clock looping through `content/music.ts`, with a placeholder on the first frame. Progress bar, equaliser bars and mute toggle.
+- [x] Art script: fetch album art once from a public catalogue API into `public/art/`. Never hotlink.
+- [x] `POST /api/contact`: zod validation, honeypot, 4/hour and 60/day per IP, sent through Resend.
+- [x] Contact fallback: if the server send fails, open `mailto:` with the draft prefilled.
+- [x] Calendar booking link in the contact sheet (shows once `profile.socials.calendar` is filled in).
 
 **Creates or changes:** `components/sheets/`, `components/media/`, `components/listening/`, `app/api/contact/route.ts`, `scripts/fetch-art.ts`, `public/art/`.
 

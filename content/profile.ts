@@ -21,6 +21,7 @@ export const profile: Profile = {
     email: "g4kohli@uwaterloo.ca",
     github: "https://github.com/GuranshSinghKohli",
     linkedin: "https://www.linkedin.com/in/guransh-singh-kohli-759a86226",
+    calendar: "[fill in: booking link for the contact sheet, e.g. a Cal.com URL, or delete this line]",
   },
   resumePath: "/Guransh_Resume.pdf",
 };

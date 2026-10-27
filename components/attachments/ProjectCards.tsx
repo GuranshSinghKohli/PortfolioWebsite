@@ -1,14 +1,16 @@
 "use client";
 
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Play } from "lucide-react";
 import * as m from "motion/react-m";
 import Image from "next/image";
-import { useState, type PointerEvent } from "react";
+import { useState, type PointerEvent, type ReactNode } from "react";
 
 import { projects } from "@/content/projects";
 import type { Project } from "@/content/types";
 import { GitHubIcon } from "@/components/icons";
+import { DemoVideo, useHoverDemo } from "@/components/media/HoverDemo";
 import { isFilled } from "@/lib/content";
+import { openSheet, prefetchSheetsOnIntent } from "@/lib/sheets";
 import { cn } from "@/lib/utils";
 import { actionClass, card, cardRise, ExternalLink, ShowAll } from "./shared";
 
@@ -22,14 +24,14 @@ function trackPointer(event: PointerEvent<HTMLElement>) {
 /**
  * Poster, or a typographic stand-in from the title and stack while there
  * isn't one: shorter, and in dim type, so it reads as artwork rather than a
- * second heading.
+ * second heading. A demo, when there is one, plays over it.
  */
-function Poster({ project, number }: { project: Project; number: string }) {
+function Poster({ project, number, children }: { project: Project; number: string; children?: ReactNode }) {
   return (
     <div
       className={cn(
         "relative overflow-hidden border-b border-line-soft bg-surface",
-        isFilled(project.poster) ? "aspect-[16/9]" : "aspect-[16/7]",
+        isFilled(project.poster) || children ? "aspect-[16/9]" : "aspect-[16/7]",
       )}
     >
       {isFilled(project.poster) ? (
@@ -47,6 +49,7 @@ function Poster({ project, number }: { project: Project; number: string }) {
           </div>
         </div>
       )}
+      {children}
       <span className="absolute top-3 left-4 font-mono text-[11px] tracking-[0.08em] text-muted-foreground">{number}</span>
     </div>
   );
@@ -63,8 +66,9 @@ function ProjectCard({
   index: number;
   reduced: boolean;
 }) {
-  const live = project.links.live;
-  const code = project.links.code;
+  const { live, demo, code } = project.links;
+  const hasDemo = isFilled(project.demo);
+  const hover = useHoverDemo(hasDemo && !reduced);
 
   return (
     <m.article
@@ -72,13 +76,34 @@ function ProjectCard({
       variants={cardRise}
       whileHover={reduced ? undefined : { y: -3, transition: { duration: 0.18 } }}
       onPointerMove={trackPointer}
-      className={cn(card, "group flex flex-col")}
+      {...hover.handlers}
+      className={cn(card, "group flex flex-col has-[button:focus-visible]:ring-2 has-[button:focus-visible]:ring-ring")}
     >
       <span aria-hidden="true" className="edge-light pointer-events-none absolute inset-0 z-10 rounded-[14px] opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
-      <Poster project={project} number={number} />
+      <Poster project={project} number={number}>
+        {hasDemo && (
+          <DemoVideo
+            src={project.demo}
+            poster={isFilled(project.poster) ? project.poster : undefined}
+            video={hover.video}
+            playing={hover.playing}
+          />
+        )}
+      </Poster>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div className="flex flex-col gap-1">
-          <h3 className="text-[17px] leading-tight font-medium text-text">{project.title}</h3>
+          <h3 className="text-[17px] leading-tight font-medium text-text">
+            {/* The whole card opens the detail sheet; the links below sit above this. */}
+            <button
+              type="button"
+              onClick={(event) => openSheet({ kind: "project", slug: project.slug }, event.currentTarget)}
+              {...prefetchSheetsOnIntent}
+              className="cursor-pointer text-left outline-none after:absolute after:inset-0 after:z-0 after:content-['']"
+            >
+              {project.title}
+              <span className="sr-only">: open details</span>
+            </button>
+          </h3>
           <p className="text-[14px] leading-[1.55] text-pretty text-body">{project.blurb}</p>
         </div>
         <ul aria-label="Stack" className="flex flex-wrap gap-1.5">
@@ -91,12 +116,18 @@ function ProjectCard({
             </li>
           ))}
         </ul>
-        {(isFilled(live) || isFilled(code)) && (
-          <div className="mt-auto flex flex-wrap gap-2 pt-1">
+        {(isFilled(live) || isFilled(demo) || isFilled(code)) && (
+          <div className="relative z-20 mt-auto flex flex-wrap gap-2 pt-1">
             {isFilled(live) && (
               <ExternalLink href={live} className={actionClass()} aria-label={`${project.title} live site`}>
                 <ArrowUpRight strokeWidth={1.5} aria-hidden="true" />
                 Live
+              </ExternalLink>
+            )}
+            {isFilled(demo) && (
+              <ExternalLink href={demo} className={actionClass()} aria-label={`${project.title} demo`}>
+                <Play strokeWidth={1.5} aria-hidden="true" />
+                Demo
               </ExternalLink>
             )}
             {isFilled(code) && (
