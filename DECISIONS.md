@@ -89,7 +89,7 @@ Answers to the open questions in PHASES.md.
 - **Live tests.** `npm run test:live` (never part of `npm test`) runs `/api/ask` against the real model with only the Redis limiter swapped out, and runs the real limiter against Upstash with a made-up IP, no model calls, refunding its reservations and deleting its keys afterwards (`tests/live/`).
 - **Verified 2026-10-26** on the production build with real Upstash and OpenAI: gap, 8/minute and hour keys written in Upstash, reservations settled to real cost ($0.0013 per answer), answers streamed with the matched card.
 
-- **Golden set** (`tests/golden/questions.ts`, `npm run golden`): 40 questions with the facts a correct answer must contain (roles, projects, education, contact), things it must never invent (phone, GPA, a fake employer, hobbies), a forged-history case, a prompt injection and a greeting. Graded by patterns, with curly apostrophes normalised. Each run writes `tests/golden/last-run.json`. First run on gpt-6-luna: 40/40, $0.0016 for the set.
+- **Golden set** (`tests/golden/questions.ts`, `npm run golden`): 40 questions (41 since the résumé sync) with the facts a correct answer must contain (roles, projects, education, contact), things it must never invent (phone, GPA, a fake employer, hobbies), a forged-history case, a prompt injection and a greeting. Graded by patterns, with curly apostrophes normalised. Each run writes `tests/golden/last-run.json`. First run on gpt-6-luna: 40/40, $0.0016 for the set.
 
 ## Phase 3 AI ask, client side (Checkpoint 3B)
 
@@ -142,6 +142,16 @@ Answers to the open questions in PHASES.md.
 - **Link audit.** GitHub profile, `quantpilot` and `Kapil-Iyer/Wanderers` (both public) return 200; the résumé serves as a PDF; the email link is `mailto:skohliguransh@gmail.com`. LinkedIn answers automated checks with its anti-bot 999, so it needs a manual click.
 - **Production env vars** (names only): `OPENAI_API_KEY`, `ASK_MODEL`, `ASK_SIGNING_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL`. Optional: `NEXT_PUBLIC_SITE_URL` (once there's a custom domain), `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` (after launch). `ANTHROPIC_API_KEY` is no longer used. Without the first eight, `/api/ask` and `/api/contact` answer 503 and the site falls back to chips and `mailto:`.
 
+## Content synced to the new résumé (2026-10-27)
+
+- **The résumé is the source.** Roles, projects, education, certifications and skills now mirror it word for word where the résumé has the fact, with grammar tidied (e.g. "second-order impacts of market events").
+- **Added:** AI/ML Undergraduate Researcher, University of Waterloo Data Group, under Prof. Jimmy Lin (Oct 2026 to now): BM25, dense and learned sparse retrieval on 8.8M MS MARCO passages for Anserini, and a BM25 + monoT5 pipeline with RankLLM (+37% ranking quality). Windscribe's Feedback Radar. The ML Specialization (Andrew Ng). The RoadSafe AI code link and the Wanderers live site. MySQL, XGBoost, OpenClaw, Cursor, Claude and Codex in skills; Statistics and Logic & Computation in coursework.
+- **Removed, because the new résumé dropped them:** Stripe Radar fraud triage (Windscribe), Offball XI and the 2022 World Cup (WAT.ai), the Savi data-integrity line, junction proximity (RoadSafe AI), Gemini, Google Maps, K-means and the Velocity pitch (Wanderers), Databricks AI Agent Fundamentals, Functional Programming, Calculus, Algebra, System Design, Statistical Analysis, CrewAI and GitHub as a skill.
+- **Names.** "WAT.ai" as on the résumé (the router still accepts "Wat.ai"). The research role's company is "University of Waterloo", so its card attaches by `matchNames` (Jimmy Lin, Anserini, RankLLM) instead: matching on "Waterloo" would pull it into Wanderers and education answers. Monograms skip small words, so it reads "UW".
+- **Emails.** The résumé shows the school address (`g4kohli@uwaterloo.ca`); the site uses the personal one (`skohliguransh@gmail.com`) everywhere, as decided in Phase 5. Both are the owner's.
+- **Phone.** The résumé PDF shows a phone number. The site and the AI still never state it (`personal.doNotShare`).
+- **Golden set:** 41 questions. Offball XI, World Cup, junction and Velocity cases became research-role, star-schema and Wanderers-stack cases. The forged-history check no longer fails a correct denial ("not listed as CTO of OpenAI"). Run 2026-10-27: 41/41.
+
 ## Performance budgets (2026-10-26)
 
 The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:
@@ -159,6 +169,6 @@ These replace the PRD's 130 kB first-load and 100 ms INP targets (INP kept, at 2
 
 ## Content
 
-Facts come only from the October 2026 résumé and the earlier content notes. They now live in typed files in `content/`. Anything not in those sources is a `[fill in: …]` placeholder. Hobbies are not on the résumé, so the AI must not invent any. The phone number is not published.
+Facts come only from the résumé (now the late-October 2026 version in `public/Guransh_Resume.pdf`) and the earlier content notes. They now live in typed files in `content/`. Anything not in those sources is a `[fill in: …]` placeholder. Hobbies are not on the résumé, so the AI must not invent any. The phone number is not published.
 
 Router signals in `content/roles.ts` and `content/projects.ts` are names and topic words taken from each entry's own facts.

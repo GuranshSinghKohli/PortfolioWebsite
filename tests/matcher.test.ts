@@ -32,6 +32,14 @@ describe("matcher", () => {
     expect(ids("tell me about QuantPilot")).toEqual(["quantpilot"]);
   });
 
+  it("attaches the research role by its people and tools, not by 'Waterloo'", () => {
+    expect(ids("What do you research with Jimmy Lin?")).toEqual(["uw-research"]);
+    expect(ids("Tell me about your Anserini work")).toEqual(["uw-research"]);
+    // Wanderers' own copy says "verified Waterloo students"; education answers name the university.
+    expect(ids("What is Wanderers.space?", answerText("project:wanderers"))).toEqual(["wanderers"]);
+    expect(ids("Where do you study?", "I study math at the University of Waterloo.")).toEqual([]);
+  });
+
   it("ignores words shared by several cards", () => {
     // "pipeline" and "100k" appear in more than one card's copy.
     expect(ids("a pipeline with 100k records")).toEqual([]);

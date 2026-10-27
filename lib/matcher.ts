@@ -58,7 +58,7 @@ const docs: Doc[] = [
   ...roles.map((role) => ({
     kind: "role" as const,
     id: role.id,
-    title: new Set(tokens(role.company)),
+    title: new Set(tokens((role.matchNames ?? [role.company]).join(" "))),
     body: new Set(tokens([role.team ?? "", role.headline, ...role.impact, ...role.stack].join(" "))),
   })),
 ];

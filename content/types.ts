@@ -52,6 +52,12 @@ export type Profile = {
 export type Role = {
   id: string;
   company: string;
+  /**
+   * Names that pick out this role's card in an answer, when the company name
+   * is too broad (e.g. "University of Waterloo" also appears in education and
+   * project answers). Defaults to the company name.
+   */
+  matchNames?: string[];
   /** Extra detail after the company, e.g. a team name. */
   team?: string;
   title: string;

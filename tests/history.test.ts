@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 
+import { projects } from "@/content/projects";
+import { roles } from "@/content/roles";
 import { factRecord } from "@/lib/ai/facts";
 import {
   clean,
@@ -71,7 +73,7 @@ describe("grounding", () => {
   });
 
   it("includes every role and project", () => {
-    for (const name of ["Windscribe", "Wat.ai", "Savi Finance", "QuantPilot", "RoadSafe AI", "Wanderers.space"]) {
+    for (const name of [...roles.map((role) => role.company), ...projects.map((project) => project.title), "Jimmy Lin"]) {
       expect(factRecord).toContain(name);
     }
   });

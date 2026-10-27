@@ -60,10 +60,11 @@ export function formatRange({ start, end }: DateRange) {
   return from.year === to.year ? `${from.name} to ${to.name} ${to.year}` : `${from.name} ${from.year} to ${to.name} ${to.year}`;
 }
 
-/** First letter of each word, at most two: "Savi Finance" → "SF", "Wat.ai" → "W". */
+/** First letter of each word, at most two, skipping "of" and the like: "Savi Finance" → "SF", "University of Waterloo" → "UW". */
 export function monogram(name: string) {
   return name
     .split(/\s+/)
+    .filter((word) => !/^(of|and|the|for|at)$/i.test(word))
     .map((word) => word[0])
     .join("")
     .slice(0, 2)

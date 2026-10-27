@@ -44,7 +44,7 @@ const topics: CuratedAnswer[] = [
     id: "about",
     question: "Who are you?",
     answer:
-      "I'm Guransh, a student at the University of Waterloo. Right now I'm an AI engineer co-op at Windscribe, building LLM tools for support and payments. On the side I'm on Wat.ai's Offball XI team doing spatial analytics on World Cup data, and I'm the founding engineer of Wanderers.space, a campus social app.",
+      "I'm Guransh, a math student at the University of Waterloo. Right now I'm an AI engineer co-op at Windscribe, building LLM tools for support and payments. I'm also an undergraduate researcher in Prof. Jimmy Lin's Data Group working on retrieval and reranking for RAG, a data science engineer at WAT.ai, and the founding engineer of Wanderers.space, a campus social app.",
     attachments: [{ kind: "roles", ids: roles.map((role) => role.id) }],
     followUps: ["projects", "experience", "contact"],
   },
@@ -60,7 +60,7 @@ const topics: CuratedAnswer[] = [
     id: "experience",
     question: "Where have you worked?",
     answer:
-      "Newest first: AI Engineer co-op at Windscribe (May to December 2026), Data Science Engineer on Wat.ai's Offball XI team (September 2026 to now), and Software Developer at Savi Finance (November 2025 to May 2026).",
+      "AI Engineer co-op at Windscribe (May to December 2026), AI/ML Undergraduate Researcher in the University of Waterloo's Data Group (October 2026 to now), Data Science Engineer at WAT.ai (September 2026 to now), and Software Developer at Savi Finance (November 2025 to May 2026).",
     attachments: [{ kind: "roles", ids: roles.map((role) => role.id) }],
     followUps: ["projects", "resume", "contact"],
   },
@@ -77,7 +77,7 @@ const topics: CuratedAnswer[] = [
     id: "resume",
     question: "Can I see your résumé?",
     answer:
-      "Here's my résumé. Short version: AI engineering at Windscribe, data engineering at Wat.ai, backend work at Savi Finance.",
+      "Here's my résumé. Short version: AI engineering at Windscribe, retrieval research at Waterloo, data engineering at WAT.ai, backend work at Savi Finance.",
     attachments: [{ kind: "resume" }],
     followUps: ["experience", "projects", "contact"],
   },
@@ -93,21 +93,23 @@ const topics: CuratedAnswer[] = [
 /** Answer text for each pinned role, keyed by `Role.id`. */
 const roleAnswerText: Record<string, string> = {
   windscribe:
-    "I'm an AI engineer co-op at Windscribe in Toronto. I revamped Garry, their support chatbot, across 15+ intents and cut human escalations by 90%. I rewrote an internal LLM support tool's pipeline to use 65% fewer tokens, and built agentic Stripe tools: a dispute analyst projected to save $32K a year, and fraud triage for Stripe Radar that cut manual review by 20%.",
+    "I'm an AI engineer co-op at Windscribe in Toronto. I revamped Garry, their OpenClaw-based support chatbot, across 15+ intents and cut escalations by 90%. I rewrote an internal LLM support tool's pipeline to use 65% fewer tokens, built a Stripe dispute analyst with agentic workflows projected to save $32K a year, and built Feedback Radar, which turns feedback from several sources into reports and cut manual time by 20%.",
+  "uw-research":
+    "I'm an undergraduate researcher in Prof. Jimmy Lin's Data Group at Waterloo, working on information retrieval and LLM-based reranking for RAG. I reproduced BM25, dense and learned sparse retrieval on 8.8M MS MARCO passages for Anserini, and built a two-stage BM25 + monoT5 search pipeline with RankLLM that improved ranking quality by 37%.",
   "wat-ai":
-    "I'm a data science engineer on Offball XI, a Waterloo design team doing spatial analytics on real football data. I'm building the Python pipeline that processes 100K+ tracking records from the 2022 World Cup across 64 matches, and engineering spatial features for counterfactual run-value models.",
+    "I'm a data science engineer at WAT.ai. I built a modular Python ETL pipeline that turns 100K+ tracking records across 64 matches into one schema, engineered 7+ spatial features from raw player-tracking data, and automated validation across an 8-stage pipeline so the run-value models get reproducible, ML-ready data.",
   savi:
-    "At Savi Finance I built Go and MySQL APIs for trip logging and expense tracking used by 1.5K+ people. The biggest win was taking a core expense query from 2 seconds to 400 ms.",
+    "At Savi Finance I built Go and MySQL APIs for trip logging and expense tracking used by 1.5K+ people. The biggest win was redesigning the schemas and queries behind a core expense query, taking it from 2 seconds to 400 ms.",
 };
 
 /** Answer text for each recent project, keyed by `Project.slug`. */
 const projectAnswerText: Record<string, string> = {
   quantpilot:
-    "QuantPilot is an event-driven research platform for stocks. It tracks market events, tech trends and their second-order effects. Kafka and PySpark pipelines feed a Neo4j knowledge graph of companies and partnerships, and multi-agent LangGraph workflows verify sources before anything reaches the analysis.",
+    "QuantPilot is an event-driven research platform for stocks that surfaces the second-order impacts of market events. Kafka and PySpark stream financial, news and research data in real time into a Neo4j knowledge graph of companies, technologies and partnerships, and LangGraph multi-agent workflows verify sources and keep the evidence in PostgreSQL. The backend is FastAPI.",
   "roadsafe-ai":
-    "RoadSafe AI looks at 100K US crash records to find what actually predicts severe crashes. The surprise: the rain-versus-clear gap is mostly about which states the crashes happen in, not the weather. Junction proximity was the one condition that held up after correcting for base rates.",
+    "RoadSafe AI models 100K US crash records in a Dockerized dbt and PostgreSQL star schema. The surprise: the national rain-versus-clear severity gap comes from which states the crashes happen in, not the weather (California +0.46 pp, Florida +9.45 pp). I benchmarked scikit-learn models against an 80.55% majority-class baseline and published the findings to Tableau.",
   wanderers:
-    "Wanderers.space is a campus social app for Waterloo students, and I'm the founding engineer. It matches people to activities using Gemini, Google Maps and K-means clustering, has 46 monthly active verified students, and we pitched it at Velocity.",
+    "Wanderers.space is a campus social app for verified Waterloo students, and I'm the founding engineer. It's built on Next.js with REST APIs, real-time pub/sub and live chat for activity matching, feeds and group chats, and it's grown to 46 monthly active users.",
 };
 
 /** Pinned roles in the sidebar ask "What did you do at [Company]?". */

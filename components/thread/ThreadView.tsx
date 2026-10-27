@@ -153,7 +153,7 @@ export function ThreadView() {
         </m.div>
       )}
 
-      <div className="sticky bottom-0 -mx-4 mt-auto bg-bg/80 px-4 pt-3 pb-4 backdrop-blur-md before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-bg/80 before:to-transparent">
+      <div className="sticky bottom-0 z-20 -mx-4 mt-auto bg-bg/80 px-4 pt-3 pb-4 backdrop-blur-md before:pointer-events-none before:absolute before:inset-x-0 before:-top-6 before:h-6 before:bg-gradient-to-t before:from-bg/80 before:to-transparent">
         <Composer placeholder="Ask a follow-up…" />
       </div>
       <SheetHost />
