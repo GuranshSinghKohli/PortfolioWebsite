@@ -152,6 +152,15 @@ Answers to the open questions in PHASES.md.
 - **Phone.** The résumé PDF shows a phone number. The site and the AI still never state it (`personal.doNotShare`).
 - **Golden set:** 41 questions. Offball XI, World Cup, junction and Velocity cases became research-role, star-schema and Wanderers-stack cases. The forged-history check no longer fails a correct denial ("not listed as CTO of OpenAI"). Run 2026-10-27: 41/41.
 
+## Content merged from all four résumés (2026-10-27)
+
+- **Base and additions.** Résumé S (the one served as `Guransh_Resume.pdf`) is the base. Facts from the Data, ML and Shopify versions that S lacks are added, and S's wording wins where they overlap. This supersedes the "removed" list in the résumé-sync entry above: Stripe Radar triage, the World Cup, the Savi data-integrity line, Gemini, K-means, Velocity, Databricks, Calculus and Functional Programming are back because another résumé has them. Offball XI, junction proximity, System Design and Statistical Analysis appear in none of the four, so they stay out.
+- **Added:** MerchantOS (Shopify résumé) as the first project, with its public code link. Research: Data Systems Group, BGE and SPLADE, matching published results, and nDCG@10 0.51 to 0.70 on TREC DL19. WAT.ai: Google Research Football counterfactual off-ball runs, run-value metrics and XGBoost. Windscribe: Stripe Radar triage and "full-time". Savi: GraphQL. RoadSafe AI: 1 fact and 4 dimension tables. Wanderers: K-means, Gemini and Velocity ("UW's startup incubator", in the résumé's words, so the card doesn't match on "University of Waterloo"). Skills gain a data and analytics group, plus AWS, GCP, RankLLM, Gemini API, LLM evals and CrewAI.
+- **Two 20% results at Windscribe.** S credits 20% less manual time to Feedback Radar; the ML and Shopify résumés credit 20% less manual fraud review to Stripe Radar triage. Both are listed as separate automations.
+- **Algebra.** The ML résumé's "Linear Algebra" is used for the Data and Shopify résumés' "Algebra".
+- **Sidebar data.** The sidebar now gets only names, ids and dates as props from the server (`lib/nav.ts`), instead of importing `content/roles.ts` and `content/projects.ts`. That took the full role and project copy out of the first load: 197.4 kB with the fourth project, down from 200.7 kB.
+- **Golden set:** 48 questions, 48/48 on 2026-10-27.
+
 ## Home backdrop and quick links (2026-10-27)
 
 - **3D backdrop.** The home screen's background is now one canvas (`components/three/Constellation.tsx`): a three-armed spiral galaxy (6,500 points, lime core fading to the dim grey, one turn every 2.5 minutes), 1,600 distant stars, and 46 drifting nodes that link up when they pass within reach, like constellations forming and breaking. The mark's 3D cluster is drawn in the same canvas, pinned over the hero box at its old size, with the galaxy's core behind it. The camera eases with the pointer, so near layers move more than far ones.

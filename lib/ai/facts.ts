@@ -42,6 +42,7 @@ function educationFacts() {
     `Certifications: ${list(personal.certifications)}`,
     `Skills (languages): ${list(personal.skills.languages)}`,
     `Skills (backend and web): ${list(personal.skills.backendAndWeb)}`,
+    `Skills (data and analytics): ${list(personal.skills.dataAndAnalytics)}`,
     `Skills (AI and ML): ${list(personal.skills.aiAndMl)}`,
     `Tools: ${list(personal.skills.tools)}`,
   ]);

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { homeChips } from "@/content/chips";
+import { projects } from "@/content/projects";
 import { hasTracks } from "@/content/music";
 import { pickFollowUps, route } from "@/lib/router";
 import { NO_AI_YET, resolveTurn, type ThreadContext } from "@/lib/thread/resolve";
@@ -123,7 +124,7 @@ describe("resolveTurn", () => {
   it("attaches the curated cards for a chip, and matched cards for typed text", () => {
     const chip = resolveTurn({ kind: "answer", id: "projects", from: "chip" }, context());
     expect(chip.turn.reply.attachments).toEqual([
-      { kind: "projects", slugs: ["quantpilot", "roadsafe-ai", "wanderers"] },
+      { kind: "projects", slugs: projects.map((project) => project.slug) },
     ]);
     const typed = resolveTurn({ kind: "typed", text: "What did you build at Savi?" }, context());
     expect(typed.turn.reply.attachments).toEqual([{ kind: "roles", ids: ["savi"] }]);

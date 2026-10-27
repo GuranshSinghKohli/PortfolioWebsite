@@ -4,10 +4,11 @@ import { Greeting } from "@/components/home/Greeting";
 import { AppShell } from "@/components/shell/AppShell";
 import { MainView } from "@/components/shell/MainView";
 import { Hero } from "@/components/three/Hero";
+import { railNav } from "@/lib/nav";
 
 export default function Home() {
   return (
-    <AppShell>
+    <AppShell nav={railNav()}>
       <MainView>
         <div className="relative grid min-h-full">
           {/* The 3D scene renders in here once it loads (components/three/Constellation.tsx). */}

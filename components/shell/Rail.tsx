@@ -19,8 +19,6 @@ import type { ComponentProps, ReactNode } from "react";
 import { hiddenTopics } from "@/content/chips";
 import { hasTracks } from "@/content/music";
 import { profile } from "@/content/profile";
-import { projects } from "@/content/projects";
-import { roles } from "@/content/roles";
 import type { DateRange } from "@/content/types";
 import { GitHubIcon, LinkedInIcon } from "@/components/icons";
 import { NowPlayingPlaceholder } from "@/components/listening/NowPlayingPlaceholder";
@@ -28,6 +26,7 @@ import { LogoMark } from "@/components/LogoMark";
 import { SheetClose } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { isFilled } from "@/lib/content";
+import type { RailNav } from "@/lib/nav";
 import { setRailCollapsed } from "@/lib/rail";
 import { ask, goHome, prefetchOnIntent } from "@/lib/thread/store";
 import { cn } from "@/lib/utils";
@@ -120,13 +119,16 @@ function SocialLink({ href, text, children }: { href: string; text: string; chil
  */
 export function Rail({
   variant,
+  nav,
   collapsed = false,
   onAsk,
 }: {
   variant: "rail" | "drawer";
+  nav: RailNav;
   collapsed?: boolean;
   onAsk?: () => void;
 }) {
+  const { roles, projects } = nav;
   const isRail = variant === "rail";
   const meta = [profile.school, profile.term].filter(isFilled).join(" · ");
   const { mode } = useMode();

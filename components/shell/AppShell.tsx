@@ -8,6 +8,7 @@ import { LogoMark } from "@/components/LogoMark";
 import { BootOverlay, Intro } from "@/components/motion/Intro";
 import { MotionProvider } from "@/components/motion/MotionProvider";
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import type { RailNav } from "@/lib/nav";
 import { useRailCollapsed } from "@/lib/rail";
 import { ModeProvider } from "./mode";
 import { Rail } from "./Rail";
@@ -20,7 +21,7 @@ import { TopActions } from "./TopActions";
 /** First and last name, so the phone header fits beside the quick links. */
 const shortName = `${profile.name.split(" ")[0]} ${profile.name.split(" ").at(-1)}`;
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, nav }: { children: ReactNode; nav: RailNav }) {
   const collapsed = useRailCollapsed();
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -33,7 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             aria-label="Sidebar"
             className="hidden w-[248px] shrink-0 border-r border-line-soft bg-rail shell:block collapsed:w-16"
           >
-            <Rail variant="rail" collapsed={collapsed} />
+            <Rail variant="rail" nav={nav} collapsed={collapsed} />
           </aside>
 
           <div className="relative flex min-w-0 flex-1 flex-col">
@@ -57,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               >
                 <SheetTitle className="sr-only">Menu</SheetTitle>
                 <SheetDescription className="sr-only">Topics, roles, projects and links</SheetDescription>
-                <Rail variant="drawer" onAsk={() => setDrawerOpen(false)} />
+                <Rail variant="drawer" nav={nav} onAsk={() => setDrawerOpen(false)} />
               </SheetContent>
             </Sheet>
 

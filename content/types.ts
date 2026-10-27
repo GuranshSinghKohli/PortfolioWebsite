@@ -142,6 +142,7 @@ export type Personal = {
   skills: {
     languages: string[];
     backendAndWeb: string[];
+    dataAndAnalytics: string[];
     aiAndMl: string[];
     tools: string[];
   };
