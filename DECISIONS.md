@@ -152,6 +152,12 @@ Answers to the open questions in PHASES.md.
 - **Phone.** The résumé PDF shows a phone number. The site and the AI still never state it (`personal.doNotShare`).
 - **Golden set:** 41 questions. Offball XI, World Cup, junction and Velocity cases became research-role, star-schema and Wanderers-stack cases. The forged-history check no longer fails a correct denial ("not listed as CTO of OpenAI"). Run 2026-10-27: 41/41.
 
+## Final pre-launch audit (2026-10-27)
+
+- **Favicon.** `app/favicon.ico` was still the default Next.js "N". Replaced with `app/icon.svg` (the mark on the page background) and `app/apple-icon.tsx` (180 px, prerendered).
+- **Dependencies.** `npm audit --omit=dev` flagged 5 issues, all inside the `shadcn` CLI (its MCP server's express/body-parser, ajv's fast-uri, and an old zod 3 in `@shadcn/registry`). The site's own zod 4.6.6 isn't affected. The CLI was listed as a runtime dependency; it's now a devDependency (only its CSS is imported, at build time, and Vercel installs devDependencies to build). Production audit: 0 vulnerabilities. The fixed CLI (4.23.0) came out 2026-10-27, too new to pin.
+- **Re-verified on the production build:** typecheck, lint, 70 unit tests, 8 live tests (OpenAI and Upstash), golden set 50/50, secret check, first load 197.4 kB, Lighthouse mobile median LCP 0.78 s / TBT 16 ms / CLS 0, axe clean on 8 states, no visible placeholders in 28 views, reduced motion still, analytics silent without a key.
+
 ## Content merged from all four résumés (2026-10-27)
 
 - **Base and additions.** Résumé S (the one served as `Guransh_Resume.pdf`) is the base. Facts from the Data, ML and Shopify versions that S lacks are added, and S's wording wins where they overlap. This supersedes the "removed" list in the résumé-sync entry above: Stripe Radar triage, the World Cup, the Savi data-integrity line, Gemini, K-means, Velocity, Databricks, Calculus and Functional Programming are back because another résumé has them. Offball XI, junction proximity, System Design and Statistical Analysis appear in none of the four, so they stay out.
