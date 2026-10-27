@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import { tracks } from "@/content/music";
 import { profile } from "@/content/profile";
 import { GitHubIcon, LinkedInIcon } from "@/components/icons";
+import { track } from "@/lib/analytics";
 import { isFilled } from "@/lib/content";
 import { openSheet, prefetchSheetsOnIntent } from "@/lib/sheets";
 import { cn } from "@/lib/utils";
@@ -100,7 +101,12 @@ export function ResumeCard({ start }: { start: number }) {
           <p className={cn(monoLabel, "truncate normal-case")}>PDF · {file}</p>
         </div>
         <div className="flex flex-wrap gap-2">
-          <a href={profile.resumePath} download className={actionClass(true)}>
+          <a
+            href={profile.resumePath}
+            download
+            onClick={() => track("resume_download", { from: "card" })}
+            className={actionClass(true)}
+          >
             <Download strokeWidth={1.75} aria-hidden="true" />
             Download
           </a>

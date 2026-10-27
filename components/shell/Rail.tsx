@@ -38,6 +38,10 @@ const NowPlaying = dynamic(() => import("@/components/listening/NowPlaying").the
   loading: () => <NowPlayingPlaceholder />,
 });
 
+/** Analytics stays out of the first load, so the rail imports it on click. */
+const trackRailDownload = () =>
+  void import("@/lib/analytics").then((mod) => mod.track("resume_download", { from: "rail" }));
+
 const topics: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "about", label: "About", icon: User },
   { id: "projects", label: "Projects", icon: FolderGit2 },
@@ -88,17 +92,22 @@ function RailButton({
   );
 }
 
+/** Icon-only link. A tooltip, not `title`, shows the name: `title` made screen readers say it twice. */
 function SocialLink({ href, text, children }: { href: string; text: string; children: ReactNode }) {
   return (
-    <a
-      href={href}
-      aria-label={text}
-      title={text}
-      {...(href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
-      className="flex size-11 items-center justify-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-text focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4"
-    >
-      {children}
-    </a>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <a
+          href={href}
+          aria-label={text}
+          {...(href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
+          className="flex size-11 items-center justify-center rounded-lg text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-text focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-4"
+        >
+          {children}
+        </a>
+      </TooltipTrigger>
+      <TooltipContent side="top">{text}</TooltipContent>
+    </Tooltip>
   );
 }
 
@@ -231,7 +240,7 @@ export function Rail({
 
       <div className="flex flex-col border-t border-line-soft px-3 py-2">
         <WithTooltip collapsed={collapsed} text="Résumé (PDF)">
-          <a href={profile.resumePath} download className={row}>
+          <a href={profile.resumePath} download onClick={trackRailDownload} className={row}>
             <FileDown className="size-4 shrink-0" strokeWidth={1.5} aria-hidden="true" />
             <span className="flex-1 collapsed:sr-only">Résumé</span>
             <span className="rounded-sm border border-line px-1.5 py-0.5 font-mono text-[10px] tracking-[0.08em] text-muted-foreground collapsed:hidden">

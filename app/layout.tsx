@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { Bricolage_Grotesque, JetBrains_Mono } from "next/font/google";
 
-import { LazyToaster } from "@/components/LazyToaster";
+import { profile } from "@/content/profile";
+import { Analytics } from "@/components/Analytics";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { shellScript } from "@/lib/prepaint";
+import { siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -18,10 +20,22 @@ const jetbrains = JetBrains_Mono({
   variable: "--font-mono",
 });
 
+const description = `${profile.subLines[0]} ${profile.subLines[1]} Ask this portfolio anything about my work.`;
+
 export const metadata: Metadata = {
-  title: "Guransh Singh Kohli",
-  description:
-    "Portfolio of Guransh Singh Kohli, a University of Waterloo mathematics student building AI systems, backends, and data pipelines.",
+  metadataBase: siteUrl,
+  title: { default: profile.name, template: `%s · ${profile.name}` },
+  description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: "/",
+    siteName: profile.name,
+    title: profile.name,
+    description,
+    locale: "en_CA",
+  },
+  twitter: { card: "summary_large_image", title: profile.name, description },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -38,7 +52,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="h-full bg-bg text-text">
         <TooltipProvider delayDuration={300}>{children}</TooltipProvider>
-        <LazyToaster theme="dark" position="bottom-center" />
+        <Analytics />
       </body>
     </html>
   );

@@ -12,6 +12,7 @@ import { actionClass, ExternalLink, formatRange, monoLabel } from "@/components/
 import { GitHubIcon } from "@/components/icons";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { contactErrors, MESSAGE_MAX, mailtoDraft, type ContactDraft, type ContactField } from "@/lib/contact";
+import { track } from "@/lib/analytics";
 import { isFilled } from "@/lib/content";
 import { useMediaQuery } from "@/lib/media";
 import { closeSheet, useSheet } from "@/lib/sheets";
@@ -241,7 +242,9 @@ function ContactSheet() {
     setErrors((current) => ({ ...current, [field]: contactErrors(draft)[field] }));
   };
 
-  const handOff = (next: Status) => {
+  const handOff = (next: Status, kind: string) => {
+    track("error", { source: "contact", kind });
+    track("contact_sent", { result: "mailto" });
     setStatus(next);
     window.location.href = mailtoDraft(draft);
   };
@@ -266,6 +269,7 @@ function ContactSheet() {
       });
       if (response.ok) {
         savedDraft = { name: "", email: "", message: "" };
+        track("contact_sent", { result: "server" });
         setStatus("sent");
         return;
       }
@@ -277,9 +281,9 @@ function ContactSheet() {
           return;
         }
       }
-      handOff(response.status === 429 ? "rateLimited" : "failed");
+      handOff(response.status === 429 ? "rateLimited" : "failed", String(response.status));
     } catch {
-      handOff("failed");
+      handOff("failed", "network");
     }
   };
 

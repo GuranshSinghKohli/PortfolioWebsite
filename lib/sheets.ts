@@ -2,6 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 
+import { track } from "@/lib/analytics";
+
 /**
  * Which sheet is open (PRD figure 3: sheets open over any state). The last
  * request stays after closing, so the sheet keeps its content while it
@@ -47,6 +49,7 @@ export const prefetchSheetsOnIntent = { onPointerEnter: prefetchSheets, onFocus:
  */
 export function openSheet(request: SheetRequest, opener?: HTMLElement | null) {
   prefetchSheets();
+  track("sheet_open", { sheet: request.kind === "project" ? request.slug : "contact" });
   set({ open: true, request, opener: opener ?? (document.activeElement as HTMLElement | null) });
 }
 

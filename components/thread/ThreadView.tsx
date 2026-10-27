@@ -4,6 +4,7 @@ import * as m from "motion/react-m";
 import { memo, useEffect, useRef, useState } from "react";
 
 import { chipLabels } from "@/content/chips";
+import { profile } from "@/content/profile";
 import { Attachments } from "@/components/attachments/Attachments";
 import { ChipButton } from "@/components/ChipButton";
 import { Composer } from "@/components/home/Composer";
@@ -12,7 +13,7 @@ import { useMode } from "@/components/shell/mode";
 import { cn } from "@/lib/utils";
 import { useMediaQuery } from "@/lib/media";
 import { ask, useThread, type Turn } from "@/lib/thread/store";
-import { AiAnswer } from "./AiAnswer";
+import { AiAnswer, problemMessage } from "./AiAnswer";
 
 /**
  * One question and its answer (PRD figure 2). Motion from figure C: the
@@ -37,7 +38,8 @@ const TurnView = memo(function TurnView({ turn, reduced }: { turn: Turn; reduced
           Asked from sidebar
         </p>
       )}
-      <m.p
+      {/* A heading, so screen readers can jump question to question; cards' titles sit under it. */}
+      <m.h2
         initial={reduced ? false : { opacity: 0, y: 32, scale: 0.97 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ type: "spring", duration: 0.26, bounce: 0.15 }}
@@ -45,7 +47,7 @@ const TurnView = memo(function TurnView({ turn, reduced }: { turn: Turn; reduced
       >
         <span className="sr-only">You asked: </span>
         {turn.question}
-      </m.p>
+      </m.h2>
       <m.div
         initial={reduced ? false : { opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -70,6 +72,19 @@ const TurnView = memo(function TurnView({ turn, reduced }: { turn: Turn; reduced
     </article>
   );
 });
+
+/**
+ * What screen readers hear for the newest turn: "Answering" while the AI
+ * works, then the question and the whole answer once it's finished (never a
+ * half-streamed sentence), or the problem line.
+ */
+function announcement(turn: Turn | undefined) {
+  if (!turn) return "";
+  const ai = turn.ai;
+  if (ai?.status === "waiting" || ai?.status === "streaming") return "Answering…";
+  const answer = ai?.status === "problem" && ai.problem ? problemMessage(ai.problem) : turn.reply.text;
+  return `You asked: ${turn.question}. ${profile.shortName}: ${answer}`;
+}
 
 /**
  * The thread (PRD §7): questions on the right, answers on the left, follow-up
@@ -99,10 +114,19 @@ export function ThreadView() {
   return (
     // relative: keeps the sr-only labels inside the scroller, not stretching the page.
     <div className="relative mx-auto flex min-h-full w-full max-w-[720px] flex-col px-4">
+      {/* The home greeting (the page's h1) is hidden while the thread shows. */}
+      <h1 className="sr-only">Conversation with {profile.shortName}</h1>
+      {/*
+        The live region is this text alone, not the conversation: a live region
+        holding cards and buttons stays exposed behind an open sheet (Radix
+        leaves live regions unhidden), and streaming text would be read in pieces.
+      */}
+      <p aria-live="polite" className="sr-only">
+        {announcement(last)}
+      </p>
       <section
         ref={region}
         tabIndex={-1}
-        aria-live="polite"
         aria-label="Conversation"
         className="flex flex-col gap-10 pt-10 pb-6 outline-none"
       >

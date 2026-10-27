@@ -44,9 +44,11 @@ type State = {
   turns: Turn[];
   topic: string | null;
   runtime: ThreadRuntime | null;
+  /** The thread chunk failed to load; MainView hands it to the error page. */
+  failure: Error | null;
 };
 
-const initial: State = { view: "home", turns: [], topic: null, runtime: null };
+const initial: State = { view: "home", turns: [], topic: null, runtime: null, failure: null };
 let state = initial;
 const listeners = new Set<() => void>();
 
@@ -120,7 +122,15 @@ let nextId = 1;
  * go to the AI client in the thread chunk, which streams into the turn.
  */
 export async function ask(input: Ask, mode: Mode) {
-  const runtime = await prefetchThread();
+  const started = performance.now();
+  let runtime: ThreadRuntime;
+  try {
+    runtime = await prefetchThread();
+  } catch (error) {
+    // Offline, or a new deploy replaced the chunk: show the error page rather than nothing.
+    set({ failure: error instanceof Error ? error : new Error("Thread failed to load") });
+    return;
+  }
   if (input.kind === "typed") {
     runtime.askAI(input.text, mode);
     return;
@@ -128,6 +138,12 @@ export async function ask(input: Ask, mode: Mode) {
   const asked = state.turns.flatMap((turn) => (turn.reply.answerId ? [turn.reply.answerId] : []));
   const { turn, topic } = runtime.resolveTurn(input, { id: nextId++, topic: state.topic, asked, mode });
   set({ view: "thread", turns: [...state.turns, turn], topic });
+  runtime.track("ask", { source: input.from === "sidebar" ? "rail" : input.from, topic: input.id, mode });
+  runtime.track("answer_done", {
+    path: "curated",
+    latency_ms: Math.round(performance.now() - started),
+    attachments: turn.reply.attachments.length,
+  });
 }
 
 /** For the AI client in the thread chunk: read and update the thread. */
@@ -138,6 +154,11 @@ export const thread = {
   patchTurn: (id: number, patch: (turn: Turn) => Turn) =>
     set({ turns: state.turns.map((turn) => (turn.id === id ? patch(turn) : turn)) }),
 };
+
+/** Forgets a failed chunk load once the error page has it, so "Try again" starts clean. */
+export function clearFailure() {
+  set({ failure: null });
+}
 
 /** Back to the home screen with a fresh thread, cancelling any answer in flight. */
 export function goHome() {

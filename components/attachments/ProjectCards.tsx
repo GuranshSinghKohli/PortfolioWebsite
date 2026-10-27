@@ -68,7 +68,7 @@ function ProjectCard({
 }) {
   const { live, demo, code } = project.links;
   const hasDemo = isFilled(project.demo);
-  const hover = useHoverDemo(hasDemo && !reduced);
+  const hover = useHoverDemo(hasDemo && !reduced, project.slug);
 
   return (
     <m.article

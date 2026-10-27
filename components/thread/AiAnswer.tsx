@@ -69,16 +69,19 @@ function useReveal(text: string, instant: boolean, reduced: boolean) {
   return caughtUp ? text : text.slice(0, shown);
 }
 
+type ProblemInfo = NonNullable<NonNullable<Turn["ai"]>["problem"]>;
+
+/** The friendly line for a problem, shown in the thread and announced to screen readers. */
+export function problemMessage(problem: ProblemInfo) {
+  const seconds = problem.retryAfter;
+  if (problem.kind !== "rateLimited") return aiProblems[problem.kind];
+  return seconds && seconds <= 90 ? aiProblems.rateLimited.replace("{seconds}", String(seconds)) : aiProblems.rateLimitedLong;
+}
+
 function Problem({ turn }: { turn: Turn }) {
   const { mode } = useMode();
   const problem = turn.ai!.problem!;
-  const seconds = problem.retryAfter;
-  const message =
-    problem.kind === "rateLimited"
-      ? seconds && seconds <= 90
-        ? aiProblems.rateLimited.replace("{seconds}", String(seconds))
-        : aiProblems.rateLimitedLong
-      : aiProblems[problem.kind];
+  const message = problemMessage(problem);
   const canRetry = problem.kind === "network" || problem.kind === "server";
 
   return (

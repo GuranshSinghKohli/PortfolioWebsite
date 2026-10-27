@@ -69,7 +69,7 @@ export function Composer({
     <form
       onSubmit={send}
       className={cn(
-        "relative w-full rounded-2xl border border-line bg-surface transition-colors focus-within:border-line-muted",
+        "relative w-full rounded-2xl border border-line bg-surface transition-colors focus-within:border-accent/45",
         className,
       )}
     >

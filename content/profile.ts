@@ -18,7 +18,7 @@ export const profile: Profile = {
     "Ask about my work. Every answer comes with receipts.",
   ],
   socials: {
-    email: "g4kohli@uwaterloo.ca",
+    email: "skohliguransh@gmail.com",
     github: "https://github.com/GuranshSinghKohli",
     linkedin: "https://www.linkedin.com/in/guransh-singh-kohli-759a86226",
     calendar: "[fill in: booking link for the contact sheet, e.g. a Cal.com URL, or delete this line]",

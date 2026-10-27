@@ -1,6 +1,7 @@
 import { homeChips } from "@/content/chips";
 import type { Attachment } from "@/content/types";
 import type { Mode } from "@/components/shell/mode";
+import { track } from "@/lib/analytics";
 import { pickFollowUps, route } from "@/lib/router";
 import { thread, type Turn } from "./store";
 
@@ -92,6 +93,7 @@ function askedAnswers() {
 
 /** Problems end with the router's best chips for the question, since chips always work. */
 function fail(id: number, question: string, problem: Problem, mode: Mode) {
+  track("error", { source: "ask", kind: problem.kind });
   const topic = route(question, thread.get().topic).topic;
   thread.patchTurn(id, (turn) => ({
     ...turn,
@@ -150,6 +152,7 @@ function textBuffer(id: number) {
 }
 
 async function run(id: number, question: string, mode: Mode) {
+  const started = performance.now();
   const controller = new AbortController();
   controllers.set(id, controller);
   const buffer = textBuffer(id);
@@ -185,6 +188,11 @@ async function run(id: number, question: string, mode: Mode) {
           } else if (event.type === "done") {
             finished = true;
             thread.update({ topic: event.topic });
+            track("answer_done", {
+              path: "ai",
+              latency_ms: Math.round(performance.now() - started),
+              attachments: thread.get().turns.find((turn) => turn.id === id)?.reply.attachments.length ?? 0,
+            });
             thread.patchTurn(id, (turn) => ({
               ...turn,
               ai: { ...turn.ai, status: "done" },
@@ -220,7 +228,9 @@ export function askAI(question: string, mode: Mode, retryOf?: number) {
     reply: { text: "", attachments: [], chips: [] },
     ai: { status: "waiting" },
   };
-  const { turns } = thread.get();
+  const { turns, topic } = thread.get();
+  // The routed topic, never the question itself.
+  if (retryOf === undefined) track("ask", { source: "typed", topic: route(question, topic).topic, mode });
   thread.update({
     view: "thread",
     turns: retryOf === undefined ? [...turns, turn] : turns.map((entry) => (entry.id === id ? turn : entry)),

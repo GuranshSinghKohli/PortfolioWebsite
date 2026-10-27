@@ -58,7 +58,7 @@ Rules that apply to every phase:
 - [x] Pin exact versions in `package.json`.
 - [x] Install the UI kit: shadcn components (button, input, card, badge, sheet, tooltip, hover-card, collapsible, separator, skeleton, sonner), `lucide-react`, `clsx`, `tailwind-merge`.
 - [x] Rewrite every token in `app/globals.css` as a `light-dark()` pair, with `--accent-ink` (§9). Set `color-scheme: dark` for launch, so the light values are written but unused. Map shadcn variables onto the tokens. Lime is the only accent.
-- [x] Wrap the app in `TooltipProvider` and mount `Toaster`.
+- [x] Wrap the app in `TooltipProvider` and mount `Toaster` (Toaster removed in Phase 5: nothing toasts).
 - [x] Use Motion through `LazyMotion` with `m` components, loading features asynchronously.
 - [x] Build the sidebar rail (§7): header, About/Work toggle, Get in touch, topics, pinned roles, recent projects, now-playing slot, résumé, footer. Collapse to 64 px (persisted); become a drawer over a scrim under 860 px.
 - [x] Build the home view: centred mark, time-aware greeting, composer (placeholder, About/Work pills, location badge, send), static chips from `homeChips`.
@@ -156,13 +156,13 @@ Rules that apply to every phase:
 **Tasks**
 
 - [x] Install `posthog-js`.
-- [ ] Accessibility pass: real buttons and links, 44 px targets, an `aria-live="polite"` thread, 4.5:1 contrast in the dark theme, theme-aware logos.
-- [ ] Reduced motion collapses every animation and stops hover playback.
-- [ ] Performance budgets (DECISIONS.md, 2026-10-26): LCP ≤ 1.8 s on Lighthouse mobile, TBT ≤ 200 ms, CLS ≤ 0.1, INP ≤ 200 ms, first-load JS ≤ 200 kB compressed, 3D chunk ≤ 350 kB compressed, demos ≤ 12 MB total, every page prerendered.
-- [ ] Analytics events from §15: `ask`, `answer_done`, `card_hover_play`, `sheet_open`, `contact_sent` (server / mailto), `resume_download`, `error`.
-- [ ] Error states for every API path.
-- [ ] Confirm the shared Upstash rate limiter holds across instances.
-- [ ] Screen-reader and keyboard pass.
+- [x] Accessibility pass: real buttons and links, 44 px targets, an `aria-live="polite"` thread, 4.5:1 contrast in the dark theme, theme-aware logos.
+- [x] Reduced motion collapses every animation and stops hover playback.
+- [x] Performance budgets (DECISIONS.md, 2026-10-26): LCP ≤ 1.8 s on Lighthouse mobile, TBT ≤ 200 ms, CLS ≤ 0.1, INP ≤ 200 ms, first-load JS ≤ 200 kB compressed, 3D chunk ≤ 350 kB compressed, demos ≤ 12 MB total, every page prerendered.
+- [x] Analytics events from §15: `ask`, `answer_done`, `card_hover_play`, `sheet_open`, `contact_sent` (server / mailto), `resume_download`, `error`.
+- [x] Error states for every API path.
+- [x] Confirm the shared Upstash rate limiter holds across instances.
+- [x] Screen-reader and keyboard pass (axe and the accessibility tree; a hands-on VoiceOver run is still on the owner's checklist).
 
 **Creates or changes:** `lib/analytics.ts`, `app/providers.tsx`, components across the app, `app/error.tsx`.
 

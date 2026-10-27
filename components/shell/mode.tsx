@@ -38,6 +38,8 @@ export function ModeToggle({ className, size = "md" }: { className?: string; siz
             key={option.value}
             type="button"
             aria-pressed={active}
+            // "About mode", so it isn't confused with the About topic in the rail.
+            aria-label={`${option.label} mode`}
             onClick={() => setMode(option.value)}
             className="group/mode flex h-11 flex-1 items-center justify-center outline-none"
           >

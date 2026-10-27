@@ -3,6 +3,7 @@
 import { Play } from "lucide-react";
 import { useEffect, useRef, useState, type PointerEvent, type RefObject } from "react";
 
+import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 
 /**
@@ -11,7 +12,7 @@ import { cn } from "@/lib/utils";
  * the cue stays, and a tap opens the sheet instead. Reduced motion skips
  * playback. Projects without a demo don't use any of this.
  */
-export function useHoverDemo(enabled: boolean) {
+export function useHoverDemo(enabled: boolean, slug: string) {
   const video = useRef<HTMLVideoElement>(null);
   const [playing, setPlaying] = useState(false);
 
@@ -41,7 +42,10 @@ export function useHoverDemo(enabled: boolean) {
         // play() rejects if the pointer leaves before it starts; that's fine.
         video.current
           ?.play()
-          .then(() => setPlaying(true))
+          .then(() => {
+            setPlaying(true);
+            track("card_hover_play", { slug });
+          })
           .catch(() => {});
       },
       onPointerLeave: stop,

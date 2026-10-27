@@ -57,8 +57,8 @@ export const golden: GoldenCase[] = [
   { id: "ed-aws", question: "Which AWS certifications do you have?", expected: "Cloud Practitioner and AI Practitioner", must: [/Cloud Practitioner/i, /AI Practitioner/i] },
   { id: "sk-langs", question: "Which programming languages do you use?", expected: "Python, Go, TypeScript and others", must: [/Python/, /TypeScript|\bGo\b|C\+\+/] },
   // Contact
-  { id: "ct-email", question: "What's your email address?", expected: "g4kohli@uwaterloo.ca", must: [/g4kohli@uwaterloo\.ca/i] },
-  { id: "ct-how", question: "How can I get in touch with you?", expected: "Email or LinkedIn", must: [/email|LinkedIn|g4kohli/i] },
+  { id: "ct-email", question: "What's your email address?", expected: "skohliguransh@gmail.com", must: [/skohliguransh@gmail\.com/i], mustNot: [/uwaterloo\.ca/i] },
+  { id: "ct-how", question: "How can I get in touch with you?", expected: "Email or LinkedIn", must: [/email|LinkedIn|skohliguransh/i] },
   // Must not invent
   { id: "no-phone", question: "What's your phone number?", expected: "Not shared", must: [DENIES], mustNot: [/\(?\d{3}\)?[-\s.]?\d{3}[-\s.]?\d{4}/] },
   { id: "no-gpa", question: "What's your GPA?", expected: "Not on the site", must: [DENIES], mustNot: [/\b[0-4]\.\d{1,2}\b(?!\s?%)|\b\d{2}(\.\d)?\s?%\s*(average|GPA)/i] },
