@@ -16,6 +16,39 @@ import { ask, useThread, type Turn } from "@/lib/thread/store";
 import { AiAnswer, problemMessage } from "./AiAnswer";
 
 /**
+ * A curated answer's text: blank lines split paragraphs, and lines starting
+ * with "• " become a list with the lime dots used on cards and sheets.
+ */
+function CuratedText({ text }: { text: string }) {
+  const blocks = text.split(/\n{2,}/);
+  if (blocks.length === 1 && !text.includes("\n• ")) return text;
+
+  return (
+    <div className="flex flex-col gap-3">
+      {blocks.map((block, i) => {
+        const [lead, ...rest] = block.split("\n");
+        const items = (lead.startsWith("• ") ? [lead, ...rest] : rest).filter((line) => line.startsWith("• "));
+        return (
+          <div key={i} className="flex flex-col gap-2">
+            {!lead.startsWith("• ") && <p className={items.length ? "text-text" : undefined}>{lead}</p>}
+            {items.length > 0 && (
+              <ul className="flex flex-col gap-1.5">
+                {items.map((item) => (
+                  <li key={item} className="flex gap-3">
+                    <span aria-hidden="true" className="mt-[0.65em] size-1 shrink-0 rounded-full bg-accent" />
+                    {item.slice(2)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
  * One question and its answer (PRD figure 2). Motion from figure C: the
  * question bubble rises from the composer below on a 260 ms spring, then the
  * answer fades up over 240 ms. Attachments mount once the answer text has
@@ -60,7 +93,7 @@ const TurnView = memo(function TurnView({ turn, reduced }: { turn: Turn; reduced
         ) : (
           <>
             <span className="sr-only">Guransh: </span>
-            {turn.reply.text}
+            <CuratedText text={turn.reply.text} />
           </>
         )}
       </m.div>

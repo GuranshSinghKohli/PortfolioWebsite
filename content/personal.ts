@@ -9,6 +9,7 @@ export const personal: Personal = {
     minor: "Computing",
     dates: { start: "2025-09", end: "2029-12" },
     expected: true,
+    year: "Second year",
     coursework: [
       "Data Structures & Algorithms",
       "Object Oriented Programming",
@@ -67,6 +68,8 @@ export const personal: Personal = {
     ],
     tools: ["Git", "Linux", "AWS", "GCP", "Cursor", "Claude", "Codex"],
   },
+  drive: "Building things at the intersection of AI, software engineering and real-world impact.",
+  openTo: "2027 opportunities across AI, software engineering, data, cloud and research.",
   interests: ["[fill in: hobbies and interests outside code. Leave empty if none should be shared.]"],
   doNotShare: ["Phone number", "Home address", "Anything not written in content/"],
 };

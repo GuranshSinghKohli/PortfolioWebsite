@@ -35,7 +35,7 @@ function profileFacts() {
 function educationFacts() {
   const e = personal.education;
   return block([
-    `${e.degree}, ${e.school}`,
+    `${e.degree}, ${e.school} (${e.year.toLowerCase()})`,
     `Majors: ${e.majors.join(" and ")}; minor: ${e.minor}`,
     `Dates: ${range(e.dates)}${e.expected ? " (graduation expected)" : ""}`,
     `Coursework: ${list(e.coursework)}`,
@@ -45,6 +45,8 @@ function educationFacts() {
     `Skills (data and analytics): ${list(personal.skills.dataAndAnalytics)}`,
     `Skills (AI and ML): ${list(personal.skills.aiAndMl)}`,
     `Tools: ${list(personal.skills.tools)}`,
+    `Loves: ${personal.drive}`,
+    `Open to: ${personal.openTo}`,
   ]);
 }
 

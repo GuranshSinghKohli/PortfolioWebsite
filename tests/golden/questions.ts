@@ -63,6 +63,8 @@ export const golden: GoldenCase[] = [
   { id: "ed-school", question: "Where do you study?", expected: "University of Waterloo", must: [/Waterloo/] },
   { id: "ed-majors", question: "What are you majoring in?", expected: "Applied Math in Machine Learning, and Statistics", must: [/machine learning/i, /statistics/i] },
   { id: "ed-minor", question: "What's your minor?", expected: "Computing", must: [/computing/i] },
+  { id: "ed-year", question: "What year are you in?", expected: "Second year", must: [/second|2nd/i] },
+  { id: "open-to", question: "Are you looking for opportunities?", expected: "2027 roles across AI, SWE, data, cloud, research", must: [/2027/] },
   { id: "ed-grad", question: "When do you expect to graduate?", expected: "2029", must: [/2029/] },
   { id: "ed-aws", question: "Which AWS certifications do you have?", expected: "Cloud Practitioner and AI Practitioner", must: [/Cloud Practitioner/i, /AI Practitioner/i] },
   { id: "sk-langs", question: "Which programming languages do you use?", expected: "Python, Go, TypeScript and others", must: [/Python/, /TypeScript|\bGo\b|C\+\+/] },

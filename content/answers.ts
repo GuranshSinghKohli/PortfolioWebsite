@@ -44,7 +44,7 @@ const topics: CuratedAnswer[] = [
     id: "about",
     question: "Who are you?",
     answer:
-      "I'm Guransh, a math student at the University of Waterloo. Right now I'm an AI engineer co-op at Windscribe, building LLM tools for support and payments. I'm also an undergraduate researcher in Prof. Jimmy Lin's Data Systems Group working on retrieval and reranking for RAG, a data science engineer at WAT.ai, and the founding engineer of Wanderers.space, a campus social app.",
+      "I'm Guransh, a second-year student at the University of Waterloo, double majoring in Applied Mathematics (Machine Learning) and Statistics with a minor in Computing. I love building things where AI, software engineering and real-world impact meet.\n\nWhat I'm doing right now:\n• AI Engineer co-op at Windscribe, building LLM tools for support and payments (through December 2026)\n• Undergraduate researcher in Prof. Jimmy Lin's Data Systems Group, working on search ranking and reranking for RAG\n• Data Science Engineer at WAT.ai, modelling off-ball runs in football\n• Founding engineer of Wanderers.space, a campus social app for Waterloo students\n• Exploring 2027 opportunities across AI, software engineering, data, cloud and research",
     attachments: [{ kind: "roles", ids: roles.map((role) => role.id) }],
     followUps: ["projects", "experience", "contact"],
   },
@@ -84,7 +84,8 @@ const topics: CuratedAnswer[] = [
   {
     id: "contact",
     question: "How do I get in touch?",
-    answer: "Send me a message below, or reach me by email or LinkedIn.",
+    answer:
+      "Working on something interesting, or want to brainstorm a crazy idea? Send me a message below, or reach me by email or LinkedIn. My DMs are always open.",
     attachments: [{ kind: "contact" }],
     followUps: ["resume", "projects"],
   },

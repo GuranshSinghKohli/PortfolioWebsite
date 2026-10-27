@@ -136,6 +136,8 @@ export type Personal = {
     dates: DateRange;
     /** True while `dates.end` is an expected date. */
     expected: boolean;
+    /** Year of study, e.g. "Second year". */
+    year: string;
     coursework: string[];
   };
   certifications: string[];
@@ -146,6 +148,10 @@ export type Personal = {
     aiAndMl: string[];
     tools: string[];
   };
+  /** One line on what the owner loves building. */
+  drive: string;
+  /** What kinds of opportunities the owner is exploring, and when. */
+  openTo: string;
   interests: string[];
   /** Facts the AI must never state or guess. */
   doNotShare: string[];
