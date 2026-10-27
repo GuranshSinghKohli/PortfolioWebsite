@@ -172,7 +172,37 @@ Rules that apply to every phase:
 
 ---
 
-## Phase 6 · Elevation
+## Phase 7 · Launch
+
+**Goal:** live, monitored, with a first round of feedback. Comes before Phase 6.
+
+**Tasks**
+
+- [x] Pre-launch audit (2026-10-27, DECISIONS.md "Launch"): no visible placeholder text in any of 25 views; every link checked; production env var names listed for the owner to confirm on Vercel.
+- [x] Hide Listening everywhere while `content/music.ts` is empty.
+- [x] Analytics off until the PostHog key is set: a missing key loads nothing and sends nothing.
+- [x] Open Graph image (Phase 5).
+- [x] Sitemap and robots (Phase 5).
+- [ ] Owner: put the updated résumé in `public/Guransh_Resume.pdf` (the repo copy still has the old email).
+- [ ] Owner: confirm the production env vars on Vercel.
+- [ ] Merge `revamp` into `main` and resume Vercel production deploys (waiting for the owner's go-ahead).
+- [ ] Custom domain on Vercel, then `NEXT_PUBLIC_SITE_URL`.
+- [ ] Monitoring and spend alerts for the AI provider and Upstash.
+- [ ] Peer review against the §4 identity rules, so the site doesn't read as a copy of the reference.
+- [ ] Share with friends and collect feedback.
+- [ ] After launch: add the PostHog key on Vercel and redeploy.
+
+**Creates or changes:** `app/opengraph-image.tsx`, `app/sitemap.ts`, `app/robots.ts`, `vercel.json`.
+
+**Libraries:** none expected.
+
+**Done when:** the site is live and monitored, and the first feedback round is done.
+
+---
+
+## Phase 6 · Elevation (post-launch)
+
+Moved after launch (2026-10-27): the site launches with Phases 0–5, and these features follow behind flags.
 
 **Goal:** the features that make the site distinctly yours. Each sits behind a flag.
 
@@ -194,28 +224,6 @@ Rules that apply to every phase:
 **Libraries:** `three`, `@react-three/fiber`, `@react-three/drei`, `@react-three/postprocessing`, `maath` (all installed). The palette and voice input may need more packages, decided in this phase.
 
 **Done when:** each feature is behind a flag, and the shipped ones meet the same quality bar. The 3D chunk stays under 350 kB compressed (§6).
-
----
-
-## Phase 7 · Launch
-
-**Goal:** live, monitored, with a first round of feedback.
-
-**Tasks**
-
-- [ ] Merge `revamp` into `main` and resume Vercel production deploys.
-- [ ] Custom domain on Vercel.
-- [ ] Open Graph images.
-- [ ] Sitemap and robots.
-- [ ] Monitoring and spend alerts for the AI provider and Upstash.
-- [ ] Peer review against the §4 identity rules, so the site doesn't read as a copy of the reference.
-- [ ] Share with friends and collect feedback.
-
-**Creates or changes:** `app/opengraph-image.tsx`, `app/sitemap.ts`, `app/robots.ts`, `vercel.json`.
-
-**Libraries:** none expected.
-
-**Done when:** the site is live and monitored, and the first feedback round is done.
 
 ---
 

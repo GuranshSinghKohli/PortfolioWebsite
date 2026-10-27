@@ -1,4 +1,5 @@
 import { answers } from "@/content/answers";
+import { hiddenTopics } from "@/content/chips";
 import { projects } from "@/content/projects";
 import { roles } from "@/content/roles";
 import type { Signals } from "@/content/types";
@@ -101,7 +102,7 @@ export function route(question: string, current: TopicId | null): Route {
  */
 export function pickFollowUps(topic: TopicId | null, asked: TopicId[], fallback: readonly TopicId[], count = 3) {
   const own = answers.find((entry) => entry.id === topic)?.followUps ?? [];
-  const candidates = [...new Set([...own, ...fallback])].filter((id) => id !== topic);
+  const candidates = [...new Set([...own, ...fallback])].filter((id) => id !== topic && !hiddenTopics.includes(id));
   const fresh = candidates.filter((id) => !asked.includes(id));
   return (fresh.length ? fresh : candidates).slice(0, count);
 }

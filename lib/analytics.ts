@@ -37,6 +37,7 @@ export function optedOut() {
 
 export function track<E extends keyof AnalyticsEvent>(event: E, properties: AnalyticsEvent[E]) {
   if (capture) return capture(event, properties);
+  if (!process.env.NEXT_PUBLIC_POSTHOG_KEY) return; // Analytics off: nothing to queue for.
   if (queue.length < 50 && !optedOut()) queue.push([event, properties]);
 }
 

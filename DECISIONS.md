@@ -133,6 +133,15 @@ Answers to the open questions in PHASES.md.
 - **Shared limiter.** Two separate processes (standing in for two serverless instances) sent 3 contact checks each for one IP at once: exactly 4 of the 6 got through (`tests/live/shared-limit.live.ts`).
 - **Measured 2026-10-26** on the production build. Lighthouse mobile, three runs each: LCP 0.78 to 0.82 s, TBT 20 to 70 ms, CLS 0, score 100. INP in headful Chrome across the main flows (mode toggle, chips, sidebar, rail collapse, both sheets, contact typing, asking, typing while streaming): worst 72 ms at normal speed, and 184 ms on a phone at 4× CPU slowdown. One 856 ms contact-typing reading at 4× on desktop didn't reproduce in six reruns, which peaked at 128 ms.
 
+## Launch (Phase 7, prepared 2026-10-27)
+
+- **Order.** Phase 7 (launch) comes before Phase 6 (elevation), which is now post-launch.
+- **Listening is hidden while `content/music.ts` is empty.** `hasTracks` in that file decides it: no sidebar topic, no chip (the About-mode chips become Projects, Résumé, Experience, Contact), never a follow-up, and no now playing card. The curated Listening answer is unreachable until then. Adding a filled-in track brings everything back with no other change.
+- **Analytics off until the key is set.** With no `NEXT_PUBLIC_POSTHOG_KEY` the site loads no analytics code, queues nothing, contacts no outside host and logs nothing (checked in a browser across chips, the thread and a sheet). Adding the key on Vercel and redeploying turns it on.
+- **Placeholder audit.** A browser crawl of 25 views (home in both modes, every sidebar item, every chip and follow-up, all three project sheets, the contact sheet, the phone drawer and the 404) found no visible `[fill in]`, `[placeholder]`, TODO, `undefined` or `NaN`, in text or in `alt`, `aria-label`, `title`, `placeholder`, link or image attributes. Placeholders still in `content/` are all hidden by `isFilled`: project write-ups, posters, demos, years and live URLs; the RoadSafe AI code link; role logos; profile location, term and booking link; interests; the playlist; and the voice guide's own phrases and rules.
+- **Link audit.** GitHub profile, `quantpilot` and `Kapil-Iyer/Wanderers` (both public) return 200; the résumé serves as a PDF; the email link is `mailto:skohliguransh@gmail.com`. LinkedIn answers automated checks with its anti-bot 999, so it needs a manual click.
+- **Production env vars** (names only): `OPENAI_API_KEY`, `ASK_MODEL`, `ASK_SIGNING_SECRET`, `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`, `RESEND_API_KEY`, `CONTACT_FROM_EMAIL`, `CONTACT_TO_EMAIL`. Optional: `NEXT_PUBLIC_SITE_URL` (once there's a custom domain), `NEXT_PUBLIC_POSTHOG_KEY` and `NEXT_PUBLIC_POSTHOG_HOST` (after launch). `ANTHROPIC_API_KEY` is no longer used. Without the first eight, `/api/ask` and `/api/contact` answer 503 and the site falls back to chips and `mailto:`.
+
 ## Performance budgets (2026-10-26)
 
 The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:

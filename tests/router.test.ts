@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { homeChips } from "@/content/chips";
+import { hasTracks } from "@/content/music";
 import { pickFollowUps, route } from "@/lib/router";
 import { NO_AI_YET, resolveTurn, type ThreadContext } from "@/lib/thread/resolve";
 
@@ -75,11 +76,10 @@ describe("router: no signals", () => {
 describe("follow-ups", () => {
   it("offers the topic's follow-ups first, skipping what was asked", () => {
     expect(pickFollowUps("projects", ["projects"], homeChips.about)).toEqual(["experience", "resume", "contact"]);
-    expect(pickFollowUps("projects", ["projects", "experience"], homeChips.about)).toEqual([
-      "resume",
-      "contact",
-      "listening",
-    ]);
+    // Listening is only offered once content/music.ts has songs.
+    expect(pickFollowUps("projects", ["projects", "experience"], homeChips.about)).toEqual(
+      hasTracks ? ["resume", "contact", "listening"] : ["resume", "contact"],
+    );
   });
 
   it("falls back to the home chips and is never empty", () => {
@@ -117,7 +117,7 @@ describe("resolveTurn", () => {
 
   it("replies with the no-AI line when nothing matches", () => {
     const { turn } = resolveTurn({ kind: "typed", text: "what's your favourite colour" }, context());
-    expect(turn.reply).toEqual({ text: NO_AI_YET, attachments: [], chips: ["projects", "resume", "listening"] });
+    expect(turn.reply).toEqual({ text: NO_AI_YET, attachments: [], chips: homeChips.about.slice(0, 3) });
   });
 
   it("attaches the curated cards for a chip, and matched cards for typed text", () => {

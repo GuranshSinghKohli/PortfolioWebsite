@@ -1,4 +1,4 @@
-import { tracks } from "./music";
+import { hasTracks } from "./music";
 import { projects } from "./projects";
 import { roles } from "./roles";
 import type { CuratedAnswer } from "./types";
@@ -38,8 +38,6 @@ export const contactCopy = {
   mailtoHint: "Nothing opened?",
 };
 
-/** The music grid hides while the playlist is still a placeholder, so the answer says so. */
-const hasTracks = tracks.some((track) => !track.title.startsWith("[fill in"));
 
 const topics: CuratedAnswer[] = [
   {

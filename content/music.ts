@@ -15,3 +15,10 @@ export const tracks: Track[] = [
     art: "[fill in: /art/track-slug.jpg]",
   },
 ];
+
+/**
+ * True once at least one track is filled in. Until then the site hides
+ * Listening everywhere: the sidebar topic, the chip, the now playing card
+ * and the answer. Nothing to edit here.
+ */
+export const hasTracks = tracks.some((track) => !track.title.startsWith("[fill in") && track.durationSeconds > 0);

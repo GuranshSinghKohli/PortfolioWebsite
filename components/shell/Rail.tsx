@@ -16,6 +16,8 @@ import {
 import dynamic from "next/dynamic";
 import type { ComponentProps, ReactNode } from "react";
 
+import { hiddenTopics } from "@/content/chips";
+import { hasTracks } from "@/content/music";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
 import { roles } from "@/content/roles";
@@ -26,7 +28,6 @@ import { LogoMark } from "@/components/LogoMark";
 import { SheetClose } from "@/components/ui/sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { isFilled } from "@/lib/content";
-import { playlist } from "@/lib/listening";
 import { setRailCollapsed } from "@/lib/rail";
 import { ask, goHome, prefetchOnIntent } from "@/lib/thread/store";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,7 @@ const topics: { id: string; label: string; icon: LucideIcon }[] = [
   { id: "projects", label: "Projects", icon: FolderGit2 },
   { id: "listening", label: "Listening", icon: Headphones },
   { id: "experience", label: "Experience", icon: Briefcase },
-];
+].filter((topic) => !hiddenTopics.includes(topic.id));
 
 const label = "font-mono text-[10px] tracking-[0.08em] text-muted-foreground uppercase";
 
@@ -233,9 +234,12 @@ export function Rail({
           ))}
         </section>
 
-        <div className="collapsed:hidden">
-          {playlist.length ? <NowPlaying /> : <NowPlayingPlaceholder empty />}
-        </div>
+        {/* Hidden until content/music.ts has songs. */}
+        {hasTracks && (
+          <div className="collapsed:hidden">
+            <NowPlaying />
+          </div>
+        )}
       </div>
 
       <div className="flex flex-col border-t border-line-soft px-3 py-2">
