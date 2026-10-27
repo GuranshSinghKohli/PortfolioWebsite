@@ -28,6 +28,13 @@ export type Turn = {
     /** Follow-up chips, shown after the last turn only. */
     chips: string[];
   };
+  /** Typed questions are answered by the AI (Phase 3); chips and sidebar items never are. */
+  ai?: {
+    status: "waiting" | "streaming" | "done" | "problem";
+    /** The answer was blocked; `reply.text` holds the deflection. */
+    blocked?: boolean;
+    problem?: { kind: "rateLimited" | "budget" | "unavailable" | "network" | "server"; retryAfter?: number };
+  };
 };
 
 type ThreadRuntime = typeof import("@/components/thread/runtime");
@@ -61,6 +68,20 @@ export function useThread() {
   );
 }
 
+/**
+ * One value from the thread, re-rendering only when it changes. For
+ * components outside the thread (composer, main view) that would otherwise
+ * re-render on every streamed batch. `select` must return a primitive or a
+ * stable reference.
+ */
+export function useThreadValue<T>(select: (state: State) => T) {
+  return useSyncExternalStore(
+    subscribe,
+    () => select(state),
+    () => select(initial),
+  );
+}
+
 let loading: Promise<ThreadRuntime> | undefined;
 
 /** Loads the thread chunk once. Called on hover, focus or press of anything that asks. */
@@ -78,6 +99,13 @@ export function prefetchThread() {
   return loading;
 }
 
+/** Composer focus: load the thread chunk and fetch a session ticket in the background. */
+export function warmAI() {
+  prefetchThread()
+    .then((runtime) => runtime.warmTicket())
+    .catch(() => {});
+}
+
 /** Spread onto anything that asks, so the chunk is on its way before the click. */
 export const prefetchOnIntent = {
   onPointerEnter: () => void prefetchThread().catch(() => {}),
@@ -87,14 +115,32 @@ export const prefetchOnIntent = {
 
 let nextId = 1;
 
+/**
+ * Chips and sidebar items get their curated answer at once. Typed questions
+ * go to the AI client in the thread chunk, which streams into the turn.
+ */
 export async function ask(input: Ask, mode: Mode) {
   const runtime = await prefetchThread();
+  if (input.kind === "typed") {
+    runtime.askAI(input.text, mode);
+    return;
+  }
   const asked = state.turns.flatMap((turn) => (turn.reply.answerId ? [turn.reply.answerId] : []));
   const { turn, topic } = runtime.resolveTurn(input, { id: nextId++, topic: state.topic, asked, mode });
   set({ view: "thread", turns: [...state.turns, turn], topic });
 }
 
-/** Back to the home screen with a fresh thread. */
+/** For the AI client in the thread chunk: read and update the thread. */
+export const thread = {
+  get: () => state,
+  nextId: () => nextId++,
+  update: (next: Partial<Pick<State, "view" | "turns" | "topic">>) => set(next),
+  patchTurn: (id: number, patch: (turn: Turn) => Turn) =>
+    set({ turns: state.turns.map((turn) => (turn.id === id ? patch(turn) : turn)) }),
+};
+
+/** Back to the home screen with a fresh thread, cancelling any answer in flight. */
 export function goHome() {
+  state.runtime?.cancelAll();
   set({ view: "home", turns: [], topic: null });
 }

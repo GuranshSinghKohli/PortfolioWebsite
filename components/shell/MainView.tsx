@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { useThread } from "@/lib/thread/store";
+import { useThreadValue } from "@/lib/thread/store";
 
 /**
  * Home or thread in the main area. Home stays mounted but hidden while the
@@ -11,7 +11,8 @@ import { useThread } from "@/lib/thread/store";
  * lazily loaded thread chunk.
  */
 export function MainView({ children }: { children: ReactNode }) {
-  const { view, runtime } = useThread();
+  const view = useThreadValue((thread) => thread.view);
+  const runtime = useThreadValue((thread) => thread.runtime);
   const ThreadView = view === "thread" ? runtime?.ThreadView : undefined;
 
   return (

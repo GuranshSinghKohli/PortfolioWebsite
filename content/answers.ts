@@ -13,6 +13,20 @@ import type { CuratedAnswer } from "./types";
  */
 export const blockedReply = "That's not one I'll answer here. Ask me about something I've built instead.";
 
+/**
+ * What a typed question shows when the AI can't answer, in the same voice.
+ * Never a raw error. `{seconds}` is filled in when the server says how long
+ * to wait. The chips under each one still answer instantly.
+ */
+export const aiProblems = {
+  rateLimited: "You're asking faster than my rate limit. Give it {seconds} seconds, or tap a chip below.",
+  rateLimitedLong: "That's a lot of questions in an hour. Take a breather, or tap a chip below.",
+  budget: "The AI has used up today's budget. The chips below still answer instantly.",
+  unavailable: "The AI is offline for a moment. The chips below still work.",
+  network: "The connection dropped before my answer arrived.",
+  server: "Something broke on my side. Try again, or tap a chip below.",
+};
+
 /** The music grid hides while the playlist is still a placeholder, so the answer says so. */
 const hasTracks = tracks.some((track) => !track.title.startsWith("[fill in"));
 

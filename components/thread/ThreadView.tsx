@@ -1,29 +1,36 @@
 "use client";
 
-import { useReducedMotion } from "motion/react";
 import * as m from "motion/react-m";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 
 import { chipLabels } from "@/content/chips";
 import { Attachments } from "@/components/attachments/Attachments";
 import { ChipButton } from "@/components/ChipButton";
 import { Composer } from "@/components/home/Composer";
 import { useMode } from "@/components/shell/mode";
+import { cn } from "@/lib/utils";
+import { useMediaQuery } from "@/lib/media";
 import { ask, useThread, type Turn } from "@/lib/thread/store";
+import { AiAnswer } from "./AiAnswer";
 
 /**
  * One question and its answer (PRD figure 2). Motion from figure C: the
  * question bubble rises from the composer below on a 260 ms spring, then the
  * answer fades up over 240 ms. Attachments mount once the answer text has
  * finished (PRD §8), so text and cards never land at once. Reduced motion
- * shows everything still.
+ * shows everything still. Memoised: while one answer streams, the other
+ * turns don't re-render.
  */
-function TurnView({ turn, reduced }: { turn: Turn; reduced: boolean }) {
+const TurnView = memo(function TurnView({ turn, reduced }: { turn: Turn; reduced: boolean }) {
   const [textDone, setTextDone] = useState(false);
   const showCards = (reduced || textDone) && turn.reply.attachments.length > 0;
 
   return (
-    <article className="relative flex scroll-mt-6 flex-col gap-3" data-turn={turn.id}>
+    <article
+      className="relative flex scroll-mt-6 flex-col gap-3"
+      data-turn={turn.id}
+      aria-busy={turn.ai?.status === "waiting" || turn.ai?.status === "streaming"}
+    >
       {turn.from === "sidebar" && (
         <p className="self-end font-mono text-[10px] tracking-[0.08em] text-muted-foreground uppercase">
           Asked from sidebar
@@ -43,19 +50,25 @@ function TurnView({ turn, reduced }: { turn: Turn; reduced: boolean }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.24, delay: reduced ? 0 : 0.12, ease: [0.22, 1, 0.36, 1] }}
         onAnimationComplete={() => setTextDone(true)}
-        className="max-w-[65ch] text-[15px] leading-[1.65] text-pretty text-body"
+        className={cn(!turn.ai && "max-w-[65ch] text-[15px] leading-[1.65] text-pretty text-body")}
       >
-        <span className="sr-only">Guransh: </span>
-        {turn.reply.text}
+        {turn.ai ? (
+          <AiAnswer turn={turn} reduced={reduced} />
+        ) : (
+          <>
+            <span className="sr-only">Guransh: </span>
+            {turn.reply.text}
+          </>
+        )}
       </m.div>
-      {showCards && (
+      {!turn.ai && showCards && (
         <div className="mt-2">
           <Attachments items={turn.reply.attachments} reduced={reduced} />
         </div>
       )}
     </article>
   );
-}
+});
 
 /**
  * The thread (PRD §7): questions on the right, answers on the left, follow-up
@@ -65,7 +78,8 @@ function TurnView({ turn, reduced }: { turn: Turn; reduced: boolean }) {
 export function ThreadView() {
   const { turns } = useThread();
   const { mode } = useMode();
-  const reduced = useReducedMotion() ?? false;
+  // Follows the setting live, unlike Motion's hook, which reads it once.
+  const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
   const region = useRef<HTMLElement>(null);
   const last = turns.at(-1);
 

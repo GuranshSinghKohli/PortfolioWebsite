@@ -1,14 +1,14 @@
 "use client";
 
 import { ArrowUp, MapPin } from "lucide-react";
-import { useReducedMotion } from "motion/react";
 import * as m from "motion/react-m";
 import { useId, useState, type FormEvent, type KeyboardEvent } from "react";
 
 import { profile } from "@/content/profile";
 import { ModeToggle, useMode } from "@/components/shell/mode";
 import { isFilled } from "@/lib/content";
-import { ask, prefetchOnIntent, prefetchThread } from "@/lib/thread/store";
+import { useMediaQuery } from "@/lib/media";
+import { ask, prefetchOnIntent, useThreadValue, warmAI } from "@/lib/thread/store";
 import { cn } from "@/lib/utils";
 
 /** PRD §11 caps a typed question at 300 characters. */
@@ -19,7 +19,7 @@ const MAX_QUESTION = 300;
  * a 2.4 s loop while the input has focus. Reduced motion gets a still border.
  */
 function FocusBeam() {
-  const reduced = useReducedMotion();
+  const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
   if (reduced) {
     return <span aria-hidden="true" className="pointer-events-none absolute -inset-px rounded-2xl border border-accent/60" />;
   }
@@ -36,7 +36,9 @@ function FocusBeam() {
 
 /**
  * The ask box, on the home screen and as the thread's sticky follow-up
- * composer. Enter sends, Shift+Enter adds a line. Focus prefetches the thread.
+ * composer. Enter sends, Shift+Enter adds a line. Focus loads the thread
+ * chunk and a session ticket in the background; the send button pulses
+ * while an AI answer waits for its first token.
  */
 export function Composer({
   placeholder = "Ask me about anything I've built…",
@@ -49,6 +51,7 @@ export function Composer({
   const { mode } = useMode();
   const [focused, setFocused] = useState(false);
   const [text, setText] = useState("");
+  const waiting = useThreadValue((thread) => thread.turns.at(-1)?.ai?.status === "waiting");
 
   function send(event?: FormEvent) {
     event?.preventDefault();
@@ -85,7 +88,7 @@ export function Composer({
         onKeyDown={onKeyDown}
         onFocus={() => {
           setFocused(true);
-          void prefetchThread().catch(() => {});
+          warmAI();
         }}
         onBlur={() => setFocused(false)}
         className="block w-full resize-none bg-transparent px-4 pt-3.5 text-[15px] leading-[1.5] text-body outline-none placeholder:text-muted-foreground"
@@ -102,7 +105,10 @@ export function Composer({
           type="submit"
           aria-label="Send question"
           {...prefetchOnIntent}
-          className="ml-auto flex size-11 items-center justify-center rounded-full bg-accent text-accent-foreground outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface"
+          className={cn(
+            "ml-auto flex size-11 items-center justify-center rounded-full bg-accent text-accent-foreground outline-none transition-[filter] hover:brightness-110 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-surface",
+            waiting && "send-pulse",
+          )}
         >
           <ArrowUp className="size-4" strokeWidth={2} aria-hidden="true" />
         </button>

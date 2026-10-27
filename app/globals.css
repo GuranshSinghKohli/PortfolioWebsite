@@ -200,6 +200,36 @@ html[data-intro] [data-chip] {
     linear-gradient(#000 0 0);
 }
 
+/* AI answers: the lime caret, the loading verb swap and the send pulse (PRD figure C). */
+.caret-blink {
+  animation: caret-blink 1s steps(1) infinite;
+}
+@keyframes caret-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.verb-in {
+  animation: verb-in 240ms ease-out both;
+}
+@keyframes verb-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+.send-pulse {
+  animation: send-pulse 1.2s ease-out infinite;
+}
+@keyframes send-pulse {
+  from {
+    box-shadow: 0 0 0 0 color-mix(in oklab, var(--accent) 55%, transparent);
+  }
+  to {
+    box-shadow: 0 0 0 10px color-mix(in oklab, var(--accent) 0%, transparent);
+  }
+}
+
 /* PRD §10: reduced motion collapses every animation. */
 @media (prefers-reduced-motion: reduce) {
   *,

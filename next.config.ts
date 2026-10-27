@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   turbopack: {
     rules: {
+      // `import text from "./file.md?raw"` gives the file as a string (loading verbs from content/voice.md).
+      "*.md": { condition: { query: "?raw" }, type: "text" },
       "*.css": {
         loaders: ["@tailwindcss/turbopack"],
         as: "*.css",

@@ -91,6 +91,17 @@ Answers to the open questions in PHASES.md.
 
 - **Golden set** (`tests/golden/questions.ts`, `npm run golden`): 40 questions with the facts a correct answer must contain (roles, projects, education, contact), things it must never invent (phone, GPA, a fake employer, hobbies), a forged-history case, a prompt injection and a greeting. Graded by patterns, with curly apostrophes normalised. Each run writes `tests/golden/last-run.json`. First run on gpt-6-luna: 40/40, $0.0016 for the set.
 
+## Phase 3 AI ask, client side (Checkpoint 3B)
+
+- **Which questions use the AI.** Typed questions only. Chips, follow-up chips and sidebar items stay on curated answers: instant and free.
+- **Where the code lives.** The AI client (`lib/thread/ai-client.ts`), the streaming UI (`components/thread/AiAnswer.tsx`) and the loading verbs are in the lazy thread chunk. The first load gained only the store's AI fields, `warmAI()` and a selector hook: 198.4 kB.
+- **Tickets.** Fetched when the composer gets focus, refreshed a minute before expiry while the tab is visible (dropped while it's hidden, and fetched fresh on the next ask), and refetched once if `/api/ask` returns 401.
+- **Streaming.** Text arrives from `/api/ask` and is batched to one store update per animation frame. Each answer reveals at a pace that catches up a sixth of its backlog per frame, with a blinking lime caret; Escape shows everything that has arrived and keeps up from then on. Cards and follow-up chips appear only when the text is fully shown. While waiting for the first token the loading verbs from `content/voice.md` cycle (imported raw through a Turbopack `?raw` rule) and the send button pulses; screen readers hear "Answering", and the turn is `aria-busy` until done.
+- **Reduced motion** follows the setting live through `useMediaQuery`, not Motion's `useReducedMotion`, which reads it once: a still caret, no verb or pulse animation, and text shown in chunks four times a second.
+- **Problems.** Never a raw error. Copy is `aiProblems` in `content/answers.ts`: rate-limited (with the server's wait when it's under 90 s), the hourly limit, the daily budget, offline (503), and a dropped connection or server failure, which get a Retry button that re-asks in the same turn. A blocked question shows `blockedReply`, replacing anything streamed. Every problem ends with the router's best chips for the question.
+- **Re-renders while streaming.** Thread turns are memoised, and the composers and main view read the store through `useThreadValue`, so they ignore streamed text. This took the worst interaction while streaming, at 4× CPU slowdown, from 200 ms to 80 ms.
+- **Known warning.** React Three Fiber logs `THREE.Clock: This module has been deprecated` with three 0.186. It's harmless and comes from inside the library; it goes away when fiber moves to `THREE.Timer`.
+
 ## Performance budgets (2026-10-26)
 
 The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:
