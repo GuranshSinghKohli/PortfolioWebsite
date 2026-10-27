@@ -14,7 +14,7 @@ export type AnalyticsEvent = {
   card_hover_play: { slug: string };
   sheet_open: { sheet: string };
   contact_sent: { result: "server" | "mailto" };
-  resume_download: { from: "rail" | "card" };
+  resume_download: { from: "rail" | "card" | "header" };
   error: { source: "ask" | "contact" | "boundary" | "window"; kind: string };
 };
 

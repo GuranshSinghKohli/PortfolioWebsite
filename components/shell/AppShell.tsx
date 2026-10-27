@@ -11,11 +11,15 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from 
 import { useRailCollapsed } from "@/lib/rail";
 import { ModeProvider } from "./mode";
 import { Rail } from "./Rail";
+import { TopActions } from "./TopActions";
 
 /**
  * App frame (PRD §7, §13): a 248px rail that collapses to 64px at 860px and
  * up, and a drawer over a scrim below 860px.
  */
+/** First and last name, so the phone header fits beside the quick links. */
+const shortName = `${profile.name.split(" ")[0]} ${profile.name.split(" ").at(-1)}`;
+
 export function AppShell({ children }: { children: ReactNode }) {
   const collapsed = useRailCollapsed();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -32,7 +36,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Rail variant="rail" collapsed={collapsed} />
           </aside>
 
-          <div className="flex min-w-0 flex-1 flex-col">
+          <div className="relative flex min-w-0 flex-1 flex-col">
             <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
               <header className="flex h-14 shrink-0 items-center gap-1 border-b border-line-soft px-2 shell:hidden">
                 {/* SheetTrigger, so Radix returns focus here when the drawer closes. */}
@@ -43,7 +47,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <Menu className="size-5" strokeWidth={1.5} aria-hidden="true" />
                 </SheetTrigger>
                 <LogoMark className="text-text" />
-                <span className="ml-1.5 text-[15px] font-medium text-text">{profile.name}</span>
+                <span className="ml-1.5 min-w-0 truncate text-[15px] font-medium text-text">{shortName}</span>
+                <TopActions className="ml-auto shrink-0 pl-2" />
               </header>
               <SheetContent
                 side="left"
@@ -57,6 +62,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Sheet>
 
             <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
+            <TopActions className="absolute top-4 right-6 z-30 hidden shell:flex" />
           </div>
         </div>
         <BootOverlay />

@@ -152,6 +152,14 @@ Answers to the open questions in PHASES.md.
 - **Phone.** The résumé PDF shows a phone number. The site and the AI still never state it (`personal.doNotShare`).
 - **Golden set:** 41 questions. Offball XI, World Cup, junction and Velocity cases became research-role, star-schema and Wanderers-stack cases. The forged-history check no longer fails a correct denial ("not listed as CTO of OpenAI"). Run 2026-10-27: 41/41.
 
+## Home backdrop and quick links (2026-10-27)
+
+- **3D backdrop.** The home screen's background is now one canvas (`components/three/Constellation.tsx`): a three-armed spiral galaxy (6,500 points, lime core fading to the dim grey, one turn every 2.5 minutes), 1,600 distant stars, and 46 drifting nodes that link up when they pass within reach, like constellations forming and breaking. The mark's 3D cluster is drawn in the same canvas, pinned over the hero box at its old size, with the galaxy's core behind it. The camera eases with the pointer, so near layers move more than far ones.
+- **Same loading rules as the hero.** It loads after first paint in the 3D chunk (269 kB gzip, under 350), only from 600 px with WebGL 2 and motion allowed. Phones and reduced motion keep the 2D mark and a plain background. It renders through a portal into `#home-backdrop` in `app/page.tsx`, so the first load gained nothing for it (199.8 kB). It stops drawing whenever the home screen is hidden: measured at about 6% main-thread time at 60 fps on home, and 0% in the thread. `PerformanceMonitor` drops bloom and the pixel ratio on slow machines.
+- **Readability.** A soft radial pool of the background colour sits behind the greeting, composer and chips, so the scene stays vivid around them but never behind the words.
+- **Quick links.** "Résumé" (the PDF in a new tab, `resume_download` from "header") and "About" (the curated About answer) sit top-right over the main area from 860 px, and in the phone header bar below that, where the name shortens to "Guransh Kohli". The thread's top padding grows at that width so the first question clears them.
+- **Measured.** axe clean; targets 44 px; reduced motion still shows no canvas and no movement. INP at normal speed: worst 88 ms. At 4x CPU, sending a question measured 200 to 216 ms on desktop and 200 ms on a phone, which has no 3D, so that step doesn't come from the backdrop.
+
 ## Performance budgets (2026-10-26)
 
 The PRD's 130 kB first-load budget can't be met on Next 16 and React 19, whose runtime alone is about 117 kB. The budgets are now:

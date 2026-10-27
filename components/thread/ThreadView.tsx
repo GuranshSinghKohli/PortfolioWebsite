@@ -128,7 +128,7 @@ export function ThreadView() {
         ref={region}
         tabIndex={-1}
         aria-label="Conversation"
-        className="flex flex-col gap-10 pt-10 pb-6 outline-none"
+        className="flex flex-col gap-10 pt-10 pb-6 outline-none shell:pt-20"
       >
         {turns.map((turn) => (
           <TurnView key={turn.id} turn={turn} reduced={reduced} />

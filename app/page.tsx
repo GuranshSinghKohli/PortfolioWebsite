@@ -9,13 +9,22 @@ export default function Home() {
   return (
     <AppShell>
       <MainView>
-        <div className="mx-auto flex min-h-full w-full max-w-[720px] flex-col items-center justify-center gap-8 px-4 py-12">
-          <Hero />
-          <div className="relative z-10 flex w-full flex-col items-center gap-8">
-            <Greeting />
-            <div className="flex w-full flex-col gap-4">
-              <Composer />
-              <Chips />
+        <div className="relative grid min-h-full">
+          {/* The 3D scene renders in here once it loads (components/three/Constellation.tsx). */}
+          <div
+            id="home-backdrop"
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+          />
+          <div className="relative mx-auto flex w-full max-w-[720px] flex-col items-center justify-center gap-8 px-4 py-12">
+            <Hero />
+            {/* The veil: a soft pool of background behind the text, so the 3D scene never competes with it. */}
+            <div className="relative z-10 flex w-full flex-col items-center gap-8 before:pointer-events-none before:absolute before:-inset-x-28 before:-inset-y-20 before:-z-10 before:bg-[radial-gradient(closest-side,var(--bg)_62%,transparent)] before:content-['']">
+              <Greeting />
+              <div className="flex w-full flex-col gap-4">
+                <Composer />
+                <Chips />
+              </div>
             </div>
           </div>
         </div>

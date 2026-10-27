@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useMediaQuery } from "@/lib/media";
 import { cn } from "@/lib/utils";
@@ -18,15 +18,18 @@ function supportsWebGL2() {
 }
 
 /**
- * Home hero (PRD §10): the 2D mark renders first, then the 3D constellation
- * loads in its own chunk once the browser is idle and crossfades in. Phones
- * under 600px, reduced motion and browsers without WebGL 2 keep the 2D mark.
+ * Home hero (PRD §10): the 2D mark renders first, then the 3D scene loads in
+ * its own chunk once the browser is idle and crossfades in: the mark as a 3D
+ * cluster pinned to this box, in front of a galaxy that fills the home
+ * screen's background (#home-backdrop). Phones under 600px, reduced motion
+ * and browsers without WebGL 2 keep the 2D mark and a plain background.
  */
 export function Hero() {
   const wide = useMediaQuery("(min-width: 600px)");
   const reduced = useMediaQuery("(prefers-reduced-motion: reduce)");
   const [canLoad, setCanLoad] = useState(false);
   const [ready, setReady] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const start = () => setCanLoad(supportsWebGL2());
@@ -41,22 +44,11 @@ export function Hero() {
   const show3d = canLoad && wide && !reduced;
 
   return (
-    <div className="relative size-20 min-[600px]:size-32">
+    <div ref={box} className="relative size-20 min-[600px]:size-32">
       <ConstellationFallback
         className={cn("absolute inset-0 size-full transition-opacity duration-500", show3d && ready && "opacity-0")}
       />
-      {show3d && (
-        // Twice the box, with a radial mask, so the bloom fades out before the
-        // canvas edge. The text below sits above it (z-10 in page.tsx).
-        <div
-          className={cn(
-            "pointer-events-none absolute -inset-16 transition-opacity duration-500 [mask-image:radial-gradient(closest-side,#000_45%,transparent)]",
-            ready ? "opacity-100" : "opacity-0",
-          )}
-        >
-          <Constellation onReady={() => setReady(true)} />
-        </div>
-      )}
+      {show3d && <Constellation hero={box} onReady={() => setReady(true)} />}
     </div>
   );
 }
