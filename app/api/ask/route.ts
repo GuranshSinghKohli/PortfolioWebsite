@@ -51,7 +51,14 @@ export async function POST(request: Request) {
 
   const model = process.env.ASK_MODEL;
   const secret = process.env.ASK_SIGNING_SECRET;
-  if (!model || !secret || !process.env.OPENAI_API_KEY) return fail(503, "unavailable");
+  if (!model || !secret || !process.env.OPENAI_API_KEY) {
+    // Names only, never values, so Vercel's logs say what's missing.
+    const missing = Object.entries({ ASK_MODEL: model, ASK_SIGNING_SECRET: secret, OPENAI_API_KEY: process.env.OPENAI_API_KEY })
+      .filter(([, value]) => !value)
+      .map(([name]) => name);
+    console.error(`ask unavailable: missing env ${missing.join(", ")}`);
+    return fail(503, "unavailable");
+  }
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return fail(400, "bad_request");
@@ -67,7 +74,9 @@ export async function POST(request: Request) {
   let limit;
   try {
     limit = await checkAsk(ip);
-  } catch {
+  } catch (error) {
+    // Upstash errors carry no secrets (e.g. "WRONGPASS invalid username-password pair").
+    console.error(`ask unavailable: rate limiter failed (${(error as Error).name}: ${(error as Error).message.slice(0, 160)})`);
     return fail(503, "limiter"); // Redis unreachable: fail closed.
   }
   if (!limit.ok) return fail(429, limit.reason, { "Retry-After": String(limit.retryAfter) });

@@ -38,8 +38,17 @@ export function AppShell({ children, nav }: { children: ReactNode; nav: RailNav 
           </aside>
 
           <div className="relative flex min-w-0 flex-1 flex-col">
+            {/*
+              The scene layer, behind home and thread alike. The 3D scene renders
+              into it once loaded (components/three/Constellation.tsx); without 3D
+              (phones, reduced motion) a static CSS starfield shows behind the thread.
+            */}
+            <div id="scene-backdrop" aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
+              <div className="scene-static absolute inset-0" />
+              <div className="scene-veil" />
+            </div>
             <Sheet open={drawerOpen} onOpenChange={setDrawerOpen}>
-              <header className="flex h-14 shrink-0 items-center gap-1 border-b border-line-soft px-2 shell:hidden">
+              <header className="relative z-10 flex h-14 shrink-0 items-center gap-1 border-b border-line-soft px-2 shell:hidden">
                 {/* SheetTrigger, so Radix returns focus here when the drawer closes. */}
                 <SheetTrigger
                   aria-label="Open menu"
@@ -62,7 +71,7 @@ export function AppShell({ children, nav }: { children: ReactNode; nav: RailNav 
               </SheetContent>
             </Sheet>
 
-            <main className="min-h-0 flex-1 overflow-y-auto">{children}</main>
+            <main className="relative z-10 min-h-0 flex-1 overflow-y-auto">{children}</main>
             <TopActions className="absolute top-4 right-6 z-30 hidden shell:flex" />
           </div>
         </div>

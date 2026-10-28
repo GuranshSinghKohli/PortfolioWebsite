@@ -1,7 +1,7 @@
 "use client";
 
 import { Line, PerformanceMonitor } from "@react-three/drei";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { easing } from "maath";
 import { useEffect, useRef, useState, type RefObject } from "react";
@@ -14,10 +14,13 @@ import {
   Color,
   DynamicDrawUsage,
   type Group,
+  type Mesh,
+  type MeshBasicMaterial,
   type Texture,
 } from "three";
 
 import { MARK_CENTRE, MARK_SATELLITES } from "@/components/LogoMark";
+import { useThreadValue } from "@/lib/thread/store";
 import { cn } from "@/lib/utils";
 
 const FOV = 40;
@@ -49,6 +52,12 @@ function readColours() {
 }
 
 type Colours = ReturnType<typeof readColours>;
+
+/**
+ * 0 on the home screen, 1 in the thread, eased over about 600 ms. Read
+ * every frame by the layers that move when a conversation starts.
+ */
+type Focus = { value: number; target: number; pulse: number; streaming: boolean };
 
 /** Where the DOM hero sits, in screen terms the scene can turn into world positions each frame. */
 type Anchor = { ndc: [number, number]; aspect: number; unitsPerPx: number };
@@ -85,7 +94,17 @@ function geometry(positions: Float32Array, colors: Float32Array) {
  * grey, seen at a tilt and turning once every 2.5 minutes. Its core sits
  * behind the mark.
  */
-function Galaxy({ colours, sprite, anchor }: { colours: Colours; sprite: Texture; anchor: RefObject<Anchor | null> }) {
+function Galaxy({
+  colours,
+  sprite,
+  anchor,
+  focus,
+}: {
+  colours: Colours;
+  sprite: Texture;
+  anchor: RefObject<Anchor | null>;
+  focus: RefObject<Focus>;
+}) {
   const place = useRef<Group>(null);
   const spin = useRef<Group>(null);
   const [shape] = useState(() => {
@@ -114,7 +133,12 @@ function Galaxy({ colours, sprite, anchor }: { colours: Colours; sprite: Texture
 
   useFrame((_, delta) => {
     if (spin.current) spin.current.rotation.y += (delta * Math.PI * 2) / GALAXY_SECONDS;
-    if (place.current && anchor.current) place.current.position.set(...onAnchor(anchor.current, -5));
+    if (place.current && anchor.current) {
+      // In the thread the galaxy sinks back and rises a little, out from behind the text.
+      const [x, y, z] = onAnchor(anchor.current, -5);
+      const away = focus.current.value;
+      place.current.position.set(x, y + away * 1.5, z - away * 4);
+    }
   });
 
   return (
@@ -268,18 +292,30 @@ function Cluster({
   colours,
   pointer,
   anchor,
+  focus,
 }: {
   colours: Colours;
   pointer: RefObject<[number, number]>;
   anchor: RefObject<Anchor | null>;
+  focus: RefObject<Focus>;
 }) {
   const place = useRef<Group>(null);
+  const coreMesh = useRef<Mesh>(null);
   const tilt = useRef<Group>(null);
   const orbit = useRef<Group>(null);
   // Above 1.0 so the lime core passes the bloom threshold.
   const [core] = useState(() => new Color(colours.accent).multiplyScalar(2.2));
+  const [lime] = useState(() => new Color(colours.accent));
 
-  useFrame(({ camera }, delta) => {
+  useFrame(({ camera, clock }, delta) => {
+    const state = focus.current;
+    // Signature touch: while an answer streams, the core breathes; it settles when the answer is done.
+    easing.damp(state, "pulse", state.streaming ? 1 : 0, 0.35, delta);
+    const wave = 0.5 + 0.5 * Math.sin((clock.elapsedTime * Math.PI * 2) / 1.2);
+    if (coreMesh.current) {
+      coreMesh.current.scale.setScalar(1 + state.pulse * 0.32 * wave);
+      (coreMesh.current.material as MeshBasicMaterial).color.copy(lime).multiplyScalar(2.2 + state.pulse * 1.6 * wave);
+    }
     if (orbit.current) orbit.current.rotation.z -= (delta * Math.PI * 2) / ORBIT_SECONDS;
     if (tilt.current) {
       const [x, y] = pointer.current;
@@ -287,8 +323,10 @@ function Cluster({
     }
     if (place.current && anchor.current) {
       // Follow the camera's parallax, so the mark never drifts off the greeting.
+      // In the thread the mark drifts up and back, behind the conversation.
       const [x, y, z] = onAnchor(anchor.current, 0);
-      place.current.position.set(x + camera.position.x, y + camera.position.y, z);
+      const away = state.value;
+      place.current.position.set(x + camera.position.x, y + camera.position.y + away * 3.4, z - away * 5);
       place.current.scale.setScalar(anchor.current.unitsPerPx / MARK_UNITS_PER_PX);
     }
   });
@@ -307,7 +345,7 @@ function Cluster({
             </group>
           ))}
         </group>
-        <mesh>
+        <mesh ref={coreMesh}>
           <sphereGeometry args={[0.13, 32, 32]} />
           <meshBasicMaterial color={core} toneMapped={false} />
         </mesh>
@@ -317,11 +355,27 @@ function Cluster({
 }
 
 /** Eases the camera with the pointer: near things move more than far ones, which is what sells the depth. */
-function Rig({ pointer }: { pointer: RefObject<[number, number]> }) {
+function Rig({ pointer, focus }: { pointer: RefObject<[number, number]>; focus: RefObject<Focus> }) {
   useFrame(({ camera }, delta) => {
+    const state = focus.current;
+    // smoothTime 0.2 settles in about 600 ms.
+    easing.damp(state, "value", state.target, 0.2, delta);
     const [x, y] = pointer.current;
-    easing.damp3(camera.position, [x * 0.7, -y * 0.45, CAMERA_Z], 0.6, delta);
+    const calm = 1 - state.value * 0.6;
+    easing.damp3(camera.position, [x * 0.7 * calm, -y * 0.45 * calm, CAMERA_Z], 0.6, delta);
   });
+  return null;
+}
+
+/** In the thread the scene sits dim and blurred behind text, so 24 frames a second is plenty. Skips frames while the tab is hidden. */
+function Ticker({ fps }: { fps: number }) {
+  const invalidate = useThree((state) => state.invalidate);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (!document.hidden) invalidate();
+    }, 1000 / fps);
+    return () => clearInterval(timer);
+  }, [fps, invalidate]);
   return null;
 }
 
@@ -329,10 +383,14 @@ function Rig({ pointer }: { pointer: RefObject<[number, number]> }) {
  * The home screen's 3D layer (PRD figure B, effect 1, extended): the mark's
  * cluster in front of a turning galaxy, a field of distant stars and a
  * drifting constellation network, in one canvas behind the home column.
- * It renders into `#home-backdrop` (app/page.tsx) and lines the cluster up
- * with the hero box it's given. Loaded by Hero through next/dynamic only on
- * wide screens with WebGL 2 and motion allowed; it stops drawing whenever
- * the home screen is off screen (the thread hides it).
+ * It renders into `#scene-backdrop` (AppShell), behind home and thread
+ * alike, and lines the cluster up with the hero box it's given. When a
+ * conversation starts it stays mounted: over about 600 ms the mark drifts up
+ * and back, the galaxy recedes and the layer dims to 30% with a slight blur;
+ * frames then drop to 24 a second. While an answer streams the lime core
+ * pulses. Going home reverses it all. Loaded by Hero through next/dynamic
+ * only on wide screens with WebGL 2 and motion allowed. Hero stays mounted
+ * (hidden) while the thread shows, so the scene is never rebuilt.
  */
 export default function Constellation({
   onReady,
@@ -344,13 +402,40 @@ export default function Constellation({
   const wrapper = useRef<HTMLDivElement>(null);
   const pointer = useRef<[number, number]>([0, 0]);
   const anchor = useRef<Anchor | null>(null);
-  const [target] = useState(() => document.getElementById("home-backdrop"));
+  const [target] = useState(() => document.getElementById("scene-backdrop"));
+  const view = useThreadValue((thread) => thread.view);
+  const streaming = useThreadValue((thread) =>
+    thread.turns.some((turn) => turn.ai?.status === "waiting" || turn.ai?.status === "streaming"),
+  );
+  const focus = useRef<Focus>({ value: 0, target: 0, pulse: 0, streaming: false });
+  // The view the scene has finished moving to: frames drop to 24 a second only once the 600 ms move is done.
+  const [settled, setSettled] = useState(view);
+  const thread = view === "thread";
+  const throttled = thread && settled === "thread";
   const [colours] = useState(readColours);
   const [sprite] = useState(starTexture);
   const [onScreen, setOnScreen] = useState(true);
   const [bloom, setBloom] = useState(true);
   const [dpr, setDpr] = useState(1.5);
   const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    focus.current.target = thread ? 1 : 0;
+    const timer = setTimeout(() => setSettled(view), 700);
+    return () => clearTimeout(timer);
+  }, [thread, view]);
+
+  useEffect(() => {
+    focus.current.streaming = streaming;
+  }, [streaming]);
+
+  // Tells the CSS fallback that the 3D scene has the layer.
+  useEffect(() => {
+    const layer = document.getElementById("scene-backdrop");
+    if (!layer) return;
+    layer.dataset.scene = "3d";
+    return () => void delete layer.dataset.scene;
+  }, []);
 
   useEffect(() => {
     const move = (event: PointerEvent) => {
@@ -393,12 +478,16 @@ export default function Constellation({
   return createPortal(
     <div
       ref={wrapper}
-      className={cn("absolute inset-0 transition-opacity duration-1000", shown ? "opacity-100" : "opacity-0")}
+      // Home: full scene. Thread: about 30% and slightly blurred, a quiet layer behind the conversation.
+      className={cn(
+        "absolute inset-0 transition-[opacity,filter] duration-[600ms] ease-out",
+        !shown ? "opacity-0" : thread ? "opacity-30 blur-[2px]" : "opacity-100",
+      )}
     >
       <Canvas
         flat
         dpr={[1, dpr]}
-        frameloop={onScreen ? "always" : "never"}
+        frameloop={!onScreen ? "never" : throttled ? "demand" : "always"}
         camera={{ fov: FOV, position: [0, 0, CAMERA_Z] }}
         gl={{ antialias: true, powerPreference: "low-power" }}
         // Two frames, so the first render is on screen before the 2D mark fades.
@@ -419,11 +508,12 @@ export default function Constellation({
             setDpr(1);
           }}
         />
-        <Rig pointer={pointer} />
+        {throttled && <Ticker fps={24} />}
+        <Rig pointer={pointer} focus={focus} />
         <Starfield colours={colours} sprite={sprite} />
-        <Galaxy colours={colours} sprite={sprite} anchor={anchor} />
+        <Galaxy colours={colours} sprite={sprite} anchor={anchor} focus={focus} />
         <Network colours={colours} sprite={sprite} />
-        <Cluster colours={colours} pointer={pointer} anchor={anchor} />
+        <Cluster colours={colours} pointer={pointer} anchor={anchor} focus={focus} />
         {bloom && (
           <EffectComposer>
             <Bloom mipmapBlur luminanceThreshold={1} intensity={1.6} radius={0.75} />

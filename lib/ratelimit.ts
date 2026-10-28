@@ -82,6 +82,14 @@ const contactPerDay = new Ratelimit({
   timeout: 2000,
 });
 
+/** GET /api/health: 10 a minute per IP. */
+export const healthLimiter = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1 m"),
+  prefix: "portfolio:health",
+  timeout: 2000,
+});
+
 export type ContactLimit = { ok: true } | { ok: false; reason: "hour" | "day"; retryAfter: number } | { ok: false; reason: "unavailable" };
 
 /**

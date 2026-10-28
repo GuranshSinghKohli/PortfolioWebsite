@@ -12,12 +12,6 @@ export default function Home() {
     <AppShell nav={railNav()}>
       <MainView>
         <div className="relative grid min-h-full grid-cols-1">
-          {/* The 3D scene renders in here once it loads (components/three/Constellation.tsx). */}
-          <div
-            id="home-backdrop"
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 overflow-hidden"
-          />
           <div className="relative mx-auto flex w-full max-w-[720px] flex-col items-center justify-center gap-8 px-4 py-12">
             <Hero />
             {/* The veil: a soft pool of background behind the text, so the 3D scene never competes with it. */}

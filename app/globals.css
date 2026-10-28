@@ -242,3 +242,60 @@ html[data-intro] [data-starter] {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * The scene's static stand-in (AppShell #scene-backdrop): a dim starfield
+ * and a faint lime glow, CSS only. Shown behind the thread when there's no
+ * 3D scene (phones under 600px, reduced motion, no WebGL 2).
+ */
+.scene-static {
+  display: none;
+  opacity: 0.3;
+  background-image:
+    radial-gradient(circle at 50% 8%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 28%),
+    radial-gradient(1.5px 1.5px at 12% 18%, var(--dim), transparent),
+    radial-gradient(1px 1px at 27% 64%, var(--dim), transparent),
+    radial-gradient(1.5px 1.5px at 41% 32%, var(--dim), transparent),
+    radial-gradient(1px 1px at 58% 78%, var(--dim), transparent),
+    radial-gradient(2px 2px at 50% 8%, var(--accent), transparent),
+    radial-gradient(1px 1px at 69% 22%, var(--dim), transparent),
+    radial-gradient(1.5px 1.5px at 83% 56%, var(--dim), transparent),
+    radial-gradient(1px 1px at 92% 12%, var(--dim), transparent),
+    radial-gradient(1px 1px at 7% 86%, var(--dim), transparent),
+    radial-gradient(1.5px 1.5px at 76% 90%, var(--dim), transparent),
+    radial-gradient(1px 1px at 34% 94%, var(--dim), transparent),
+    radial-gradient(1px 1px at 63% 46%, var(--dim), transparent);
+}
+html[data-view="thread"] .scene-static {
+  display: block;
+}
+#scene-backdrop[data-scene="3d"] .scene-static {
+  display: none;
+}
+
+/*
+ * Behind the thread, a soft dark band under the conversation column so text
+ * keeps 4.5:1 or better over the scene. Fixed (it doesn't scroll with the
+ * thread) and open at the top, where the mark floats while answers stream.
+ * Above the canvas (the scene's wrapper is portalled in after it).
+ */
+.scene-veil {
+  display: none;
+  position: absolute;
+  inset-block: 0;
+  left: 50%;
+  z-index: 10;
+  width: min(100%, 60rem);
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to right,
+    transparent,
+    color-mix(in oklab, var(--bg) 90%, transparent) 14%,
+    color-mix(in oklab, var(--bg) 90%, transparent) 86%,
+    transparent
+  );
+  mask-image: linear-gradient(to bottom, transparent 0, #000 9rem);
+}
+html[data-view="thread"] .scene-veil {
+  display: block;
+}

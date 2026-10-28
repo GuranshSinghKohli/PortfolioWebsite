@@ -56,6 +56,10 @@ const listeners = new Set<() => void>();
 
 function set(next: Partial<State>) {
   state = { ...state, ...next };
+  // For CSS: the scene's fallback and veil show only behind the thread. Written
+  // only on a real change, since any attribute write on <html> restyles the page.
+  const root = document.documentElement;
+  if (next.view && root.dataset.view !== next.view) root.dataset.view = next.view;
   listeners.forEach((listener) => listener());
 }
 

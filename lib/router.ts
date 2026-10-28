@@ -49,12 +49,21 @@ export function normalize(text: string) {
 /** Words that point back at the current topic, so a follow-up stays on it. */
 const POINTS_BACK = /(?<![\p{L}])(that|this|it|its|there|they|them|those|these)(?![\p{L}])/u;
 
-const escape = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const WORD_CHAR = /[\p{L}\p{N}]/u;
 
-/** Where `term` first appears in `text` as a whole word or phrase, or -1. Both normalized. */
+/**
+ * Where `term` first appears in `text` as a whole word or phrase, or -1. Both
+ * normalized. A plain substring search plus a letter-or-digit check on either
+ * side: building a Unicode RegExp per term instead cost about 50 ms on every
+ * typed question (200 ms at 4x CPU), enough to blow the INP budget.
+ */
 function find(text: string, term: string) {
-  const match = new RegExp(`(?<![\\p{L}\\p{N}])${escape(term)}(?![\\p{L}\\p{N}])`, "u").exec(text);
-  return match ? match.index : -1;
+  for (let at = text.indexOf(term); at >= 0; at = text.indexOf(term, at + 1)) {
+    const before = text[at - 1];
+    const after = text[at + term.length];
+    if ((!before || !WORD_CHAR.test(before)) && (!after || !WORD_CHAR.test(after))) return at;
+  }
+  return -1;
 }
 
 /** What each topic "says": its answer text and its own signal words. */
@@ -69,8 +78,14 @@ const said = new Map(
 function hits(text: string, kind: keyof Signals) {
   const found: { topic: TopicId; at: number; terms: string[] }[] = [];
   for (const [topic, words] of signals) {
-    const terms = words[kind].map(normalize).filter((term) => find(text, term) >= 0);
-    if (terms.length) found.push({ topic, at: Math.min(...terms.map((term) => find(text, term))), terms });
+    const positions = words[kind].map((word) => {
+      const term = normalize(word);
+      return { term, at: find(text, term) };
+    });
+    const matched = positions.filter((entry) => entry.at >= 0);
+    if (matched.length) {
+      found.push({ topic, at: Math.min(...matched.map((entry) => entry.at)), terms: matched.map((entry) => entry.term) });
+    }
   }
   return found.sort((a, b) => a.at - b.at);
 }
