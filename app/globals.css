@@ -157,7 +157,8 @@ html[data-intro="boot"] [data-boot-overlay] {
   animation: intro-failsafe-out 0s 5s forwards;
 }
 html[data-intro="boot"] [data-shell],
-html[data-intro] [data-chip] {
+html[data-intro] [data-chip],
+html[data-intro] [data-starter] {
   opacity: 0;
   animation: intro-failsafe-in 0s 5s forwards;
 }

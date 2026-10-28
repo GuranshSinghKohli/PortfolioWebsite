@@ -46,9 +46,11 @@ type State = {
   runtime: ThreadRuntime | null;
   /** The thread chunk failed to load; MainView hands it to the error page. */
   failure: Error | null;
+  /** Something has been asked this visit. Survives going home; hides the starter questions. */
+  started: boolean;
 };
 
-const initial: State = { view: "home", turns: [], topic: null, runtime: null, failure: null };
+const initial: State = { view: "home", turns: [], topic: null, runtime: null, failure: null, started: false };
 let state = initial;
 const listeners = new Set<() => void>();
 
@@ -123,6 +125,7 @@ let nextId = 1;
  */
 export async function ask(input: Ask, mode: Mode) {
   const started = performance.now();
+  if (!state.started) set({ started: true });
   let runtime: ThreadRuntime;
   try {
     runtime = await prefetchThread();

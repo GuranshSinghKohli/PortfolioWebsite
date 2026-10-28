@@ -23,3 +23,11 @@ export const homeChips: Record<"about" | "work", readonly string[]> = {
 
 /** Topics hidden from chips, follow-ups and the sidebar. */
 export const hiddenTopics: readonly string[] = hasTracks ? [] : ["listening"];
+
+/** "Try asking" starters under the home chips. Each goes to the AI as a typed question. */
+export const starterQuestions = [
+  "What are you building right now?",
+  "What's the hardest problem you've solved?",
+  "How did you cut support escalations by 90%?",
+  "What do you do when you're not coding?",
+];

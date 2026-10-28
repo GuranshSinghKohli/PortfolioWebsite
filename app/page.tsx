@@ -1,6 +1,7 @@
 import { Chips } from "@/components/home/Chips";
 import { Composer } from "@/components/home/Composer";
 import { Greeting } from "@/components/home/Greeting";
+import { StarterQuestions } from "@/components/home/StarterQuestions";
 import { AppShell } from "@/components/shell/AppShell";
 import { MainView } from "@/components/shell/MainView";
 import { Hero } from "@/components/three/Hero";
@@ -10,7 +11,7 @@ export default function Home() {
   return (
     <AppShell nav={railNav()}>
       <MainView>
-        <div className="relative grid min-h-full">
+        <div className="relative grid min-h-full grid-cols-1">
           {/* The 3D scene renders in here once it loads (components/three/Constellation.tsx). */}
           <div
             id="home-backdrop"
@@ -25,6 +26,7 @@ export default function Home() {
               <div className="flex w-full flex-col gap-4">
                 <Composer />
                 <Chips />
+                <StarterQuestions />
               </div>
             </div>
           </div>

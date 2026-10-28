@@ -152,6 +152,14 @@ Answers to the open questions in PHASES.md.
 - **Phone.** The résumé PDF shows a phone number. The site and the AI still never state it (`personal.doNotShare`).
 - **Golden set:** 41 questions. Offball XI, World Cup, junction and Velocity cases became research-role, star-schema and Wanderers-stack cases. The forged-history check no longer fails a correct denial ("not listed as CTO of OpenAI"). Run 2026-10-27: 41/41.
 
+## "Try asking" starters (2026-10-27)
+
+- **Row.** Four starter questions (`starterQuestions` in `content/chips.ts`) under the home chips, behind a mono "TRY ASKING" label: 12.5px muted text, a thin `line-soft` border, no hover lift, so they read as suggestions rather than competing with the chips. Each is a 44px button with the standard focus ring. They rise in after the chips with the same 60 ms stagger (still under reduced motion), and wait for their turn during the first-visit intro like the chips do (`[data-starter]` in the intro CSS).
+- **Behaviour.** A click sends the question as a typed question, so it goes through the AI and streams. The row is gone for the rest of the visit once anything has been asked (`started` in the thread store survives going home).
+- **Phones.** One row that scrolls sideways, faded at the right edge, with snapping aligned to the composer. The home grid is now `grid-cols-1` (`minmax(0, 1fr)`): with the default track, the row's width stretched the whole home column off screen.
+- **Budget.** It's in the first load (it has to paint with the chips): 197.8 kB, up 0.4 kB.
+- **Interests** are still the `[fill in]` placeholder: the request carried the template text, not real interests. Until they're filled in, "What do you do when you're not coding?" gets the off-topic deflection.
+
 ## Final pre-launch audit (2026-10-27)
 
 - **Favicon.** `app/favicon.ico` was still the default Next.js "N". Replaced with `app/icon.svg` (the mark on the page background) and `app/apple-icon.tsx` (180 px, prerendered).
