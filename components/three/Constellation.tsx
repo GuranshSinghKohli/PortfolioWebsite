@@ -8,14 +8,17 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import {
   AdditiveBlending,
+  BoxGeometry,
   BufferAttribute,
   BufferGeometry,
   CanvasTexture,
   Color,
-  DynamicDrawUsage,
+  EdgesGeometry,
   type Group,
+  type LineBasicMaterial,
   type Mesh,
   type MeshBasicMaterial,
+  OctahedronGeometry,
   type Texture,
 } from "three";
 
@@ -198,33 +201,36 @@ function Starfield({ colours, sprite }: { colours: Colours; sprite: Texture }) {
   );
 }
 
-const NODES = 46;
-const LINK_DISTANCE = 3.4;
-/** How far (world units, in the screen plane) the pointer reaches into the network. */
-const CURSOR_REACH = 4.2;
-/** How far a node near the pointer steps aside, and how far a click's ripple pushes. */
-const CURSOR_PUSH = 0.9;
-const RIPPLE_PUSH = 2.4;
-/** The network's middle depth, where the pointer is placed in the scene. */
-const NETWORK_Z = -5;
+const SHAPE_COUNT = 16;
+/** How far (world units, in the screen plane) the pointer reaches into the shapes. */
+const CURSOR_REACH = 4.5;
+/** How far a shape near the pointer steps aside, and how far a click's ripple pushes. */
+const CURSOR_PUSH = 1.1;
+const RIPPLE_PUSH = 2.6;
+/** The shapes' middle depth, where the pointer is placed in the scene. */
+const SHAPES_Z = -5;
 
-/** The pointer in the network's plane. `presence` fades in on move and out when it leaves; `ripple` is a click, decaying. */
+/** The pointer in the shapes' plane. `presence` fades in on move and out when it leaves; `ripple` is a click, decaying. */
 type Cursor = { x: number; y: number; presence: number; ripple: number };
 
-type NetworkState = {
-  nodes: BufferGeometry;
-  lines: BufferGeometry;
-  /** Where each node drifts to on its own. */
-  base: Float32Array;
-  /** Where it's drawn: `base` plus an eased push away from the pointer. */
-  positions: Float32Array;
-  velocities: Float32Array;
-  line: Color;
-  accent: Color;
-  cursor: Cursor;
+type Kind = "cube" | "cuboid" | "octahedron";
+
+/** One floating shape: where it rests, how it turns, and its eased reaction to the pointer. */
+type Shape = {
+  kind: Kind;
+  home: [number, number, number];
+  scale: [number, number, number];
+  /** Starting orientation. */
+  tilt: [number, number, number];
+  spin: [number, number, number];
+  bob: { phase: number; speed: number };
+  lime: boolean;
+  /** Eased offset away from the pointer, and how close the pointer is (0 to 1). */
+  offset: { x: number; y: number };
+  near: number;
 };
 
-/** Puts the pointer on the network's middle plane and eases its presence and any click ripple. */
+/** Puts the pointer on the shapes' middle plane and eases its presence and any click ripple. */
 function follow(
   cursor: Cursor,
   [x, y]: [number, number],
@@ -233,7 +239,7 @@ function follow(
   aspect: number,
   delta: number,
 ) {
-  const halfHeight = (camera.z - NETWORK_Z) * HALF_FOV_TAN;
+  const halfHeight = (camera.z - SHAPES_Z) * HALF_FOV_TAN;
   cursor.x = x * halfHeight * aspect + camera.x;
   cursor.y = -y * halfHeight + camera.y;
   easing.damp(cursor, "presence", signal.inside ? 1 : 0, 0.25, delta);
@@ -244,128 +250,115 @@ function follow(
   easing.damp(cursor, "ripple", 0, 0.35, delta);
 }
 
-/**
- * One frame of drift, then relink every pair within reach. Nodes near the
- * pointer step aside and link to it in lime, so the network answers the
- * cursor; a click sends a ripple outward. Mutates the buffers in place.
- */
-function advance(state: NetworkState, cursor: Cursor, delta: number) {
-  const { base, positions, velocities, nodes, lines, line, accent } = state;
-  const step = Math.min(delta, 0.05);
-  const ease = 1 - Math.exp(-step * 6);
-  const push = CURSOR_PUSH * cursor.presence + RIPPLE_PUSH * cursor.ripple;
-  for (let i = 0; i < NODES * 3; i += 3) {
-    for (let axis = 0; axis < 3; axis++) {
-      base[i + axis] += velocities[i + axis] * step;
-      const limit = [17, 9, 0][axis];
-      const value = base[i + axis];
-      if (axis < 2 ? Math.abs(value) > limit : value > -1 || value < -9) velocities[i + axis] *= -1;
-    }
-    const dx = base[i] - cursor.x;
-    const dy = base[i + 1] - cursor.y;
-    const distance = Math.hypot(dx, dy) || 1;
-    const falloff = Math.max(0, 1 - distance / CURSOR_REACH);
-    const amount = push * falloff * falloff;
-    positions[i] += (base[i] + (dx / distance) * amount - positions[i]) * ease;
-    positions[i + 1] += (base[i + 1] + (dy / distance) * amount - positions[i + 1]) * ease;
-    positions[i + 2] = base[i + 2];
+/** Scattered round the edges of the view, clear of the middle where the greeting and answers sit. */
+function makeShapes(): Shape[] {
+  const kinds: Kind[] = ["cube", "cuboid", "cube", "cuboid", "octahedron"];
+  const shapes: Shape[] = [];
+  while (shapes.length < SHAPE_COUNT) {
+    const x = (Math.random() * 2 - 1) * 16;
+    const y = (Math.random() * 2 - 1) * 8.5;
+    if (Math.abs(x) < 5.5 && Math.abs(y) < 5) continue;
+    if (shapes.some(({ home }) => Math.hypot(home[0] - x, home[1] - y) < 3.6)) continue;
+    const kind = kinds[shapes.length % kinds.length];
+    const size = 0.7 + Math.random() * 0.9;
+    const long = 1.5 + Math.random() * 0.8;
+    const turn = () => (Math.random() < 0.5 ? -1 : 1) * (0.08 + Math.random() * 0.22);
+    shapes.push({
+      kind,
+      home: [x, y, -8 + Math.random() * 6],
+      scale: kind === "cuboid" ? [size * long, size * 0.7, size * 0.7] : [size, size, size],
+      tilt: [Math.random() * Math.PI, Math.random() * Math.PI, 0],
+      spin: [turn(), turn(), turn() * 0.5],
+      bob: { phase: Math.random() * Math.PI * 2, speed: 0.25 + Math.random() * 0.35 },
+      lime: shapes.length % 5 === 0,
+      offset: { x: 0, y: 0 },
+      near: 0,
+    });
   }
-  nodes.getAttribute("position").needsUpdate = true;
-
-  const linePositions = lines.getAttribute("position") as BufferAttribute;
-  const lineColors = lines.getAttribute("color") as BufferAttribute;
-  let segment = 0;
-  for (let a = 0; a < NODES; a++) {
-    for (let b = a + 1; b < NODES; b++) {
-      const dx = positions[a * 3] - positions[b * 3];
-      const dy = positions[a * 3 + 1] - positions[b * 3 + 1];
-      const dz = positions[a * 3 + 2] - positions[b * 3 + 2];
-      const distance = Math.sqrt(dx * dx + dy * dy + dz * dz);
-      if (distance > LINK_DISTANCE) continue;
-      const strength = (1 - distance / LINK_DISTANCE) * 0.55;
-      linePositions.array.set(positions.subarray(a * 3, a * 3 + 3), segment * 6);
-      linePositions.array.set(positions.subarray(b * 3, b * 3 + 3), segment * 6 + 3);
-      const colour = [line.r * strength, line.g * strength, line.b * strength];
-      lineColors.array.set([...colour, ...colour], segment * 6);
-      segment++;
-    }
-  }
-
-  // Lime threads from the pointer to every node in reach, fading with distance.
-  if (cursor.presence > 0.01) {
-    for (let i = 0; i < NODES; i++) {
-      const dx = positions[i * 3] - cursor.x;
-      const dy = positions[i * 3 + 1] - cursor.y;
-      const distance = Math.hypot(dx, dy);
-      if (distance > CURSOR_REACH * 1.15) continue;
-      const strength = (1 - distance / (CURSOR_REACH * 1.15)) * 1.1 * cursor.presence;
-      linePositions.array.set([cursor.x, cursor.y, positions[i * 3 + 2]], segment * 6);
-      linePositions.array.set(positions.subarray(i * 3, i * 3 + 3), segment * 6 + 3);
-      // Brighter at the node end, so each thread reads as reaching out from it.
-      lineColors.array.set(
-        [accent.r * strength * 0.25, accent.g * strength * 0.25, accent.b * strength * 0.25, accent.r * strength, accent.g * strength, accent.b * strength],
-        segment * 6,
-      );
-      segment++;
-    }
-  }
-  lines.setDrawRange(0, segment * 2);
-  linePositions.needsUpdate = true;
-  lineColors.needsUpdate = true;
+  return shapes;
 }
 
 /**
- * Drifting nodes that link up when they pass close, like constellations
- * forming and breaking. A few are lime. Lines fade with distance (additive
- * blending, so darker means fainter).
+ * Moves one shape for this frame: a slow turn and bob, a step aside and a
+ * faster spin when the pointer is close, a push when a click ripples out,
+ * and a brighter, limer edge while it's near. Mutates the shape and its group.
  */
-function Network({
+function moveShape(shape: Shape, group: Group, material: LineBasicMaterial, cursor: Cursor, colours: { dim: Color; lime: Color }, time: number, delta: number) {
+  const step = Math.min(delta, 0.05);
+  const [hx, hy, hz] = shape.home;
+  const y = hy + Math.sin(time * shape.bob.speed + shape.bob.phase) * 0.35;
+  const dx = hx - cursor.x;
+  const dy = y - cursor.y;
+  const distance = Math.hypot(dx, dy) || 1;
+  const falloff = Math.max(0, 1 - distance / CURSOR_REACH);
+  const near = falloff * cursor.presence;
+  const push = (CURSOR_PUSH * cursor.presence + RIPPLE_PUSH * cursor.ripple) * falloff * falloff;
+  easing.damp(shape.offset, "x", (dx / distance) * push, 0.3, step);
+  easing.damp(shape.offset, "y", (dy / distance) * push, 0.3, step);
+  easing.damp(shape, "near", near, 0.2, step);
+
+  group.position.set(hx + shape.offset.x, y + shape.offset.y, hz);
+  const boost = 1 + shape.near * 5 + cursor.ripple * falloff * 6;
+  group.rotation.x += shape.spin[0] * boost * step;
+  group.rotation.y += shape.spin[1] * boost * step;
+  group.rotation.z += shape.spin[2] * boost * step;
+  material.color.copy(shape.lime ? colours.lime : colours.dim).lerp(colours.lime, shape.near * 0.85);
+  material.opacity = (shape.lime ? 0.55 : 0.4) + shape.near * 0.5;
+}
+
+/**
+ * Wireframe cubes, cuboids and a few octahedra, floating round the edges
+ * and turning slowly; a few are lime. Near the pointer they step aside,
+ * spin up and glow lime, and a click pushes them outward.
+ */
+function Shapes({
   colours,
-  sprite,
   pointer,
   presence,
 }: {
   colours: Colours;
-  sprite: Texture;
   pointer: RefObject<[number, number]>;
   presence: RefObject<Pointer>;
 }) {
+  const groups = useRef<(Group | null)[]>([]);
+  const materials = useRef<(LineBasicMaterial | null)[]>([]);
+  const cursor = useRef<Cursor>({ x: 0, y: 0, presence: 0, ripple: 0 });
+  const [shapes] = useState(makeShapes);
+  const [edges] = useState(() => ({
+    cube: new EdgesGeometry(new BoxGeometry(1, 1, 1)),
+    cuboid: new EdgesGeometry(new BoxGeometry(1, 1, 1)),
+    octahedron: new EdgesGeometry(new OctahedronGeometry(0.75)),
+  }));
+  const [tints] = useState(() => ({ dim: new Color(colours.dim).multiplyScalar(1.6), lime: new Color(colours.accent) }));
 
-  const [state] = useState((): NetworkState => {
-    const positions = new Float32Array(NODES * 3);
-    const velocities = new Float32Array(NODES * 3);
-    const colors = new Float32Array(NODES * 3);
-    const dim = new Color(colours.dim);
-    const accent = new Color(colours.accent);
-    for (let i = 0; i < NODES; i++) {
-      positions.set([(Math.random() * 2 - 1) * 17, (Math.random() * 2 - 1) * 9, -9 + Math.random() * 8], i * 3);
-      velocities.set([(Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.18, (Math.random() - 0.5) * 0.08], i * 3);
-      const colour = i % 9 === 0 ? accent : dim;
-      colors.set([colour.r, colour.g, colour.b], i * 3);
-    }
-    const nodes = geometry(positions, colors);
-    // Every pair, plus one thread from the pointer to each node.
-    const pairs = (NODES * (NODES - 1)) / 2 + NODES;
-    const lines = geometry(new Float32Array(pairs * 6), new Float32Array(pairs * 6));
-    (lines.getAttribute("position") as BufferAttribute).setUsage(DynamicDrawUsage);
-    (lines.getAttribute("color") as BufferAttribute).setUsage(DynamicDrawUsage);
-    const cursor = { x: 0, y: 0, presence: 0, ripple: 0 };
-    return { nodes, lines, base: positions.slice(), positions, velocities, line: dim, accent, cursor };
-  });
-
-  useFrame(({ camera, size }, delta) => {
-    follow(state.cursor, pointer.current, presence.current, camera.position, size.width / size.height, delta);
-    advance(state, state.cursor, delta);
+  useFrame(({ camera, size, clock }, delta) => {
+    follow(cursor.current, pointer.current, presence.current, camera.position, size.width / size.height, delta);
+    shapes.forEach((shape, i) => {
+      const group = groups.current[i];
+      const material = materials.current[i];
+      if (group && material) moveShape(shape, group, material, cursor.current, tints, clock.elapsedTime, delta);
+    });
   });
 
   return (
     <>
-      <lineSegments geometry={state.lines}>
-        <lineBasicMaterial vertexColors transparent depthWrite={false} blending={AdditiveBlending} />
-      </lineSegments>
-      <points geometry={state.nodes}>
-        <pointsMaterial size={0.32} map={sprite} vertexColors transparent depthWrite={false} blending={AdditiveBlending} />
-      </points>
+      {shapes.map((shape, i) => (
+        <group
+          key={i}
+          ref={(node) => void (groups.current[i] = node)}
+          position={shape.home}
+          rotation={shape.tilt}
+        >
+          <lineSegments geometry={edges[shape.kind]} scale={shape.scale}>
+            <lineBasicMaterial
+              ref={(node) => void (materials.current[i] = node)}
+              transparent
+              depthWrite={false}
+              blending={AdditiveBlending}
+            />
+          </lineSegments>
+        </group>
+      ))}
     </>
   );
 }
@@ -469,14 +462,14 @@ function Ticker({ fps }: { fps: number }) {
 /**
  * The home screen's 3D layer (PRD figure B, effect 1, extended): the mark's
  * cluster in front of a turning galaxy, a field of distant stars and a
- * drifting constellation network, in one canvas behind the home column.
+ * field of slowly turning wireframe shapes, in one canvas behind the home column.
  * It renders into `#scene-backdrop` (AppShell), behind home and thread
  * alike, and lines the cluster up with the hero box it's given. When a
  * conversation starts it stays mounted: over about 600 ms the mark drifts up
  * and back, the galaxy recedes and the layer dims to 75%; frames then drop
- * to 30 a second plus one per pointer move. The constellation network
- * follows the pointer everywhere: nearby nodes step aside and link to it,
- * and a click ripples through them. While an answer streams the lime core
+ * to 30 a second plus one per pointer move. The wireframe shapes
+ * follow the pointer everywhere: nearby ones step aside, spin up and glow
+ * lime, and a click ripples through them. While an answer streams the lime core
  * pulses. Going home reverses it all. Loaded by Hero through next/dynamic
  * only on wide screens with WebGL 2 and motion allowed. Hero stays mounted
  * (hidden) while the thread shows, so the scene is never rebuilt.
@@ -621,7 +614,7 @@ export default function Constellation({
         <Rig pointer={pointer} focus={focus} />
         <Starfield colours={colours} sprite={sprite} />
         <Galaxy colours={colours} sprite={sprite} anchor={anchor} focus={focus} />
-        <Network colours={colours} sprite={sprite} pointer={pointer} presence={presence} />
+        <Shapes colours={colours} pointer={pointer} presence={presence} />
         <Cluster colours={colours} pointer={pointer} anchor={anchor} focus={focus} />
         {bloom && (
           <EffectComposer>

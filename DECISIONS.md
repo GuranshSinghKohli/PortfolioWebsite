@@ -166,7 +166,7 @@ Answers to the open questions in PHASES.md.
 
 Certifications are now structured in `content/personal.ts` (name, optional issuer, issue and expiry month, PDF). Only the two AWS certificates carry dates and PDFs, taken from the certificates themselves (`public/certificates/`). The other three have names only, since no source gives their issuer or date. A new curated answer, "certifications", shows a card with a View link per PDF. It's reached from the About and Résumé follow-ups, and typed questions naming a certification route to it (the AI's answer gets the card too).
 
-In the thread, the 3D scene now stays at 75% with no blur, and the veil behind the text column is lighter (62% of the background, down from 90%), so the scene stays visible around the conversation. The constellation network follows the pointer: nodes within reach step aside and link to it with lime threads, and a click sends a ripple outward. Touch doesn't leave a cursor behind. In the thread, frames stay on demand at 30 a second, plus one per pointer move.
+In the thread, the 3D scene now stays at 75% with no blur, and the veil behind the text column is lighter (62% of the background, down from 90%), so the scene stays visible around the conversation. The drifting constellation network (nodes joined by lines) is replaced by 16 slowly turning wireframe cubes, cuboids and octahedra round the edges of the view, clear of the middle; about one in five is lime. They follow the pointer: shapes within reach step aside, spin faster and glow lime, and a click sends a ripple outward. Touch doesn't leave a cursor behind. In the thread, frames stay on demand at 30 a second, plus one per pointer move.
 
 ## "Try asking" starters (2026-10-27)
 
