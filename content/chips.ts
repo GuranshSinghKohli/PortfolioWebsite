@@ -12,6 +12,7 @@ export const chipLabels: Record<string, string> = {
   experience: "Experience",
   listening: "Listening",
   resume: "Résumé",
+  certifications: "Certifications",
   contact: "Contact",
 };
 

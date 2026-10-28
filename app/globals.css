@@ -290,8 +290,8 @@ html[data-view="thread"] .scene-static {
   background: linear-gradient(
     to right,
     transparent,
-    color-mix(in oklab, var(--bg) 90%, transparent) 14%,
-    color-mix(in oklab, var(--bg) 90%, transparent) 86%,
+    color-mix(in oklab, var(--bg) 62%, transparent) 18%,
+    color-mix(in oklab, var(--bg) 62%, transparent) 82%,
     transparent
   );
   mask-image: linear-gradient(to bottom, transparent 0, #000 9rem);

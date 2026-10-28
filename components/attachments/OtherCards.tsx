@@ -1,18 +1,19 @@
 "use client";
 
-import { ArrowUpRight, Download, ExternalLink as OpenIcon, Mail, Music, Send } from "lucide-react";
+import { ArrowUpRight, BadgeCheck, Download, ExternalLink as OpenIcon, Mail, Music, Send } from "lucide-react";
 import * as m from "motion/react-m";
 import Image from "next/image";
 import type { ReactNode } from "react";
 
 import { tracks } from "@/content/music";
+import { personal } from "@/content/personal";
 import { profile } from "@/content/profile";
 import { GitHubIcon, LinkedInIcon } from "@/components/icons";
 import { track } from "@/lib/analytics";
 import { isFilled } from "@/lib/content";
 import { openSheet, prefetchSheetsOnIntent } from "@/lib/sheets";
 import { cn } from "@/lib/utils";
-import { actionClass, card, cardRise, ExternalLink, monoLabel } from "./shared";
+import { actionClass, card, cardRise, ExternalLink, formatMonth, monoLabel } from "./shared";
 
 /** Tracks from content/music.ts. Renders nothing while the playlist is a placeholder. */
 export function MusicGrid({ start }: { start: number }) {
@@ -116,6 +117,51 @@ export function ResumeCard({ start }: { start: number }) {
           </a>
         </div>
       </div>
+    </m.div>
+  );
+}
+
+/** Certifications from content/personal.ts: dated ones first, each with its PDF when there is one. */
+export function CertificationsCard({ start }: { start: number }) {
+  const items = personal.certifications.filter((item) => isFilled(item.name));
+
+  return (
+    <m.div custom={start} variants={cardRise} className={cn(card, "flex flex-col gap-3 p-4 sm:p-5")}>
+      <p className={monoLabel}>Certifications</p>
+      <ul className="flex flex-col divide-y divide-line">
+        {items.map((item) => {
+          const details = [
+            item.issuer,
+            item.issued && `Issued ${formatMonth(item.issued)}`,
+            item.expires && `Valid to ${formatMonth(item.expires)}`,
+          ].filter(Boolean);
+          return (
+            <li key={item.name} className="flex items-center gap-3 py-3 first:pt-1 last:pb-1">
+              <BadgeCheck
+                className={cn("size-5 shrink-0", item.file ? "text-accent" : "text-dim")}
+                strokeWidth={1.5}
+                aria-hidden="true"
+              />
+              <div className="min-w-0 flex-1">
+                <p className="text-[14px] text-text">{item.name}</p>
+                {details.length > 0 && <p className="text-[12px] text-muted-foreground">{details.join(" · ")}</p>}
+              </div>
+              {item.file && (
+                <a
+                  href={item.file}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`View the ${item.name} certificate (PDF)`}
+                  className={cn(actionClass(), "shrink-0")}
+                >
+                  <OpenIcon strokeWidth={1.5} aria-hidden="true" />
+                  View
+                </a>
+              )}
+            </li>
+          );
+        })}
+      </ul>
     </m.div>
   );
 }

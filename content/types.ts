@@ -115,7 +115,8 @@ export type Attachment =
   | { kind: "roles"; ids: string[] }
   | { kind: "music" }
   | { kind: "contact" }
-  | { kind: "resume" };
+  | { kind: "resume" }
+  | { kind: "certifications" };
 
 export type CuratedAnswer = {
   id: string;
@@ -125,6 +126,16 @@ export type CuratedAnswer = {
   attachments: Attachment[];
   /** Chips shown after this answer. Each is the id of another curated answer. */
   followUps: string[];
+};
+
+export type Certification = {
+  name: string;
+  issuer?: string;
+  /** "YYYY-MM". Left out when the certificate gives no date. */
+  issued?: string;
+  expires?: string;
+  /** The certificate PDF under public/, when there is one. */
+  file?: string;
 };
 
 export type Personal = {
@@ -140,7 +151,7 @@ export type Personal = {
     year: string;
     coursework: string[];
   };
-  certifications: string[];
+  certifications: Certification[];
   skills: {
     languages: string[];
     backendAndWeb: string[];

@@ -52,6 +52,12 @@ function month(value: string) {
   return { year, name: MONTHS[Number(m) - 1] };
 }
 
+/** "2026-06" → "Jun 2026". */
+export function formatMonth(value: string) {
+  const { year, name } = month(value);
+  return `${name} ${year}`;
+}
+
 /** PRD §7 entry format: "May to Dec 2026", "Nov 2025 to May 2026", "Sep 2026 to Present". */
 export function formatRange({ start, end }: DateRange) {
   const from = month(start);

@@ -46,7 +46,7 @@ const topics: CuratedAnswer[] = [
     answer:
       "I'm Guransh, a second-year student at the University of Waterloo, double majoring in Applied Mathematics (Machine Learning) and Statistics with a minor in Computing. I love building things where AI, software engineering and real-world impact meet.\n\nWhat I'm doing right now:\n• AI Engineer co-op at Windscribe, building LLM tools for support and payments (through December 2026)\n• Undergraduate researcher in Prof. Jimmy Lin's Data Systems Group, working on search ranking and reranking for RAG\n• Data Science Engineer at WAT.ai, modelling off-ball runs in football\n• Founding engineer of Wanderers.space, a campus social app for Waterloo students\n• Exploring 2027 opportunities across AI, software engineering, data, cloud and research",
     attachments: [{ kind: "roles", ids: roles.map((role) => role.id) }],
-    followUps: ["projects", "experience", "contact"],
+    followUps: ["projects", "experience", "certifications"],
   },
   {
     id: "projects",
@@ -79,7 +79,15 @@ const topics: CuratedAnswer[] = [
     answer:
       "Here's my résumé. Short version: AI engineering at Windscribe, retrieval research at Waterloo, data engineering at WAT.ai, backend work at Savi Finance.",
     attachments: [{ kind: "resume" }],
-    followUps: ["experience", "projects", "contact"],
+    followUps: ["experience", "certifications", "contact"],
+  },
+  {
+    id: "certifications",
+    question: "What certifications do you have?",
+    answer:
+      "Two AWS certifications: AI Practitioner (July 2026) and Cloud Practitioner (June 2026). I've also completed Andrew Ng's Machine Learning Specialization, Google Cloud Gen AI and Databricks AI Agent Fundamentals.",
+    attachments: [{ kind: "certifications" }],
+    followUps: ["resume", "projects", "contact"],
   },
   {
     id: "contact",

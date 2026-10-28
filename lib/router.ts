@@ -32,6 +32,10 @@ const topicSignals: Record<string, Signals> = {
   },
   listening: { strong: ["Spotify"], weak: ["music", "listen", "listening", "song", "songs", "playlist"] },
   resume: { strong: ["résumé", "resume", "CV"], weak: [] },
+  certifications: {
+    strong: ["certification", "certifications", "certificate", "certificates", "certified", "AWS cert", "AWS certs"],
+    weak: [],
+  },
   contact: { strong: [], weak: ["contact", "email", "reach", "hire", "hiring", "get in touch", "linkedin"] },
 };
 

@@ -3,7 +3,7 @@
 import * as m from "motion/react-m";
 
 import type { Attachment } from "@/content/types";
-import { ContactCard, MusicGrid, ResumeCard } from "./OtherCards";
+import { CertificationsCard, ContactCard, MusicGrid, ResumeCard } from "./OtherCards";
 import { ProjectCards } from "./ProjectCards";
 import { RoleTimeline } from "./RoleTimeline";
 
@@ -37,6 +37,8 @@ export function Attachments({ items, reduced }: { items: Attachment[]; reduced: 
             return <ContactCard key="contact" start={at} />;
           case "resume":
             return <ResumeCard key="resume" start={at} />;
+          case "certifications":
+            return <CertificationsCard key="certifications" start={at} />;
         }
       })}
     </m.div>

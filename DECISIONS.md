@@ -162,6 +162,12 @@ Answers to the open questions in PHASES.md.
 - **Router speed.** Every typed question used to compile a Unicode RegExp per signal term, a few hundred of them: about 50 ms of processing per send, around 235 ms at 4x CPU, which put sending a question at 280 to 340 ms INP. Terms are now found with a substring search and a letter-or-digit check on each side. Sending now measures 80 to 88 ms (phone, 4x) and 112 to 136 ms (desktop, 4x).
 - **Measured.** First load 197.9 kB. INP, all flows, desktop 1x: worst 112 ms. Typing while an answer streams: 56 to 88 ms at 4x across reruns, with one non-reproducible 1,088 ms reading under heavy machine load. Main-thread cost: about 7% on home at 60 fps, 4.5% in the thread at 24 fps. axe clean, reduced motion still. Golden set 50/50 (twice; one earlier run had the forged-CTO case ignore rather than deny the claim).
 
+## Certifications and an interactive thread backdrop (2026-10-28)
+
+Certifications are now structured in `content/personal.ts` (name, optional issuer, issue and expiry month, PDF). Only the two AWS certificates carry dates and PDFs, taken from the certificates themselves (`public/certificates/`). The other three have names only, since no source gives their issuer or date. A new curated answer, "certifications", shows a card with a View link per PDF. It's reached from the About and Résumé follow-ups, and typed questions naming a certification route to it (the AI's answer gets the card too).
+
+In the thread, the 3D scene now stays at 75% with no blur, and the veil behind the text column is lighter (62% of the background, down from 90%), so the scene stays visible around the conversation. The constellation network follows the pointer: nodes within reach step aside and link to it with lime threads, and a click sends a ripple outward. Touch doesn't leave a cursor behind. In the thread, frames stay on demand at 30 a second, plus one per pointer move.
+
 ## "Try asking" starters (2026-10-27)
 
 - **Row.** Four starter questions (`starterQuestions` in `content/chips.ts`) under the home chips, behind a mono "TRY ASKING" label: 12.5px muted text, a thin `line-soft` border, no hover lift, so they read as suggestions rather than competing with the chips. Each is a 44px button with the standard focus ring. They rise in after the chips with the same 60 ms stagger (still under reduced motion), and wait for their turn during the first-visit intro like the chips do (`[data-starter]` in the intro CSS).

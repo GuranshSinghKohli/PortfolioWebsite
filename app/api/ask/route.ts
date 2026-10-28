@@ -139,7 +139,8 @@ export async function POST(request: Request) {
         if (finishReason === "content-filter" || !text.trim()) {
           send({ type: "blocked", text: blockedReply });
         } else {
-          send({ type: "attachments", items: matchedAttachments(question, text) });
+          const items = matchedAttachments(question, text);
+          send({ type: "attachments", items: topic === "certifications" ? [...items, { kind: "certifications" }] : items });
         }
         send({ type: "done", topic });
       } catch (error) {

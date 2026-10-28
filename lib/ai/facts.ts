@@ -3,7 +3,7 @@ import { personal } from "@/content/personal";
 import { profile } from "@/content/profile";
 import { projects } from "@/content/projects";
 import { roles } from "@/content/roles";
-import type { DateRange } from "@/content/types";
+import type { Certification, DateRange } from "@/content/types";
 import { isFilled } from "@/lib/content";
 
 /**
@@ -32,6 +32,12 @@ function profileFacts() {
   ]);
 }
 
+/** "AWS Certified AI Practitioner (Amazon Web Services, July 2026, valid to July 2029)". */
+function certification({ name, issuer, issued, expires }: Certification) {
+  const details = [issuer, issued && month(issued), expires && `valid to ${month(expires)}`].filter(Boolean);
+  return details.length ? `${name} (${details.join(", ")})` : name;
+}
+
 function educationFacts() {
   const e = personal.education;
   return block([
@@ -39,7 +45,7 @@ function educationFacts() {
     `Majors: ${e.majors.join(" and ")}; minor: ${e.minor}`,
     `Dates: ${range(e.dates)}${e.expected ? " (graduation expected)" : ""}`,
     `Coursework: ${list(e.coursework)}`,
-    `Certifications: ${list(personal.certifications)}`,
+    `Certifications: ${personal.certifications.map(certification).join("; ")}`,
     `Skills (languages): ${list(personal.skills.languages)}`,
     `Skills (backend and web): ${list(personal.skills.backendAndWeb)}`,
     `Skills (data and analytics): ${list(personal.skills.dataAndAnalytics)}`,

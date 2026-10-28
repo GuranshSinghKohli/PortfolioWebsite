@@ -59,6 +59,9 @@ type Colours = ReturnType<typeof readColours>;
  */
 type Focus = { value: number; target: number; pulse: number; streaming: boolean };
 
+/** Whether the pointer is over the page, and a click waiting to ripple through the network. */
+type Pointer = { inside: boolean; clicked: boolean };
+
 /** Where the DOM hero sits, in screen terms the scene can turn into world positions each frame. */
 type Anchor = { ndc: [number, number]; aspect: number; unitsPerPx: number };
 
@@ -137,7 +140,7 @@ function Galaxy({
       // In the thread the galaxy sinks back and rises a little, out from behind the text.
       const [x, y, z] = onAnchor(anchor.current, -5);
       const away = focus.current.value;
-      place.current.position.set(x, y + away * 1.5, z - away * 4);
+      place.current.position.set(x, y + away * 1.5, z - away * 2.5);
     }
   });
 
@@ -197,26 +200,75 @@ function Starfield({ colours, sprite }: { colours: Colours; sprite: Texture }) {
 
 const NODES = 46;
 const LINK_DISTANCE = 3.4;
+/** How far (world units, in the screen plane) the pointer reaches into the network. */
+const CURSOR_REACH = 4.2;
+/** How far a node near the pointer steps aside, and how far a click's ripple pushes. */
+const CURSOR_PUSH = 0.9;
+const RIPPLE_PUSH = 2.4;
+/** The network's middle depth, where the pointer is placed in the scene. */
+const NETWORK_Z = -5;
+
+/** The pointer in the network's plane. `presence` fades in on move and out when it leaves; `ripple` is a click, decaying. */
+type Cursor = { x: number; y: number; presence: number; ripple: number };
 
 type NetworkState = {
   nodes: BufferGeometry;
   lines: BufferGeometry;
+  /** Where each node drifts to on its own. */
+  base: Float32Array;
+  /** Where it's drawn: `base` plus an eased push away from the pointer. */
   positions: Float32Array;
   velocities: Float32Array;
   line: Color;
+  accent: Color;
+  cursor: Cursor;
 };
 
-/** One frame of drift, then relink every pair within reach. Mutates the buffers in place. */
-function advance(state: NetworkState, delta: number) {
-  const { positions, velocities, nodes, lines, line } = state;
+/** Puts the pointer on the network's middle plane and eases its presence and any click ripple. */
+function follow(
+  cursor: Cursor,
+  [x, y]: [number, number],
+  signal: Pointer,
+  camera: { x: number; y: number; z: number },
+  aspect: number,
+  delta: number,
+) {
+  const halfHeight = (camera.z - NETWORK_Z) * HALF_FOV_TAN;
+  cursor.x = x * halfHeight * aspect + camera.x;
+  cursor.y = -y * halfHeight + camera.y;
+  easing.damp(cursor, "presence", signal.inside ? 1 : 0, 0.25, delta);
+  if (signal.clicked) {
+    cursor.ripple = 1;
+    signal.clicked = false;
+  }
+  easing.damp(cursor, "ripple", 0, 0.35, delta);
+}
+
+/**
+ * One frame of drift, then relink every pair within reach. Nodes near the
+ * pointer step aside and link to it in lime, so the network answers the
+ * cursor; a click sends a ripple outward. Mutates the buffers in place.
+ */
+function advance(state: NetworkState, cursor: Cursor, delta: number) {
+  const { base, positions, velocities, nodes, lines, line, accent } = state;
   const step = Math.min(delta, 0.05);
+  const ease = 1 - Math.exp(-step * 6);
+  const push = CURSOR_PUSH * cursor.presence + RIPPLE_PUSH * cursor.ripple;
   for (let i = 0; i < NODES * 3; i += 3) {
     for (let axis = 0; axis < 3; axis++) {
-      positions[i + axis] += velocities[i + axis] * step;
+      base[i + axis] += velocities[i + axis] * step;
       const limit = [17, 9, 0][axis];
-      const value = positions[i + axis];
+      const value = base[i + axis];
       if (axis < 2 ? Math.abs(value) > limit : value > -1 || value < -9) velocities[i + axis] *= -1;
     }
+    const dx = base[i] - cursor.x;
+    const dy = base[i + 1] - cursor.y;
+    const distance = Math.hypot(dx, dy) || 1;
+    const falloff = Math.max(0, 1 - distance / CURSOR_REACH);
+    const amount = push * falloff * falloff;
+    positions[i] += (base[i] + (dx / distance) * amount - positions[i]) * ease;
+    positions[i + 1] += (base[i + 1] + (dy / distance) * amount - positions[i + 1]) * ease;
+    positions[i + 2] = base[i + 2];
   }
   nodes.getAttribute("position").needsUpdate = true;
 
@@ -238,6 +290,25 @@ function advance(state: NetworkState, delta: number) {
       segment++;
     }
   }
+
+  // Lime threads from the pointer to every node in reach, fading with distance.
+  if (cursor.presence > 0.01) {
+    for (let i = 0; i < NODES; i++) {
+      const dx = positions[i * 3] - cursor.x;
+      const dy = positions[i * 3 + 1] - cursor.y;
+      const distance = Math.hypot(dx, dy);
+      if (distance > CURSOR_REACH * 1.15) continue;
+      const strength = (1 - distance / (CURSOR_REACH * 1.15)) * 1.1 * cursor.presence;
+      linePositions.array.set([cursor.x, cursor.y, positions[i * 3 + 2]], segment * 6);
+      linePositions.array.set(positions.subarray(i * 3, i * 3 + 3), segment * 6 + 3);
+      // Brighter at the node end, so each thread reads as reaching out from it.
+      lineColors.array.set(
+        [accent.r * strength * 0.25, accent.g * strength * 0.25, accent.b * strength * 0.25, accent.r * strength, accent.g * strength, accent.b * strength],
+        segment * 6,
+      );
+      segment++;
+    }
+  }
   lines.setDrawRange(0, segment * 2);
   linePositions.needsUpdate = true;
   lineColors.needsUpdate = true;
@@ -248,7 +319,18 @@ function advance(state: NetworkState, delta: number) {
  * forming and breaking. A few are lime. Lines fade with distance (additive
  * blending, so darker means fainter).
  */
-function Network({ colours, sprite }: { colours: Colours; sprite: Texture }) {
+function Network({
+  colours,
+  sprite,
+  pointer,
+  presence,
+}: {
+  colours: Colours;
+  sprite: Texture;
+  pointer: RefObject<[number, number]>;
+  presence: RefObject<Pointer>;
+}) {
+
   const [state] = useState((): NetworkState => {
     const positions = new Float32Array(NODES * 3);
     const velocities = new Float32Array(NODES * 3);
@@ -262,14 +344,19 @@ function Network({ colours, sprite }: { colours: Colours; sprite: Texture }) {
       colors.set([colour.r, colour.g, colour.b], i * 3);
     }
     const nodes = geometry(positions, colors);
-    const pairs = (NODES * (NODES - 1)) / 2;
+    // Every pair, plus one thread from the pointer to each node.
+    const pairs = (NODES * (NODES - 1)) / 2 + NODES;
     const lines = geometry(new Float32Array(pairs * 6), new Float32Array(pairs * 6));
     (lines.getAttribute("position") as BufferAttribute).setUsage(DynamicDrawUsage);
     (lines.getAttribute("color") as BufferAttribute).setUsage(DynamicDrawUsage);
-    return { nodes, lines, positions, velocities, line: dim };
+    const cursor = { x: 0, y: 0, presence: 0, ripple: 0 };
+    return { nodes, lines, base: positions.slice(), positions, velocities, line: dim, accent, cursor };
   });
 
-  useFrame((_, delta) => advance(state, delta));
+  useFrame(({ camera, size }, delta) => {
+    follow(state.cursor, pointer.current, presence.current, camera.position, size.width / size.height, delta);
+    advance(state, state.cursor, delta);
+  });
 
   return (
     <>
@@ -367,7 +454,7 @@ function Rig({ pointer, focus }: { pointer: RefObject<[number, number]>; focus: 
   return null;
 }
 
-/** In the thread the scene sits dim and blurred behind text, so 24 frames a second is plenty. Skips frames while the tab is hidden. */
+/** In the thread the scene sits behind text, so 30 frames a second is plenty (pointer moves add their own). Skips frames while the tab is hidden. */
 function Ticker({ fps }: { fps: number }) {
   const invalidate = useThree((state) => state.invalidate);
   useEffect(() => {
@@ -386,8 +473,10 @@ function Ticker({ fps }: { fps: number }) {
  * It renders into `#scene-backdrop` (AppShell), behind home and thread
  * alike, and lines the cluster up with the hero box it's given. When a
  * conversation starts it stays mounted: over about 600 ms the mark drifts up
- * and back, the galaxy recedes and the layer dims to 30% with a slight blur;
- * frames then drop to 24 a second. While an answer streams the lime core
+ * and back, the galaxy recedes and the layer dims to 75%; frames then drop
+ * to 30 a second plus one per pointer move. The constellation network
+ * follows the pointer everywhere: nearby nodes step aside and link to it,
+ * and a click ripples through them. While an answer streams the lime core
  * pulses. Going home reverses it all. Loaded by Hero through next/dynamic
  * only on wide screens with WebGL 2 and motion allowed. Hero stays mounted
  * (hidden) while the thread shows, so the scene is never rebuilt.
@@ -401,6 +490,8 @@ export default function Constellation({
 }) {
   const wrapper = useRef<HTMLDivElement>(null);
   const pointer = useRef<[number, number]>([0, 0]);
+  const presence = useRef<Pointer>({ inside: false, clicked: false });
+  const invalidate = useRef<() => void>(() => {});
   const anchor = useRef<Anchor | null>(null);
   const [target] = useState(() => document.getElementById("scene-backdrop"));
   const view = useThreadValue((thread) => thread.view);
@@ -440,8 +531,21 @@ export default function Constellation({
   useEffect(() => {
     const move = (event: PointerEvent) => {
       pointer.current = [(event.clientX / innerWidth) * 2 - 1, (event.clientY / innerHeight) * 2 - 1];
+      // Mouse and pen only: a finger lifting would leave a cursor behind.
+      presence.current.inside = event.pointerType !== "touch";
+      invalidate.current();
     };
-    window.addEventListener("pointermove", move);
+    const leave = () => {
+      presence.current.inside = false;
+    };
+    const click = (event: PointerEvent) => {
+      move(event);
+      presence.current.clicked = true;
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    window.addEventListener("pointerdown", click, { passive: true });
+    document.documentElement.addEventListener("pointerleave", leave);
+    window.addEventListener("blur", leave);
 
     // The hero's centre in the canvas, refreshed when either moves or resizes.
     const measure = () => {
@@ -467,6 +571,9 @@ export default function Constellation({
 
     return () => {
       window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerdown", click);
+      document.documentElement.removeEventListener("pointerleave", leave);
+      window.removeEventListener("blur", leave);
       window.removeEventListener("scroll", measure, { capture: true });
       resize.disconnect();
       visible.disconnect();
@@ -478,10 +585,10 @@ export default function Constellation({
   return createPortal(
     <div
       ref={wrapper}
-      // Home: full scene. Thread: about 30% and slightly blurred, a quiet layer behind the conversation.
+      // Home: full scene. Thread: about 75%, still live round the conversation; the veil keeps the text column readable.
       className={cn(
-        "absolute inset-0 transition-[opacity,filter] duration-[600ms] ease-out",
-        !shown ? "opacity-0" : thread ? "opacity-30 blur-[2px]" : "opacity-100",
+        "absolute inset-0 transition-opacity duration-[600ms] ease-out",
+        !shown ? "opacity-0" : thread ? "opacity-75" : "opacity-100",
       )}
     >
       <Canvas
@@ -491,9 +598,11 @@ export default function Constellation({
         camera={{ fov: FOV, position: [0, 0, CAMERA_Z] }}
         gl={{ antialias: true, powerPreference: "low-power" }}
         // Two frames, so the first render is on screen before the 2D mark fades.
-        onCreated={() =>
+        onCreated={(state) =>
           void requestAnimationFrame(() =>
             requestAnimationFrame(() => {
+              // In the thread frames are on demand; a pointer move asks for one, so the network keeps up with the cursor.
+              invalidate.current = state.invalidate;
               setShown(true);
               onReady();
             }),
@@ -508,11 +617,11 @@ export default function Constellation({
             setDpr(1);
           }}
         />
-        {throttled && <Ticker fps={24} />}
+        {throttled && <Ticker fps={30} />}
         <Rig pointer={pointer} focus={focus} />
         <Starfield colours={colours} sprite={sprite} />
         <Galaxy colours={colours} sprite={sprite} anchor={anchor} focus={focus} />
-        <Network colours={colours} sprite={sprite} />
+        <Network colours={colours} sprite={sprite} pointer={pointer} presence={presence} />
         <Cluster colours={colours} pointer={pointer} anchor={anchor} focus={focus} />
         {bloom && (
           <EffectComposer>

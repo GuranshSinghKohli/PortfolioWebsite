@@ -21,11 +21,23 @@ export const personal: Personal = {
     ],
   },
   certifications: [
-    "AWS Certified Cloud Practitioner",
-    "AWS Certified AI Practitioner",
-    "Machine Learning Specialization (Andrew Ng)",
-    "Google Cloud Gen AI",
-    "Databricks AI Agent Fundamentals",
+    {
+      name: "AWS Certified AI Practitioner",
+      issuer: "Amazon Web Services",
+      issued: "2026-07",
+      expires: "2029-07",
+      file: "/certificates/AWS_Certified_AI_Practitioner.pdf",
+    },
+    {
+      name: "AWS Certified Cloud Practitioner",
+      issuer: "Amazon Web Services",
+      issued: "2026-06",
+      expires: "2029-06",
+      file: "/certificates/AWS_Certified_Cloud_Practitioner.pdf",
+    },
+    { name: "Machine Learning Specialization (Andrew Ng)" },
+    { name: "Google Cloud Gen AI" },
+    { name: "Databricks AI Agent Fundamentals" },
   ],
   skills: {
     languages: ["Python", "Go", "C++", "C", "JavaScript", "TypeScript", "SQL", "Racket"],
