@@ -11,7 +11,13 @@ import { DAILY_CAP_MICROS } from "@/lib/ai/pricing";
  * closed: if Redis is unreachable, the request is refused rather than let
  * through unmetered.
  */
-const redis = Redis.fromEnv();
+/** The value as pasted, minus surrounding whitespace, newlines and quotes. */
+const clean = (value: string | undefined) => (value ?? "").trim().replace(/^["'`]+|["'`]+$/g, "").trim();
+
+const redis = new Redis({
+  url: clean(process.env.UPSTASH_REDIS_REST_URL).replace(/\/+$/, ""),
+  token: clean(process.env.UPSTASH_REDIS_REST_TOKEN),
+});
 const PREFIX = "portfolio:ask";
 
 const perMinute = new Ratelimit({
