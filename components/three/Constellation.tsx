@@ -429,7 +429,7 @@ function Cluster({
   const coreMesh = useRef<Mesh>(null);
   const tilt = useRef<Group>(null);
   const orbit = useRef<Group>(null);
-  // Above 1.0 so the lime core passes the bloom threshold.
+  // Well above 1.5 so the lime core, and only the core, passes the bloom threshold.
   const [core] = useState(() => new Color(colours.accent).multiplyScalar(2.2));
   const [lime] = useState(() => new Color(colours.accent));
 
@@ -664,7 +664,9 @@ export default function Constellation({
         <Cluster colours={colours} pointer={pointer} anchor={anchor} focus={focus} />
         {bloom && (
           <EffectComposer>
-            <Bloom mipmapBlur luminanceThreshold={1} intensity={1.6} radius={0.75} />
+            {/* Threshold 1.5: only the mark's core (2.2× lime) blooms. At 1.0 the galaxy's dense centre bloomed too,
+                and the scene visibly shrank when PerformanceMonitor later turned bloom off. */}
+            <Bloom mipmapBlur luminanceThreshold={1.5} intensity={1.6} radius={0.75} />
           </EffectComposer>
         )}
       </Canvas>
