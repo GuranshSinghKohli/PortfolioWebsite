@@ -30,9 +30,13 @@ const FOV = 40;
 const CAMERA_Z = 16;
 const HALF_FOV_TAN = Math.tan(((FOV / 2) * Math.PI) / 180);
 const ORBIT_SECONDS = 12;
-const GALAXY_SECONDS = 150;
+const GALAXY_SECONDS = 100;
+/** The galaxy drawn larger than its 12-unit model, so it fills more of the home screen. */
+const GALAXY_SCALE = 1.45;
 const PARALLAX = (4 * Math.PI) / 180;
 /** World units per pixel the mark was drawn at in its old 256px canvas, so it keeps its size. */
+/** The hero box grew from 128px to 192px; the 3D mark grows with it so the 2D-to-3D crossfade lines up. */
+const CLUSTER_SCALE = 1.5;
 const MARK_UNITS_PER_PX = (2 * 13 * Math.tan((15 * Math.PI) / 180)) / 256;
 
 /** The mark's satellites in world units, each at its own depth so the orbit reads as 3D. */
@@ -88,6 +92,21 @@ function starTexture() {
   return new CanvasTexture(canvas);
 }
 
+/** A wide, gentle falloff for the galaxy's core glow: no visible edge. */
+function glowTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = canvas.height = 128;
+  const context = canvas.getContext("2d")!;
+  const gradient = context.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gradient.addColorStop(0, "rgba(255,255,255,0.9)");
+  gradient.addColorStop(0.15, "rgba(255,255,255,0.35)");
+  gradient.addColorStop(0.4, "rgba(255,255,255,0.08)");
+  gradient.addColorStop(1, "rgba(255,255,255,0)");
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 128, 128);
+  return new CanvasTexture(canvas);
+}
+
 function geometry(positions: Float32Array, colors: Float32Array) {
   const result = new BufferGeometry();
   result.setAttribute("position", new BufferAttribute(positions, 3));
@@ -97,8 +116,8 @@ function geometry(positions: Float32Array, colors: Float32Array) {
 
 /**
  * A three-armed spiral galaxy, lime at the core fading to the page's dim
- * grey, seen at a tilt and turning once every 2.5 minutes. Its core sits
- * behind the mark.
+ * grey, seen at a tilt and turning once every 100 seconds, with a soft glow at
+ * its core behind the mark.
  */
 function Galaxy({
   colours,
@@ -113,8 +132,9 @@ function Galaxy({
 }) {
   const place = useRef<Group>(null);
   const spin = useRef<Group>(null);
+  const [glow] = useState(glowTexture);
   const [shape] = useState(() => {
-    const count = 6500;
+    const count = 11000;
     const radius = 12;
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
@@ -131,7 +151,7 @@ function Galaxy({
       positions.set([Math.cos(angle) * r + scatter(), scatter() * 0.35, Math.sin(angle) * r + scatter()], i * 3);
       mixed.copy(core).lerp(edge, Math.min(1, r / (radius * 0.55)));
       if (Math.random() < 0.08) mixed.lerp(sparkle, 0.6);
-      mixed.multiplyScalar(0.55 + Math.random() * 0.45);
+      mixed.multiplyScalar(0.6 + Math.random() * 0.5);
       colors.set([mixed.r, mixed.g, mixed.b], i * 3);
     }
     return geometry(positions, colors);
@@ -149,11 +169,15 @@ function Galaxy({
 
   return (
     <group ref={place}>
-      <group rotation={[1.12, 0, 0.32]}>
+      {/* A soft lime glow behind the core, so the centre reads as a light source. */}
+      <sprite scale={[9, 9, 1]}>
+        <spriteMaterial map={glow} color={colours.accent} transparent opacity={0.5} depthWrite={false} blending={AdditiveBlending} />
+      </sprite>
+      <group rotation={[1.12, 0, 0.32]} scale={GALAXY_SCALE}>
         <group ref={spin}>
           <points geometry={shape}>
             <pointsMaterial
-              size={0.075}
+              size={0.07}
               map={sprite}
               vertexColors
               transparent
@@ -201,7 +225,6 @@ function Starfield({ colours, sprite }: { colours: Colours; sprite: Texture }) {
   );
 }
 
-const SHAPE_COUNT = 16;
 /** How far (world units, in the screen plane) the pointer reaches into the shapes. */
 const CURSOR_REACH = 4.5;
 /** How far a shape near the pointer steps aside, and how far a click's ripple pushes. */
@@ -218,7 +241,9 @@ type Kind = "cube" | "cuboid" | "octahedron";
 /** One floating shape: where it rests, how it turns, and its eased reaction to the pointer. */
 type Shape = {
   kind: Kind;
-  home: [number, number, number];
+  /** Where it rests, as a share of the visible half-width and half-height at its depth, so the layout holds on any screen. */
+  spot: [number, number];
+  z: number;
   scale: [number, number, number];
   /** Starting orientation. */
   tilt: [number, number, number];
@@ -250,32 +275,39 @@ function follow(
   easing.damp(cursor, "ripple", 0, 0.35, delta);
 }
 
-/** Scattered round the edges of the view, clear of the middle where the greeting and answers sit. */
+/**
+ * A fixed composition: three shapes down each side, balanced left to right,
+ * and one small one in each outer corner. Nothing in the middle half of the
+ * screen, where the greeting, galaxy and answers sit. Spots are shares of
+ * the visible half-width and half-height.
+ */
+const LAYOUT: { kind: Kind; spot: [number, number]; size: number; lime?: boolean }[] = [
+  { kind: "cube", spot: [-0.8, 0.55], size: 0.75, lime: true },
+  { kind: "octahedron", spot: [-0.68, -0.02], size: 0.7 },
+  { kind: "cuboid", spot: [-0.8, -0.58], size: 0.6 },
+  { kind: "cuboid", spot: [0.8, 0.56], size: 0.6 },
+  { kind: "cube", spot: [0.68, 0.0], size: 0.65 },
+  { kind: "octahedron", spot: [0.8, -0.58], size: 0.75, lime: true },
+  { kind: "cube", spot: [-0.55, 0.88], size: 0.4 },
+  { kind: "cube", spot: [0.55, -0.88], size: 0.4 },
+];
+
 function makeShapes(): Shape[] {
-  const kinds: Kind[] = ["cube", "cuboid", "cube", "cuboid", "octahedron"];
-  const shapes: Shape[] = [];
-  while (shapes.length < SHAPE_COUNT) {
-    const x = (Math.random() * 2 - 1) * 16;
-    const y = (Math.random() * 2 - 1) * 8.5;
-    if (Math.abs(x) < 5.5 && Math.abs(y) < 5) continue;
-    if (shapes.some(({ home }) => Math.hypot(home[0] - x, home[1] - y) < 3.6)) continue;
-    const kind = kinds[shapes.length % kinds.length];
-    const size = 0.7 + Math.random() * 0.9;
-    const long = 1.5 + Math.random() * 0.8;
-    const turn = () => (Math.random() < 0.5 ? -1 : 1) * (0.08 + Math.random() * 0.22);
-    shapes.push({
+  return LAYOUT.map(({ kind, spot, size, lime }, i) => {
+    const turn = () => (Math.random() < 0.5 ? -1 : 1) * (0.08 + Math.random() * 0.16);
+    return {
       kind,
-      home: [x, y, -8 + Math.random() * 6],
-      scale: kind === "cuboid" ? [size * long, size * 0.7, size * 0.7] : [size, size, size],
+      spot,
+      z: -6 + (i % 3) * 0.6,
+      scale: kind === "cuboid" ? [size * 1.9, size * 0.75, size * 0.75] : [size, size, size],
       tilt: [Math.random() * Math.PI, Math.random() * Math.PI, 0],
       spin: [turn(), turn(), turn() * 0.5],
-      bob: { phase: Math.random() * Math.PI * 2, speed: 0.25 + Math.random() * 0.35 },
-      lime: shapes.length % 5 === 0,
+      bob: { phase: Math.random() * Math.PI * 2, speed: 0.25 + Math.random() * 0.3 },
+      lime: Boolean(lime),
       offset: { x: 0, y: 0 },
       near: 0,
-    });
-  }
-  return shapes;
+    };
+  });
 }
 
 /**
@@ -283,10 +315,22 @@ function makeShapes(): Shape[] {
  * faster spin when the pointer is close, a push when a click ripples out,
  * and a brighter, limer edge while it's near. Mutates the shape and its group.
  */
-function moveShape(shape: Shape, group: Group, material: LineBasicMaterial, cursor: Cursor, colours: { dim: Color; lime: Color }, time: number, delta: number) {
+function moveShape(
+  shape: Shape,
+  group: Group,
+  material: LineBasicMaterial,
+  cursor: Cursor,
+  colours: { dim: Color; lime: Color },
+  view: { cameraZ: number; aspect: number },
+  time: number,
+  delta: number,
+) {
   const step = Math.min(delta, 0.05);
-  const [hx, hy, hz] = shape.home;
-  const y = hy + Math.sin(time * shape.bob.speed + shape.bob.phase) * 0.35;
+  const halfHeight = (view.cameraZ - shape.z) * HALF_FOV_TAN;
+  const hx = shape.spot[0] * halfHeight * view.aspect;
+  const hy = shape.spot[1] * halfHeight;
+  const hz = shape.z;
+  const y = hy + Math.sin(time * shape.bob.speed + shape.bob.phase) * 0.25;
   const dx = hx - cursor.x;
   const dy = y - cursor.y;
   const distance = Math.hypot(dx, dy) || 1;
@@ -307,8 +351,8 @@ function moveShape(shape: Shape, group: Group, material: LineBasicMaterial, curs
 }
 
 /**
- * Wireframe cubes, cuboids and a few octahedra, floating round the edges
- * and turning slowly; a few are lime. Near the pointer they step aside,
+ * Eight wireframe cubes, cuboids and octahedra in a fixed composition
+ * down the sides, turning slowly; two are lime. Near the pointer they step aside,
  * spin up and glow lime, and a click pushes them outward.
  */
 function Shapes({
@@ -332,11 +376,13 @@ function Shapes({
   const [tints] = useState(() => ({ dim: new Color(colours.dim).multiplyScalar(1.6), lime: new Color(colours.accent) }));
 
   useFrame(({ camera, size, clock }, delta) => {
-    follow(cursor.current, pointer.current, presence.current, camera.position, size.width / size.height, delta);
+    const aspect = size.width / size.height;
+    follow(cursor.current, pointer.current, presence.current, camera.position, aspect, delta);
+    const view = { cameraZ: CAMERA_Z, aspect };
     shapes.forEach((shape, i) => {
       const group = groups.current[i];
       const material = materials.current[i];
-      if (group && material) moveShape(shape, group, material, cursor.current, tints, clock.elapsedTime, delta);
+      if (group && material) moveShape(shape, group, material, cursor.current, tints, view, clock.elapsedTime, delta);
     });
   });
 
@@ -346,7 +392,7 @@ function Shapes({
         <group
           key={i}
           ref={(node) => void (groups.current[i] = node)}
-          position={shape.home}
+          position={[0, 0, shape.z]}
           rotation={shape.tilt}
         >
           <lineSegments geometry={edges[shape.kind]} scale={shape.scale}>
@@ -407,7 +453,7 @@ function Cluster({
       const [x, y, z] = onAnchor(anchor.current, 0);
       const away = state.value;
       place.current.position.set(x + camera.position.x, y + camera.position.y + away * 3.4, z - away * 5);
-      place.current.scale.setScalar(anchor.current.unitsPerPx / MARK_UNITS_PER_PX);
+      place.current.scale.setScalar((anchor.current.unitsPerPx / MARK_UNITS_PER_PX) * CLUSTER_SCALE);
     }
   });
 

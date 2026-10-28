@@ -44,7 +44,7 @@ export function Hero() {
   const show3d = canLoad && wide && !reduced;
 
   return (
-    <div ref={box} className="relative size-20 min-[600px]:size-32">
+    <div ref={box} className="relative size-20 min-[600px]:size-48">
       <ConstellationFallback
         className={cn("absolute inset-0 size-full transition-opacity duration-500", show3d && ready && "opacity-0")}
       />
